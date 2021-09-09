@@ -1,5 +1,5 @@
 # DBuddyBot
-> *Kind of like Tinder, but without the swiping! And without the dates. Maybe it's not like Tinder afterall...*
+> *Kind of like Tinder, but without the swiping! And without the dates. Maybe it's not like Tinder after all...*
 
 ---
 
@@ -26,11 +26,11 @@ DBuddyBot only includes the most cutting edge features, like:
 > <sub>*Sometimes I actually plan stuff!*</sub>
 
 Everybody loves a roadmap, so here are some things that are planned to be implemented soon<sup>TM</sup>!
-+ Use of an actual **database**! Impressive, I know
-+ **Logging**! Not cutting down any forests though, just logging some info on bot abuse
-+ More **information** on games! The future is now and the internet can magically print game infos apparently
-+ Better **configuration**! Write some stuff in a file and you're good to go
-+ **More**.. just stuff. More stuff! Feel free to suggest features you'd like to see
+- [ ] Use of an actual **database**! Impressive, I know
+- [ ] **Logging**! Not cutting down any forests though, just logging some info on bot abuse
+- [ ] More **information** on games! The future is now and the internet can magically print game infos apparently
+- [x] ~~Better **configuration**! Write some stuff in a file and you're good to go~~
+- [ ] **More**.. just stuff. More stuff! Feel free to suggest features you'd like to see
 
 ### License
 > <sub>*You got a license for that, Sir?*</sub>
