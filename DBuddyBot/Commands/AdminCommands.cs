@@ -20,16 +20,21 @@ namespace DBuddyBot.Commands
         [Command("add"), RequirePermissions(DSharpPlus.Permissions.ManageRoles)]
         public async Task AddGame(CommandContext ctx, [RemainingText] string name)
         {
-            DiscordRole role = await ctx.Guild.CreateRoleAsync(name: name, color: DiscordColor.Purple, mentionable: true, reason: $"{ctx.Member.Nickname} added {name} to the game database.");
-            if (role != null)
+            if (!Database.TryGetGame(name, out Game game))
             {
-                Game game = new(name, role);
-                Database.AddGame(game);
-                await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":white_check_mark:"));
-
-
-
+                DiscordRole role = await ctx.Guild.CreateRoleAsync(name: name, color: DiscordColor.Purple, mentionable: true, reason: $"{ctx.Member.Nickname} added {name} to the game database.");
+                if (role != null)
+                {
+                    Game newGame = new(name, role);
+                    Database.AddGame(newGame);
+                    await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":white_check_mark:"));
+                }
             }
+            else
+            {
+                await ctx.Channel.SendMessageAsync($"{game.Name} already exists in the Databank, currently has {game.Subscribers}, no need to add it again");
+            }
+
 
         }
 
