@@ -10,4 +10,10 @@
     <PackageReference Include="DSharpPlus.CommandsNext" Version="4.1.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Config\BotConfig.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

@@ -1,0 +1,6 @@
+{
+    "discord": {
+        "discord_token": "token here",
+        "command_prefixes": [ "?" ]
+    }
+}

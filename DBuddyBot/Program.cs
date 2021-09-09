@@ -6,7 +6,8 @@ namespace DBuddyBot
     {
         static void Main(string[] args)
         {
-            Bot bot = new("token", new[] { "?" }); // TODO: Move this somewhere else to an external config file.
+            Bootstrapper.Setup();
+            Bot bot = new(Bootstrapper.DiscordToken, Bootstrapper.CommandPrefixes);
 
             bot.StartAsync().Wait(-1);
             Console.Read();
