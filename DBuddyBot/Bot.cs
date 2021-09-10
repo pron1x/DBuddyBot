@@ -3,6 +3,8 @@ using DBuddyBot.Data;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Serilog;
 using System.Threading.Tasks;
 
 namespace DBuddyBot
@@ -17,7 +19,8 @@ namespace DBuddyBot
             DiscordConfiguration config = new()
             {
                 Token = token,
-                MinimumLogLevel = Microsoft.Extensions.Logging.LogLevel.Information
+                MinimumLogLevel = LogLevel.Debug,
+                LoggerFactory = new LoggerFactory().AddSerilog()
             };
 
             Client = new DiscordClient(config);

@@ -3,6 +3,7 @@ using DBuddyBot.Models;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -28,11 +29,13 @@ namespace DBuddyBot.Commands
                 await ctx.Member.GrantRoleAsync(game.GameRole, $"User added {game.Name} to their collection.");
                 game.AddSubscriber();
                 await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":white_check_mark:"));
+                ctx.Client.Logger.Log(LogLevel.Information, $"{ctx.Member.Username} subscribed to {game.Name}.");
             }
             else
             {
                 await ctx.Channel.SendMessageAsync($"The game {name} does not exist as a role yet. Ask an admin to add it to the collection!");
                 await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":no_entry:"));
+                ctx.Client.Logger.Log(LogLevel.Information, $"{ctx.Member.Username} tried to subscribe to {name}, but does not exist.");
             }
         }
 
@@ -54,10 +57,12 @@ namespace DBuddyBot.Commands
                     game.RemoveSubscriber();
                 }
                 await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":white_check_mark:"));
+                ctx.Client.Logger.Log(LogLevel.Information, $"{ctx.Member.Username} unsubscribed from {game.Name}.");
             }
             else
             {
                 await ctx.Channel.SendMessageAsync($"The game {name} does not exist as a role!");
+                ctx.Client.Logger.Log(LogLevel.Information, $"{ctx.Member.Username} tried to unsubscribe from {name}, but does not exist.");
             }
         }
 

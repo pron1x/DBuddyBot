@@ -3,6 +3,7 @@ using DBuddyBot.Models;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 
 namespace DBuddyBot.Commands
@@ -28,11 +29,13 @@ namespace DBuddyBot.Commands
                     Game newGame = new(name, role);
                     Database.AddGame(newGame);
                     await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":white_check_mark:"));
+                    ctx.Client.Logger.Log(LogLevel.Information, $"{ctx.Member.Username} added {game.Name} to database.");
                 }
             }
             else
             {
-                await ctx.Channel.SendMessageAsync($"{game.Name} already exists in the Databank, currently has {game.Subscribers}, no need to add it again");
+                await ctx.Channel.SendMessageAsync($"{game.Name} already exists in the Databank, currently has {game.Subscribers} subscribers, no need to add it again");
+                ctx.Client.Logger.Log(LogLevel.Information, $"{ctx.Member.Username} added {game.Name} to database.");
             }
 
 
@@ -52,10 +55,12 @@ namespace DBuddyBot.Commands
                 await game.GameRole.DeleteAsync($"{ctx.Member.Nickname} removed the game from database.");
                 Database.RemoveGame(game.Id);
                 await ctx.Channel.SendMessageAsync($"Succesfully removed role for {game.Name}! {game.Subscribers} members were subscribed to it.");
+                ctx.Client.Logger.Log(LogLevel.Information, $"{ctx.Member.Username} removed {game.Name} from database.");
             }
             else
             {
                 await ctx.Channel.SendMessageAsync($"Game {name} does not exist in the database, no need to remove it.");
+                ctx.Client.Logger.Log(LogLevel.Information, $"{ctx.Member.Username} tried to remove {name} from database, but does not exist.");
             }
         }
     }
