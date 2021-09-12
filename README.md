@@ -26,10 +26,10 @@ DBuddyBot only includes the most cutting edge features, like:
 > <sub>*Sometimes I actually plan stuff!*</sub>
 
 Everybody loves a roadmap, so here are some things that are planned to be implemented soon<sup>TM</sup>!
-- [ ] Use of an actual **database**! Impressive, I know
 - [ ] More **information** on games! The future is now and the internet can magically print game infos apparently
 - [ ] Better **stability** and **performance**. Enough with those error messages everyone ignores anyways
 - [ ] **More**.. just stuff. More stuff! Feel free to suggest features you'd like to see
+- [x] ~~Use of an actual **database**! Impressive, I know~~
 - [x] ~~Better **configuration**! Write some stuff in a file and you're good to go~~
 - [x] ~~**Logging**! Not cutting down any forests though, just logging some info on bot abuse~~
 
