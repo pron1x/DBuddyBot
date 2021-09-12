@@ -1,5 +1,4 @@
 ﻿using DBuddyBot.Commands;
-using DBuddyBot.Data;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,7 +26,7 @@ namespace DBuddyBot
 
 
             ServiceProvider services = new ServiceCollection()
-                .AddSingleton<IAppDatabase>(new DatabaseService())
+                .AddSingleton(Bootstrapper.Database)
                 .BuildServiceProvider();
 
             CommandsNextConfiguration commandsConfig = new()

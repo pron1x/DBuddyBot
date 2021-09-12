@@ -1,33 +1,58 @@
 ﻿using DBuddyBot.Models;
-using System.Collections.Generic;
-using System.Linq;
+using Serilog;
+using System.Data.SQLite;
 
 namespace DBuddyBot.Data
 {
     public class DatabaseService : IAppDatabase
     {
-        private readonly List<Game> _games = new();
+        private readonly string _connectionString;
 
-        public void AddGame(Game game)
+        public DatabaseService(string connectionString)
         {
-            if (!_games.Contains(game))
-            {
-                _games.Add(game);
-            }
+            _connectionString = connectionString;
         }
 
         public Game GetGame(string name)
-            => _games.FirstOrDefault(g => g.Name == name);
+        {
+            Game game = null;
+            using (SQLiteConnection _connection = new(_connectionString))
+            {
+                SQLiteCommand command = new("SELECT * FROM games WHERE name = $name;", _connection);
+                command.Parameters.AddWithValue("$name", name);
+
+                _connection.Open();
+                SQLiteDataReader reader = command.ExecuteReader();
+                if (reader.HasRows)
+                {
+                    reader.Read();
+                    game = new((int)reader["id"], (string)reader["name"], (int)reader["subscribers"]);
+                }
+                _connection.Close();
+                command.Dispose();
+            }
+            return game;
+        }
 
         public Game GetGame(int id)
-            => _games.FirstOrDefault(g => g.Id == id);
-
-        public void RemoveGame(int id)
         {
-            if (TryGetGame(id, out Game game))
+            Game game = null;
+            using (SQLiteConnection _connection = new(_connectionString))
             {
-                _games.Remove(game);
+                SQLiteCommand command = new("SELECT * FROM games WHERE id = $id;", _connection);
+                command.Parameters.AddWithValue("$name", id);
+
+                _connection.Open();
+                SQLiteDataReader reader = command.ExecuteReader();
+                if (reader.HasRows)
+                {
+                    reader.Read();
+                    game = new((int)reader["id"], (string)reader["name"], (int)reader["subscribers"]);
+                }
+                _connection.Close();
+                command.Dispose();
             }
+            return game;
         }
 
         public bool TryGetGame(string name, out Game game)
@@ -41,5 +66,45 @@ namespace DBuddyBot.Data
             game = GetGame(id);
             return game != null;
         }
+
+        public void AddGame(Game game)
+        {
+            using SQLiteConnection _connection = new(_connectionString);
+            SQLiteCommand command = new("INSERT INTO games (id, name, subscribers) VALUES ($id, $name, $subscribers);", _connection);
+            command.Parameters.AddWithValue("$id", game.Id);
+            command.Parameters.AddWithValue("$name", game.Name);
+            command.Parameters.AddWithValue("$subscribers", game.Subscribers);
+
+            _connection.Open();
+            command.ExecuteNonQueryAsync();
+            _connection.Close();
+            command.Dispose();
+        }
+
+        public void RemoveGame(int id)
+        {
+            using SQLiteConnection _connection = new(_connectionString);
+            SQLiteCommand command = new("DELETE FROM games WHERE id = $id;", _connection);
+            command.Parameters.AddWithValue("$id", id);
+
+            _connection.Open();
+
+            command.ExecuteNonQueryAsync();
+            _connection.Close();
+            command.Dispose();
+        }
+
+        public void SetupDatabase()
+        {
+            using SQLiteConnection _connection = new(_connectionString);
+            Log.Logger.Information($"Setting up SQLite database {_connection.DataSource}");
+            SQLiteCommand command = new("CREATE TABLE IF NOT EXISTS games (id INT PRIMARY KEY , name TEXT, subscribers INT);", _connection);
+
+            _connection.Open();
+            command.ExecuteNonQueryAsync();
+            _connection.Close();
+            command.Dispose();
+        }
+
     }
 }

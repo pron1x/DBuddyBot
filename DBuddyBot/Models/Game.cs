@@ -22,12 +22,18 @@ namespace DBuddyBot.Models
         public DiscordRole GameRole { get => _gameRole; }
         public int Subscribers { get => _subscribers; }
 
-        public Game(string name, DiscordRole gameRole)
+        public Game(string name)
         {
             _id = System.Threading.Interlocked.Increment(ref idCounter);
             _name = name;
-            _gameRole = gameRole;
             _subscribers = 0;
+        }
+
+        public Game(int id, string name, int subscribers)
+        {
+            _id = id;
+            _name = name;
+            _subscribers = subscribers;
         }
 
 

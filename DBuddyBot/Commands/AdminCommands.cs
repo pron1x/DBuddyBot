@@ -4,6 +4,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Microsoft.Extensions.Logging;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace DBuddyBot.Commands
@@ -26,10 +27,10 @@ namespace DBuddyBot.Commands
                 DiscordRole role = await ctx.Guild.CreateRoleAsync(name: name, color: DiscordColor.Purple, mentionable: true, reason: $"{ctx.Member.Nickname} added {name} to the game database.");
                 if (role != null)
                 {
-                    Game newGame = new(name, role);
+                    Game newGame = new(name);
                     Database.AddGame(newGame);
                     await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":white_check_mark:"));
-                    ctx.Client.Logger.Log(LogLevel.Information, $"{ctx.Member.Username} added {game.Name} to database.");
+                    ctx.Client.Logger.Log(LogLevel.Information, $"{ctx.Member.Username} added {newGame.Name} to database.");
                 }
             }
             else
@@ -52,7 +53,8 @@ namespace DBuddyBot.Commands
         {
             if (Database.TryGetGame(name, out Game game))
             {
-                await game.GameRole.DeleteAsync($"{ctx.Member.Nickname} removed the game from database.");
+                DiscordRole role = ctx.Guild.Roles.FirstOrDefault(x => x.Value.Name == game.Name).Value;
+                await role.DeleteAsync($"{ctx.Member.Nickname} removed the game from database.");
                 Database.RemoveGame(game.Id);
                 await ctx.Channel.SendMessageAsync($"Succesfully removed role for {game.Name}! {game.Subscribers} members were subscribed to it.");
                 ctx.Client.Logger.Log(LogLevel.Information, $"{ctx.Member.Username} removed {game.Name} from database.");

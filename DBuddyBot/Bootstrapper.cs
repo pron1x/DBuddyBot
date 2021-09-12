@@ -1,4 +1,6 @@
-﻿using Serilog;
+﻿using DBuddyBot.Data;
+using Serilog;
+using System.Data.SQLite;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -9,9 +11,11 @@ namespace DBuddyBot
     {
         private static string _discordToken;
         private static string[] _commandPrefixes;
+        private static IAppDatabase _database;
 
         public static string DiscordToken { get => _discordToken; }
         public static string[] CommandPrefixes { get => _commandPrefixes; }
+        public static IAppDatabase Database { get => _database; }
 
         public static void Setup()
         {
@@ -40,8 +44,23 @@ namespace DBuddyBot
             }
             else
             {
-                Log.Logger.Error("No Config file found, shutting down...");
+                Log.Logger.Fatal("No Config file found, shutting down...");
                 System.Environment.Exit(78);
+            }
+
+            string connectionString = @"Data Source=.\Data\buddybotdb.sqlite;Version=3;Pooling=True;Max Pool Size=20;";
+            bool newSetup = !File.Exists(@".\Data\buddybotdb.sqlite");
+            if (newSetup)
+            {
+                Log.Logger.Information("No database found. Creating new SQLite database");
+                Directory.CreateDirectory(@".\Data");
+                SQLiteConnection.CreateFile(@".\Data\buddybotdb.sqlite");
+            }
+            _database = new DatabaseService(connectionString);
+
+            if(newSetup)
+            {
+                _database.SetupDatabase();
             }
         }
     }

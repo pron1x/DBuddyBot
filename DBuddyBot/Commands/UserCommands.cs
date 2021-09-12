@@ -26,7 +26,8 @@ namespace DBuddyBot.Commands
         {
             if (Database.TryGetGame(name, out Game game))
             {
-                await ctx.Member.GrantRoleAsync(game.GameRole, $"User added {game.Name} to their collection.");
+                DiscordRole role = ctx.Guild.Roles.FirstOrDefault(x => x.Value.Name == game.Name).Value;
+                await ctx.Member.GrantRoleAsync(role, $"User added {game.Name} to their collection.");
                 game.AddSubscriber();
                 await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":white_check_mark:"));
                 ctx.Client.Logger.Log(LogLevel.Information, $"{ctx.Member.Username} subscribed to {game.Name}.");
@@ -51,9 +52,10 @@ namespace DBuddyBot.Commands
         {
             if (Database.TryGetGame(name, out Game game))
             {
-                if (ctx.Member.Roles.Contains(game.GameRole))
+                DiscordRole role = ctx.Guild.Roles.FirstOrDefault(x => x.Value.Name == game.Name).Value;
+                if (ctx.Member.Roles.Contains(role))
                 {
-                    await ctx.Member.RevokeRoleAsync(game.GameRole);
+                    await ctx.Member.RevokeRoleAsync(role);
                     game.RemoveSubscriber();
                 }
                 await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":white_check_mark:"));
