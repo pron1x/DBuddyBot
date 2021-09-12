@@ -44,7 +44,18 @@ namespace DBuddyBot
 
         }
 
-        public Task StartAsync() => Client.ConnectAsync();
+        public async void StartAsync()
+        {
+            try
+            {
+                await Client.ConnectAsync();
+            }
+            catch (System.Exception e)
+            {
+                Log.Logger.Fatal($"Bot could not connect to the discord server. {e.Message}");
+                System.Environment.Exit(1);
+            }
+        }
 
         public Task StopAsync() => Client.DisconnectAsync();
     }

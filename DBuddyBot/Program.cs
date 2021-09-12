@@ -9,8 +9,9 @@ namespace DBuddyBot
             Bootstrapper.Setup();
             Bot bot = new(Bootstrapper.DiscordToken, Bootstrapper.CommandPrefixes);
 
-            bot.StartAsync().Wait(-1);
+            bot.StartAsync();
             Console.Read();
+            bot.StopAsync();
         }
     }
 }
