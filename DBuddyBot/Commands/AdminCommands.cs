@@ -22,7 +22,11 @@ namespace DBuddyBot.Commands
         [Command("add"), RequirePermissions(DSharpPlus.Permissions.ManageRoles)]
         public async Task AddGame(CommandContext ctx, [RemainingText] string name)
         {
-            if (!Database.TryGetGame(name, out Game game))
+            if (ctx.Guild.Roles.Any(r => r.Value.Name == name))
+            {
+                await ctx.Channel.SendMessageAsync($"A role named {name} already exists on the Server, will not create that again.");
+            }
+            else if (!Database.TryGetGame(name, out Game game))
             {
                 DiscordRole role = await ctx.Guild.CreateRoleAsync(name: name, color: DiscordColor.Purple, mentionable: true, reason: $"{ctx.Member.Nickname} added {name} to the game database.");
                 if (role != null)
@@ -36,7 +40,7 @@ namespace DBuddyBot.Commands
             else
             {
                 await ctx.Channel.SendMessageAsync($"{game.Name} already exists in the Databank, currently has {game.Subscribers} subscribers, no need to add it again");
-                ctx.Client.Logger.Log(LogLevel.Information, $"{ctx.Member.Username} added {game.Name} to database.");
+                ctx.Client.Logger.Log(LogLevel.Information, $"{ctx.Member.Username} tried to add {name} to database, but already exists.");
             }
 
 
