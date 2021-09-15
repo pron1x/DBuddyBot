@@ -13,8 +13,12 @@ namespace DBuddyBot.Commands
     [Group("game")]
     public class UserCommands : BaseCommandModule
     {
+        #region properties
         public IAppDatabase Database { private get; set; }
+        #endregion properties
 
+
+        #region commandmethods
         /// <summary>
         /// <c>AddGameToUser()</c> adds the game role to the user.
         /// </summary>
@@ -88,6 +92,8 @@ namespace DBuddyBot.Commands
                 await ctx.Channel.SendMessageAsync($"{name} does not exist in the database. Perhaps you should recommend adding it.");
             }
         }
+
+        #endregion commandmethods
     }
 
 }

@@ -11,8 +11,12 @@ namespace DBuddyBot.Commands
 {
     public class AdminCommands : BaseCommandModule
     {
+        #region properties
         public IAppDatabase Database { private get; set; }
+        #endregion properties
 
+
+        #region commandmethods
         /// <summary>
         /// Adds a game to the database and creates the corresponding discord role
         /// </summary>
@@ -42,8 +46,6 @@ namespace DBuddyBot.Commands
                 await ctx.Channel.SendMessageAsync($"{game.Name} already exists in the Databank, currently has {game.Subscribers} subscribers, no need to add it again");
                 ctx.Client.Logger.Log(LogLevel.Information, $"{ctx.Member.Username} tried to add {name} to database, but already exists.");
             }
-
-
         }
 
         /// <summary>
@@ -69,5 +71,7 @@ namespace DBuddyBot.Commands
                 ctx.Client.Logger.Log(LogLevel.Information, $"{ctx.Member.Username} tried to remove {name} from database, but does not exist.");
             }
         }
+
+        #endregion commandmethods
     }
 }

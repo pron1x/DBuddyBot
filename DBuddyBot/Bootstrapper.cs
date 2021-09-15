@@ -11,20 +11,25 @@ namespace DBuddyBot
 {
     public static class Bootstrapper
     {
+        #region constants
         private static readonly string _configFilePath = @".\Config\BotConfig.json";
         private static readonly string _databaseFilePath = @".\Data\buddybotdb.sqlite";
         private static readonly string _databaseConnectionString = @"Data Source=.\Data\buddybotdb.sqlite;Version=3;Pooling=True;Max Pool Size=20;";
+        #endregion constants
 
-
+        #region backingfields
         private static string _discordToken;
         private static List<string> _commandPrefixes;
         private static IAppDatabase _database;
+        #endregion backingfields
 
-
+        #region properties
         public static string DiscordToken { get => _discordToken; }
         public static string[] CommandPrefixes { get => _commandPrefixes.ToArray(); }
         public static IAppDatabase Database { get => _database; }
+        #endregion properties
 
+        #region publicmethods
         public static void Setup()
         {
             Log.Logger = new LoggerConfiguration()
@@ -93,5 +98,6 @@ namespace DBuddyBot
                 _database.SetupDatabase();
             }
         }
+        #endregion publicmethods
     }
 }

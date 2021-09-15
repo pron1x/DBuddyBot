@@ -12,16 +12,21 @@ namespace DBuddyBot.Models
         /// </summary>
         private static int idCounter = 0;
 
+        #region backingfields
         private readonly int _id;
         private readonly string _name;
         private readonly DiscordRole _gameRole;
         private int _subscribers;
+        #endregion backingfields
 
+        #region properties
         public int Id { get => _id; }
         public string Name { get => _name; }
         public DiscordRole GameRole { get => _gameRole; }
         public int Subscribers { get => _subscribers; }
+        #endregion properties
 
+        #region constructors
         public Game(string name)
         {
             _id = System.Threading.Interlocked.Increment(ref idCounter);
@@ -36,17 +41,20 @@ namespace DBuddyBot.Models
             _subscribers = subscribers;
         }
 
+        #endregion constructors
 
+        #region publicmethods
         public void AddSubscriber()
             => _subscribers++;
 
         public void RemoveSubscriber()
             => _subscribers--;
+        #endregion publicmethods
 
-
+        #region overrides
         public override bool Equals(object obj)
         {
-            if(obj is not Game)
+            if (obj is not Game)
             {
                 return false;
             }
@@ -64,5 +72,6 @@ namespace DBuddyBot.Models
         {
             return Name;
         }
+        #endregion overrides
     }
 }

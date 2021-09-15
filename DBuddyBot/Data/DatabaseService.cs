@@ -6,13 +6,18 @@ namespace DBuddyBot.Data
 {
     public class DatabaseService : IAppDatabase
     {
+        #region backingfields
         private readonly string _connectionString;
+        #endregion backingfields
 
+        #region constructors
         public DatabaseService(string connectionString)
         {
             _connectionString = connectionString;
         }
+        #endregion constructors
 
+        #region publicmethods
         public Game GetGame(string name)
         {
             Game game = null;
@@ -105,6 +110,8 @@ namespace DBuddyBot.Data
             _connection.Close();
             command.Dispose();
         }
+
+        #endregion publicmethods
 
     }
 }

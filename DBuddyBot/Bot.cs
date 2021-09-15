@@ -10,9 +10,12 @@ namespace DBuddyBot
 {
     public class Bot
     {
+        #region properties
         public DiscordClient Client { get; }
         public CommandsNextExtension Commands { get; }
+        #endregion properties
 
+        #region publicmethods
         public Bot(string token, string[] prefixes)
         {
             DiscordConfiguration config = new()
@@ -58,5 +61,7 @@ namespace DBuddyBot
         }
 
         public Task StopAsync() => Client.DisconnectAsync();
+
+        #endregion publicmethods
     }
 }
