@@ -32,10 +32,7 @@ namespace DBuddyBot
         #region publicmethods
         public static void Setup()
         {
-            Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Debug()
-                .WriteTo.Console(outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}")
-                .CreateLogger();
+            SetupLogger();
 
             if (File.Exists(_configFilePath))
             {
@@ -83,6 +80,29 @@ namespace DBuddyBot
                 Environment.Exit(78);
             }
 
+            SetupDatabase();
+        }
+        #endregion publicmethods
+
+
+        #region privatemethods
+        private static void SetupLogger()
+        {
+#if DEBUG
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Debug()
+                .WriteTo.Console(outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}")
+                .CreateLogger();
+#else
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Warning()
+                .WriteTo.File("log.txt", fileSizeLimitBytes: 10000000, outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}")
+                .CreateLogger();
+#endif
+        }
+
+        private static void SetupDatabase()
+        {
             bool newSetup = !File.Exists(_databaseFilePath);
             if (newSetup)
             {
@@ -98,6 +118,6 @@ namespace DBuddyBot
                 _database.SetupDatabase();
             }
         }
-        #endregion publicmethods
+        #endregion privatemethods
     }
 }
