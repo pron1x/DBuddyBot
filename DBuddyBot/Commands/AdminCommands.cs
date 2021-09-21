@@ -26,7 +26,8 @@ namespace DBuddyBot.Commands
         [Command("add"), RequirePermissions(DSharpPlus.Permissions.ManageRoles)]
         public async Task AddGame(CommandContext ctx, [RemainingText] string name)
         {
-            if (ctx.Guild.Roles.Any(r => r.Value.Name == name))
+            name = name.ToTitleCase();
+            if (ctx.Guild.Roles.Any(r => r.Value.Name.ToLower() == name.ToLower()))
             {
                 await ctx.Channel.SendMessageAsync($"A role named {name} already exists on the Server, will not create that again.");
             }
@@ -57,9 +58,10 @@ namespace DBuddyBot.Commands
         [Command("remove"), RequirePermissions(DSharpPlus.Permissions.ManageRoles)]
         public async Task RemoveGame(CommandContext ctx, [RemainingText] string name)
         {
+            name = name.ToTitleCase();
             if (Database.TryGetGame(name, out Game game))
             {
-                DiscordRole role = ctx.Guild.Roles.FirstOrDefault(x => x.Value.Name == game.Name).Value;
+                DiscordRole role = ctx.Guild.Roles.FirstOrDefault(x => x.Value.Name.ToLower() == game.Name.ToLower()).Value;
                 await role.DeleteAsync($"{ctx.Member.Nickname} removed the game from database.");
                 Database.RemoveGame(game.Id);
                 await ctx.Channel.SendMessageAsync($"Succesfully removed role for {game.Name}! {game.Subscribers} members were subscribed to it.");

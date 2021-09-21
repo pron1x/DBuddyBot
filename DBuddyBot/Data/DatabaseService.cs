@@ -23,8 +23,8 @@ namespace DBuddyBot.Data
             Game game = null;
             using (SQLiteConnection _connection = new(_connectionString))
             {
-                SQLiteCommand command = new("SELECT * FROM games WHERE name = $name;", _connection);
-                command.Parameters.AddWithValue("$name", name);
+                SQLiteCommand command = new("SELECT * FROM games WHERE lower(name) = $name;", _connection);
+                command.Parameters.AddWithValue("$name", name.ToLower());
 
                 _connection.Open();
                 SQLiteDataReader reader = command.ExecuteReader();
