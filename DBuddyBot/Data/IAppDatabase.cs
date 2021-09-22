@@ -13,6 +13,5 @@ namespace DBuddyBot.Data
         public Game GetGame(int id);
         public bool TryGetGame(int id, out Game game);
         public void RemoveGame(int id);
-        public void SetupDatabase();
     }
 }

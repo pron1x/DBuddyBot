@@ -4,14 +4,14 @@ using System.Data.SQLite;
 
 namespace DBuddyBot.Data
 {
-    public class DatabaseService : IAppDatabase
+    public class SQLiteDatabaseService : IAppDatabase
     {
         #region backingfields
         private readonly string _connectionString;
         #endregion backingfields
 
         #region constructors
-        public DatabaseService(string connectionString)
+        public SQLiteDatabaseService(string connectionString)
         {
             _connectionString = connectionString;
         }
@@ -94,18 +94,6 @@ namespace DBuddyBot.Data
 
             _connection.Open();
 
-            command.ExecuteNonQueryAsync();
-            _connection.Close();
-            command.Dispose();
-        }
-
-        public void SetupDatabase()
-        {
-            using SQLiteConnection _connection = new(_connectionString);
-            Log.Logger.Information($"Setting up SQLite database {_connection.DataSource}");
-            SQLiteCommand command = new("CREATE TABLE IF NOT EXISTS games (id INT PRIMARY KEY , name TEXT, subscribers INT);", _connection);
-
-            _connection.Open();
             command.ExecuteNonQueryAsync();
             _connection.Close();
             command.Dispose();

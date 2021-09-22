@@ -2,5 +2,8 @@
     "discord": {
         "discord_token": "token here",
         "command_prefixes": [ "?" ]
+    },
+    "database": {
+        "connection_string": ""
     }
 }

@@ -13,14 +13,15 @@ namespace DBuddyBot
     {
         #region constants
         private static readonly string _configFilePath = @".\Config\BotConfig.json";
-        private static readonly string _databaseFilePath = @".\Data\buddybotdb.sqlite";
-        private static readonly string _databaseConnectionString = @"Data Source=.\Data\buddybotdb.sqlite;Version=3;Pooling=True;Max Pool Size=20;";
+        private static readonly string _defaultDatabase = @"Data Source=.\Data\buddybotdb.sqlite;Version=3;Pooling=True;Max Pool Size=20;";
         #endregion constants
 
         #region backingfields
         private static string _discordToken;
         private static List<string> _commandPrefixes;
         private static IAppDatabase _database;
+        private static string _databaseConnectionString;
+        private static string _databaseFilePath = @".\Data\buddybotdb.sqlite";
         #endregion backingfields
 
         #region properties
@@ -69,6 +70,33 @@ namespace DBuddyBot
                         _commandPrefixes.Add("?");
                     }
                 }
+
+                if (json.RootElement.TryGetProperty("database", out JsonElement database))
+                {
+                    if (database.TryGetProperty("connection_string", out JsonElement connection))
+                    {
+                        _databaseConnectionString = connection.GetString();
+                        if (string.IsNullOrWhiteSpace(_databaseConnectionString))
+                        {
+                            _databaseConnectionString = _defaultDatabase;
+                            Log.Logger.Warning("Database connection string found in config is empty. Using default SQLite database.");
+                        }
+                        else
+                        {
+                            Log.Logger.Information("Using specified database connection string.");
+                        }
+                    }
+                    else
+                    {
+                        _databaseConnectionString = _defaultDatabase;
+                        Log.Logger.Warning("Config is missing connection_string element. Using default SQLite database.");
+                    }
+                }
+                else
+                {
+                    _databaseConnectionString = _defaultDatabase;
+                    Log.Logger.Warning("No database connection string found in config. Using default SQLite database.");
+                }
             }
             else
             {
@@ -79,7 +107,6 @@ namespace DBuddyBot
 
                 Environment.Exit(78);
             }
-
             SetupDatabase();
         }
         #endregion publicmethods
@@ -103,21 +130,34 @@ namespace DBuddyBot
 
         private static void SetupDatabase()
         {
-            bool newSetup = !File.Exists(_databaseFilePath);
-            if (newSetup)
+            bool sqliteDatabase = !_databaseConnectionString.ToLower().Contains("uid");
+            if (sqliteDatabase)
             {
-                Log.Logger.Warning("No database found. Creating new SQLite database");
-                Directory.CreateDirectory(@".\Data");
-                SQLiteConnection.CreateFile(_databaseFilePath);
+                SQLiteConnectionStringBuilder connStringBuilder = new(_databaseConnectionString);
+                _databaseFilePath = connStringBuilder.DataSource;
+                if (!File.Exists(_databaseFilePath))
+                {
+                    Log.Logger.Warning("No database found. Creating new SQLite database.");
+                    Directory.CreateDirectory(Path.GetDirectoryName(_databaseFilePath));
+                    SQLiteConnection.CreateFile(_databaseFilePath);
+
+                    using SQLiteConnection conn = new(connStringBuilder.ConnectionString);
+                    Log.Logger.Information($"Setting up SQLite database {conn.DataSource}.");
+                    SQLiteCommand command = new("CREATE TABLE IF NOT EXISTS games (id INT PRIMARY KEY , name TEXT, subscribers INT);", conn);
+
+                    conn.Open();
+                    command.ExecuteNonQueryAsync();
+                    conn.Close();
+                    command.Dispose();
+                }
+                _database = new SQLiteDatabaseService(_databaseConnectionString);
             }
-
-            _database = new DatabaseService(_databaseConnectionString);
-
-            if (newSetup)
+            else
             {
-                _database.SetupDatabase();
+                _database = new SQLDatabaseService(_databaseConnectionString);
             }
         }
+
         #endregion privatemethods
     }
 }
