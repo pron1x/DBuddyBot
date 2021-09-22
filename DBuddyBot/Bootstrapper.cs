@@ -2,6 +2,7 @@
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Data.SQLite;
 using System.IO;
 using System.Linq;
@@ -92,15 +93,23 @@ namespace DBuddyBot
             bool sqliteDatabase = !_databaseConnectionString.ToLower().Contains("uid");
             if (sqliteDatabase)
             {
-                SQLiteConnectionStringBuilder connStringBuilder = new(_databaseConnectionString);
-                _databaseFilePath = connStringBuilder.DataSource;
+                try
+                {
+                    SQLiteConnectionStringBuilder connStringBuilder = new(_databaseConnectionString);
+                    _databaseFilePath = connStringBuilder.DataSource;
+                }
+                catch (Exception e)
+                {
+                    Log.Logger.Fatal($"SQLite connection string is malformed. Please enter a correct SQLite connection string.\nError: {e.Message}");
+                    Environment.Exit(78);
+                }
                 if (!File.Exists(_databaseFilePath))
                 {
                     Log.Logger.Warning("No database found. Creating new SQLite database.");
                     Directory.CreateDirectory(Path.GetDirectoryName(_databaseFilePath));
                     SQLiteConnection.CreateFile(_databaseFilePath);
 
-                    using SQLiteConnection conn = new(connStringBuilder.ConnectionString);
+                    using SQLiteConnection conn = new(_databaseConnectionString);
                     Log.Logger.Information($"Setting up SQLite database {conn.DataSource}.");
                     SQLiteCommand command = new("CREATE TABLE IF NOT EXISTS games (id INT PRIMARY KEY , name TEXT, subscribers INT);", conn);
 
@@ -109,10 +118,30 @@ namespace DBuddyBot
                     conn.Close();
                     command.Dispose();
                 }
+                using SQLiteConnection connection = new(_databaseConnectionString);
+                try
+                {
+                    connection.Open();
+                }
+                catch (Exception e)
+                {
+                    Log.Logger.Fatal($"Could not connect to SQLite database. Shutting down...\nError: {e.Message}");
+                    Environment.Exit(74);
+                }
                 _database = new SQLiteDatabaseService(_databaseConnectionString);
             }
             else
             {
+                using SqlConnection connection = new(_databaseConnectionString);
+                try
+                {
+                    connection.Open();
+                }
+                catch (Exception e)
+                {
+                    Log.Logger.Fatal($"Could not connect to SQL database. Shutting down...\nError: {e.Message}");
+                    Environment.Exit(74);
+                }
                 _database = new SQLDatabaseService(_databaseConnectionString);
             }
         }
