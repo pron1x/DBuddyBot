@@ -21,7 +21,7 @@ namespace DBuddyBot
         private static List<string> _commandPrefixes;
         private static IAppDatabase _database;
         private static string _databaseConnectionString;
-        private static string _databaseFilePath = @".\Data\buddybotdb.sqlite";
+        private static string _databaseFilePath;
         #endregion backingfields
 
         #region properties
@@ -41,70 +41,29 @@ namespace DBuddyBot
                 using JsonDocument json = JsonDocument.Parse(File.ReadAllText(_configFilePath));
                 if (json.RootElement.TryGetProperty("discord", out JsonElement discord))
                 {
-                    if (discord.TryGetProperty("discord_token", out JsonElement token))
-                    {
-                        _discordToken = token.GetString();
-                        if (string.IsNullOrWhiteSpace(_discordToken))
-                        {
-                            Log.Logger.Fatal("Empty discord token in the config. Shutting down...");
-                            Environment.Exit(78);
-                        }
-                    }
-                    else
-                    {
-                        Log.Logger.Fatal("Config is missing discord_token element, shutting down...");
-                    }
-                    _commandPrefixes = new();
-                    if (discord.TryGetProperty("command_prefixes", out JsonElement prefixes))
-                    {
-                        _commandPrefixes = prefixes.EnumerateArray().Select(x => x.GetString()).ToList();
-                        if (_commandPrefixes.Count == 0 || (_commandPrefixes.Count == 1 && _commandPrefixes.Contains(string.Empty)))
-                        {
-                            Log.Logger.Warning("No command prefix found. Using standard '?' prefix.");
-                            _commandPrefixes.Add("?");
-                        }
-                    }
-                    else
-                    {
-                        Log.Logger.Warning("Config is missing command_prefixes element, using standard '?' prefix.");
-                        _commandPrefixes.Add("?");
-                    }
+                    ReadDiscordConfig(discord);
+                }
+                else
+                {
+                    Log.Logger.Fatal("Config is missing discord section. Creating new config and shutting down...");
+                    CreateNewConfigFile();
+                    Environment.Exit(78);
                 }
 
                 if (json.RootElement.TryGetProperty("database", out JsonElement database))
                 {
-                    if (database.TryGetProperty("connection_string", out JsonElement connection))
-                    {
-                        _databaseConnectionString = connection.GetString();
-                        if (string.IsNullOrWhiteSpace(_databaseConnectionString))
-                        {
-                            _databaseConnectionString = _defaultDatabase;
-                            Log.Logger.Warning("Database connection string found in config is empty. Using default SQLite database.");
-                        }
-                        else
-                        {
-                            Log.Logger.Information("Using specified database connection string.");
-                        }
-                    }
-                    else
-                    {
-                        _databaseConnectionString = _defaultDatabase;
-                        Log.Logger.Warning("Config is missing connection_string element. Using default SQLite database.");
-                    }
+                    ReadDatabaseConfig(database);
                 }
                 else
                 {
                     _databaseConnectionString = _defaultDatabase;
-                    Log.Logger.Warning("No database connection string found in config. Using default SQLite database.");
+                    Log.Logger.Warning("Config is missing database section. Using default SQLite database.");
                 }
             }
             else
             {
                 Log.Logger.Fatal("No Config file found, creating empty one and shutting down...");
-                Directory.CreateDirectory(@".\Config");
-                string nl = Environment.NewLine;
-                File.WriteAllText(@".\Config\BotConfig.json", $"{{{nl}\t\"discord\": {{{nl}\t\t\"discord_token\": \"\",{nl}\t\t\"command_prefixes\": [ \"\" ]{nl}\t}}{nl}}}{nl}");
-
+                CreateNewConfigFile();
                 Environment.Exit(78);
             }
             SetupDatabase();
@@ -155,6 +114,70 @@ namespace DBuddyBot
             else
             {
                 _database = new SQLDatabaseService(_databaseConnectionString);
+            }
+        }
+
+        private static void CreateNewConfigFile()
+        {
+            Directory.CreateDirectory(@".\Config");
+            string nl = Environment.NewLine;
+            File.WriteAllText(@".\Config\BotConfig.json", $"{{{nl}\t\"discord\": {{{nl}\t\t\"discord_token\": \"\",{nl}\t\t\"command_prefixes\": [ \"\" ]{nl}\t}},{nl}\t\"database\": {{{nl}\t\t\"connection_string\": \"connection\"{nl}\t}}{nl}}}{nl}");
+        }
+
+        private static void ReadDiscordConfig(JsonElement discord)
+        {
+            if (discord.TryGetProperty("discord_token", out JsonElement token))
+            {
+                _discordToken = token.GetString();
+                if (string.IsNullOrWhiteSpace(_discordToken))
+                {
+                    Log.Logger.Fatal("Empty discord token in the config. Shutting down...");
+                    Environment.Exit(78);
+                }
+            }
+            else
+            {
+                Log.Logger.Fatal("Config is missing discord_token element, creating new config and shutting down...");
+                CreateNewConfigFile();
+                Environment.Exit(78);
+            }
+            _commandPrefixes = new();
+
+            if (discord.TryGetProperty("command_prefixes", out JsonElement prefixes))
+            {
+                _commandPrefixes = prefixes.EnumerateArray().Select(x => x.GetString()).ToList();
+                if (_commandPrefixes.Count == 0 || (_commandPrefixes.Count == 1 && _commandPrefixes.Contains(string.Empty)))
+                {
+                    Log.Logger.Warning("No command prefix found. Using standard '?' prefix.");
+                    _commandPrefixes.Add("?");
+                }
+            }
+            else
+            {
+                Log.Logger.Warning("Config is missing command_prefixes element, using standard '?' prefix.");
+                _commandPrefixes.Add("?");
+            }
+        }
+
+        private static void ReadDatabaseConfig(JsonElement database)
+        {
+            if (database.TryGetProperty("connection_string", out JsonElement connection))
+            {
+                _databaseConnectionString = connection.GetString();
+                if (string.IsNullOrWhiteSpace(_databaseConnectionString))
+                {
+                    _databaseConnectionString = _defaultDatabase;
+                    Log.Logger.Warning("Database connection string found in config is empty. Using default SQLite database.");
+                }
+                else
+                {
+                    Log.Logger.Information("Using specified database connection string.");
+                }
+            }
+            else
+            {
+                _databaseConnectionString = _defaultDatabase;
+                Log.Logger.Warning("Config is missing connection_string element. Using default SQLite database.");
             }
         }
 
