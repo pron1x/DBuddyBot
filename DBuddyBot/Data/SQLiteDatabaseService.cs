@@ -23,18 +23,17 @@ namespace DBuddyBot.Data
             Game game = null;
             using (SQLiteConnection _connection = new(_connectionString))
             {
-                SQLiteCommand command = new("SELECT * FROM games WHERE lower(name) = $name;", _connection);
+                using SQLiteCommand command = new("SELECT * FROM games WHERE lower(name) = $name;", _connection);
                 command.Parameters.AddWithValue("$name", name.ToLower());
 
                 _connection.Open();
-                SQLiteDataReader reader = command.ExecuteReader();
+                using SQLiteDataReader reader = command.ExecuteReader();
                 if (reader.HasRows)
                 {
                     reader.Read();
                     game = new((int)reader["id"], (string)reader["name"], (int)reader["subscribers"]);
                 }
                 _connection.Close();
-                command.Dispose();
             }
             return game;
         }
@@ -44,18 +43,17 @@ namespace DBuddyBot.Data
             Game game = null;
             using (SQLiteConnection _connection = new(_connectionString))
             {
-                SQLiteCommand command = new("SELECT * FROM games WHERE id = $id;", _connection);
+                using SQLiteCommand command = new("SELECT * FROM games WHERE id = $id;", _connection);
                 command.Parameters.AddWithValue("$name", id);
 
                 _connection.Open();
-                SQLiteDataReader reader = command.ExecuteReader();
+                using SQLiteDataReader reader = command.ExecuteReader();
                 if (reader.HasRows)
                 {
                     reader.Read();
                     game = new((int)reader["id"], (string)reader["name"], (int)reader["subscribers"]);
                 }
                 _connection.Close();
-                command.Dispose();
             }
             return game;
         }
@@ -75,7 +73,7 @@ namespace DBuddyBot.Data
         public void AddGame(Game game)
         {
             using SQLiteConnection _connection = new(_connectionString);
-            SQLiteCommand command = new("INSERT INTO games (id, name, subscribers) VALUES ($id, $name, $subscribers);", _connection);
+            using SQLiteCommand command = new("INSERT INTO games (id, name, subscribers) VALUES ($id, $name, $subscribers);", _connection);
             command.Parameters.AddWithValue("$id", game.Id);
             command.Parameters.AddWithValue("$name", game.Name);
             command.Parameters.AddWithValue("$subscribers", game.Subscribers);
@@ -83,20 +81,18 @@ namespace DBuddyBot.Data
             _connection.Open();
             command.ExecuteNonQueryAsync();
             _connection.Close();
-            command.Dispose();
         }
 
         public void RemoveGame(int id)
         {
             using SQLiteConnection _connection = new(_connectionString);
-            SQLiteCommand command = new("DELETE FROM games WHERE id = $id;", _connection);
+            using SQLiteCommand command = new("DELETE FROM games WHERE id = $id;", _connection);
             command.Parameters.AddWithValue("$id", id);
 
             _connection.Open();
 
             command.ExecuteNonQueryAsync();
             _connection.Close();
-            command.Dispose();
         }
 
         #endregion publicmethods
