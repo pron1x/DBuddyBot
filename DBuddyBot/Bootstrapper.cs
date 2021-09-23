@@ -31,6 +31,7 @@ namespace DBuddyBot
         public static IAppDatabase Database { get => _database; }
         #endregion properties
 
+
         #region publicmethods
         public static void Setup()
         {
@@ -69,6 +70,7 @@ namespace DBuddyBot
             }
             SetupDatabase();
         }
+
         #endregion publicmethods
 
 
@@ -87,6 +89,7 @@ namespace DBuddyBot
                 .CreateLogger();
 #endif
         }
+
 
         private static void SetupDatabase()
         {
@@ -149,12 +152,14 @@ namespace DBuddyBot
             }
         }
 
+
         private static void CreateNewConfigFile()
         {
             Directory.CreateDirectory(@".\Config");
             string nl = Environment.NewLine;
             File.WriteAllText(@".\Config\BotConfig.json", $"{{{nl}\t\"discord\": {{{nl}\t\t\"discord_token\": \"\",{nl}\t\t\"command_prefixes\": [ \"\" ]{nl}\t}},{nl}\t\"database\": {{{nl}\t\t\"connection_string\": \"connection\"{nl}\t}}{nl}}}{nl}");
         }
+
 
         private static void ReadDiscordConfig(JsonElement discord)
         {
@@ -190,6 +195,7 @@ namespace DBuddyBot
                 _commandPrefixes.Add("?");
             }
         }
+
 
         private static void ReadDatabaseConfig(JsonElement database)
         {

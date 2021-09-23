@@ -9,6 +9,7 @@ namespace DBuddyBot
         private static TextInfo _textInfo = _cultureInfo.TextInfo;
         #endregion constants
 
+
         #region internalmethods
         /// <summary>
         /// Extension method to easily turn strings into title case

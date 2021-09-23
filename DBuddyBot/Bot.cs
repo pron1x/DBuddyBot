@@ -15,7 +15,8 @@ namespace DBuddyBot
         public CommandsNextExtension Commands { get; }
         #endregion properties
 
-        #region publicmethods
+
+        #region constructors
         public Bot(string token, string[] prefixes)
         {
             DiscordConfiguration config = new()
@@ -26,7 +27,6 @@ namespace DBuddyBot
             };
 
             Client = new DiscordClient(config);
-
 
             ServiceProvider services = new ServiceCollection()
                 .AddSingleton(Bootstrapper.Database)
@@ -39,7 +39,6 @@ namespace DBuddyBot
                 Services = services
             };
 
-
             Commands = Client.UseCommandsNext(commandsConfig);
 
             Commands.RegisterCommands<UserCommands>();
@@ -47,6 +46,10 @@ namespace DBuddyBot
 
         }
 
+        #endregion constructors
+
+
+        #region publicmethods
         public async void StartAsync()
         {
             try
@@ -59,6 +62,7 @@ namespace DBuddyBot
                 System.Environment.Exit(1);
             }
         }
+
 
         public Task StopAsync() => Client.DisconnectAsync();
 
