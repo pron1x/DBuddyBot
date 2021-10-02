@@ -68,10 +68,9 @@ namespace DBuddyBot.Commands
             if (Database.TryGetGame(name, out Game game))
             {
                 DiscordRole role = ctx.Guild.Roles.FirstOrDefault(x => x.Value.Name.ToLower() == game.Name.ToLower()).Value;
-                await role.DeleteAsync($"{ctx.Member.Nickname} removed the game from database.");
                 Database.RemoveGame(game.Id);
-                await ctx.Channel.SendMessageAsync($"Succesfully removed role for {game.Name}!");
                 ctx.Client.Logger.Log(LogLevel.Information, $"{ctx.Member.Username} removed {game.Name} from database.");
+                await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":white_check_mark:"));
             }
             else
             {
