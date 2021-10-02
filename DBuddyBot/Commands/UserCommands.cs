@@ -33,7 +33,6 @@ namespace DBuddyBot.Commands
             {
                 DiscordRole role = ctx.Guild.Roles.FirstOrDefault(x => x.Value.Name.ToLower() == game.Name.ToLower()).Value;
                 await ctx.Member.GrantRoleAsync(role, $"User added {game.Name} to their collection.");
-                game.AddSubscriber();
                 await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":white_check_mark:"));
                 ctx.Client.Logger.Log(LogLevel.Information, $"{ctx.Member.Username} subscribed to {game.Name}.");
             }
@@ -62,7 +61,6 @@ namespace DBuddyBot.Commands
                 if (ctx.Member.Roles.Contains(role))
                 {
                     await ctx.Member.RevokeRoleAsync(role);
-                    game.RemoveSubscriber();
                 }
                 await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":white_check_mark:"));
                 ctx.Client.Logger.Log(LogLevel.Information, $"{ctx.Member.Username} unsubscribed from {game.Name}.");
@@ -88,7 +86,9 @@ namespace DBuddyBot.Commands
             // In future versions this could call the igdb api to retrieve more information about games.
             if (Database.TryGetGame(name, out Game game))
             {
-                await ctx.Channel.SendMessageAsync($"{game.Name} currently has {game.Subscribers} subscribers!");
+                DiscordRole role = ctx.Guild.Roles.FirstOrDefault(x => x.Value.Name.ToLower() == game.Name.ToLower()).Value;
+                int amount = ctx.Guild.Members.Count(member => member.Value.Roles.Contains(role));
+                await ctx.Channel.SendMessageAsync($"{game.Name} currently has {amount} subscribers!");
             }
             else
             {

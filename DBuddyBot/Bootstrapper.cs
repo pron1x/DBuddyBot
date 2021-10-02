@@ -114,7 +114,7 @@ namespace DBuddyBot
 
                     using SQLiteConnection conn = new(_databaseConnectionString);
                     Log.Logger.Information($"Setting up SQLite database {conn.DataSource}.");
-                    using SQLiteCommand command = new("CREATE TABLE IF NOT EXISTS games (id INT PRIMARY KEY , name TEXT, subscribers INT);", conn);
+                    using SQLiteCommand command = new("CREATE TABLE IF NOT EXISTS games (id INT PRIMARY KEY , name TEXT, emoji TEXT);", conn);
 
                     conn.Open();
                     command.ExecuteNonQueryAsync();
@@ -138,7 +138,7 @@ namespace DBuddyBot
                 using SqlConnection connection = new(_databaseConnectionString);
                 try
                 {
-                    using SqlCommand command = new("CREATE TABLE IF NOT EXISTS games (id INT PRIMARY KEY , name TEXT, subscribers INT);", connection);
+                    using SqlCommand command = new("CREATE TABLE IF NOT EXISTS games (id INT PRIMARY KEY , name TEXT, emoji TEXT);", connection);
                     connection.Open();
                     command.ExecuteNonQuery();
                     connection.Close();

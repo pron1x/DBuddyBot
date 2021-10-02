@@ -1,6 +1,4 @@
-﻿using DSharpPlus.Entities;
-
-namespace DBuddyBot.Models
+﻿namespace DBuddyBot.Models
 {
     /// <summary>
     /// Class <c>Game</c> models a game with basic information.
@@ -17,44 +15,37 @@ namespace DBuddyBot.Models
         #region backingfields
         private readonly int _id;
         private readonly string _name;
-        private readonly DiscordRole _gameRole;
-        private int _subscribers;
+        private readonly string _emoji;
         #endregion backingfields
 
         #region properties
         public int Id { get => _id; }
         public string Name { get => _name; }
-        public DiscordRole GameRole { get => _gameRole; }
-        public int Subscribers { get => _subscribers; }
+        public string Emoji { get => _emoji; }
         #endregion properties
 
 
         #region constructors
-        public Game(string name)
+        public Game(string name, string emoji)
         {
             _id = System.Threading.Interlocked.Increment(ref idCounter);
             _name = name;
-            _subscribers = 0;
+            _emoji = emoji;
         }
 
 
-        public Game(int id, string name, int subscribers)
+        public Game(int id, string name, string emoji)
         {
             _id = id;
             _name = name;
-            _subscribers = subscribers;
+            _emoji = emoji;
         }
 
         #endregion constructors
 
 
         #region publicmethods
-        public void AddSubscriber()
-            => _subscribers++;
 
-
-        public void RemoveSubscriber()
-            => _subscribers--;
         #endregion publicmethods
 
 

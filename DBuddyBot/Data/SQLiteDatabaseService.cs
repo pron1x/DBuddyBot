@@ -32,7 +32,7 @@ namespace DBuddyBot.Data
                 if (reader.HasRows)
                 {
                     reader.Read();
-                    game = new((int)reader["id"], (string)reader["name"], (int)reader["subscribers"]);
+                    game = new((int)reader["id"], (string)reader["name"], (string)reader["emoji"]);
                 }
                 _connection.Close();
             }
@@ -53,7 +53,7 @@ namespace DBuddyBot.Data
                 if (reader.HasRows)
                 {
                     reader.Read();
-                    game = new((int)reader["id"], (string)reader["name"], (int)reader["subscribers"]);
+                    game = new((int)reader["id"], (string)reader["name"], (string)reader["emoji"]);
                 }
                 _connection.Close();
             }
@@ -78,10 +78,10 @@ namespace DBuddyBot.Data
         public void AddGame(Game game)
         {
             using SQLiteConnection _connection = new(_connectionString);
-            using SQLiteCommand command = new("INSERT INTO games (id, name, subscribers) VALUES ($id, $name, $subscribers);", _connection);
+            using SQLiteCommand command = new("INSERT INTO games (id, name, emoji) VALUES ($id, $name, $emoji);", _connection);
             command.Parameters.AddWithValue("$id", game.Id);
             command.Parameters.AddWithValue("$name", game.Name);
-            command.Parameters.AddWithValue("$subscribers", game.Subscribers);
+            command.Parameters.AddWithValue("$emoji", game.Emoji);
 
             _connection.Open();
             command.ExecuteNonQueryAsync();

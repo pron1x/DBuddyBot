@@ -24,14 +24,14 @@ namespace DBuddyBot.Commands
         /// <param name="name">Name of the game to add</param>
         /// <returns></returns>
         [Command("add"), RequirePermissions(DSharpPlus.Permissions.ManageRoles)]
-        public async Task AddGame(CommandContext ctx, [RemainingText] string name)
+        public async Task AddGame(CommandContext ctx, DiscordEmoji emoji, [RemainingText] string name)
         {
             name = name.ToTitleCase();
             bool existsInDatabase = Database.TryGetGame(name, out Game game);
             DiscordRole existsAsRole = ctx.Guild.Roles.FirstOrDefault(r => r.Value.Name.ToLower() == name.ToLower()).Value;
             if (existsAsRole != null && !existsInDatabase)
             {
-                game = new(existsAsRole.Name);
+                game = new(existsAsRole.Name, emoji.GetDiscordName());
                 Database.AddGame(game);
                 await ctx.Channel.SendMessageAsync($"A role named {existsAsRole.Name} already exists on the Server, it has been added to the database.");
                 ctx.Client.Logger.Log(LogLevel.Information, $"{ctx.Member.Username} added {game.Name} to database, role existed.");
@@ -41,7 +41,7 @@ namespace DBuddyBot.Commands
                 DiscordRole role = await ctx.Guild.CreateRoleAsync(name: name, color: DiscordColor.Purple, mentionable: true, reason: $"{ctx.Member.Nickname} added {name} to the game database.");
                 if (role != null)
                 {
-                    Game newGame = new(name);
+                    Game newGame = new(name, emoji.GetDiscordName());
                     Database.AddGame(newGame);
                     await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":white_check_mark:"));
                     ctx.Client.Logger.Log(LogLevel.Information, $"{ctx.Member.Username} added {newGame.Name} to database, new role has been created.");
@@ -49,7 +49,7 @@ namespace DBuddyBot.Commands
             }
             else
             {
-                await ctx.Channel.SendMessageAsync($"{game.Name} already exists in the Databank, currently has {game.Subscribers} subscribers, no need to add it again");
+                await ctx.Channel.SendMessageAsync($"{game.Name} already exists in the Databank, no need to add it again");
                 ctx.Client.Logger.Log(LogLevel.Information, $"{ctx.Member.Username} tried to add {name} to database, but already exists.");
             }
         }
@@ -70,7 +70,7 @@ namespace DBuddyBot.Commands
                 DiscordRole role = ctx.Guild.Roles.FirstOrDefault(x => x.Value.Name.ToLower() == game.Name.ToLower()).Value;
                 await role.DeleteAsync($"{ctx.Member.Nickname} removed the game from database.");
                 Database.RemoveGame(game.Id);
-                await ctx.Channel.SendMessageAsync($"Succesfully removed role for {game.Name}! {game.Subscribers} members were subscribed to it.");
+                await ctx.Channel.SendMessageAsync($"Succesfully removed role for {game.Name}!");
                 ctx.Client.Logger.Log(LogLevel.Information, $"{ctx.Member.Username} removed {game.Name} from database.");
             }
             else
