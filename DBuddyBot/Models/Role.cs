@@ -3,7 +3,7 @@
     /// <summary>
     /// Class <c>Game</c> models a game with basic information.
     /// </summary>
-    public class Game
+    public class Role
     {
         /// <summary>
         /// Simple internal ID counter to auto increment game IDs.
@@ -26,7 +26,7 @@
 
 
         #region constructors
-        public Game(string name, string emoji)
+        public Role(string name, string emoji)
         {
             _id = System.Threading.Interlocked.Increment(ref idCounter);
             _name = name;
@@ -34,7 +34,7 @@
         }
 
 
-        public Game(int id, string name, string emoji)
+        public Role(int id, string name, string emoji)
         {
             _id = id;
             _name = name;
@@ -52,11 +52,11 @@
         #region overrides
         public override bool Equals(object obj)
         {
-            if (obj is not Game)
+            if (obj is not Role)
             {
                 return false;
             }
-            Game game = (Game)obj;
+            Role game = (Role)obj;
 
             return game.Id == Id;
         }

@@ -7,11 +7,11 @@ namespace DBuddyBot.Data
     /// </summary>
     public interface IAppDatabase
     {
-        public void AddGame(Game game);
-        public Game GetGame(string name);
-        public bool TryGetGame(string name, out Game game);
-        public Game GetGame(int id);
-        public bool TryGetGame(int id, out Game game);
+        public void AddGame(Role game);
+        public Role GetGame(string name);
+        public bool TryGetGame(string name, out Role game);
+        public Role GetGame(int id);
+        public bool TryGetGame(int id, out Role game);
         public void RemoveGame(int id);
     }
 }

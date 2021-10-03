@@ -27,7 +27,7 @@ namespace DBuddyBot.Commands
         public async Task AddGame(CommandContext ctx, DiscordEmoji emoji, [RemainingText] string name)
         {
             name = name.ToTitleCase();
-            bool existsInDatabase = Database.TryGetGame(name, out Game game);
+            bool existsInDatabase = Database.TryGetGame(name, out Role game);
             DiscordRole existsAsRole = ctx.Guild.Roles.FirstOrDefault(r => r.Value.Name.ToLower() == name.ToLower()).Value;
             if (existsAsRole != null && !existsInDatabase)
             {
@@ -41,7 +41,7 @@ namespace DBuddyBot.Commands
                 DiscordRole role = await ctx.Guild.CreateRoleAsync(name: name, color: DiscordColor.Purple, mentionable: true, reason: $"{ctx.Member.Nickname} added {name} to the game database.");
                 if (role != null)
                 {
-                    Game newGame = new(name, emoji.GetDiscordName());
+                    Role newGame = new(name, emoji.GetDiscordName());
                     Database.AddGame(newGame);
                     await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":white_check_mark:"));
                     ctx.Client.Logger.Log(LogLevel.Information, $"{ctx.Member.Username} added {newGame.Name} to database, new role has been created.");
@@ -65,7 +65,7 @@ namespace DBuddyBot.Commands
         public async Task RemoveGame(CommandContext ctx, [RemainingText] string name)
         {
             name = name.ToTitleCase();
-            if (Database.TryGetGame(name, out Game game))
+            if (Database.TryGetGame(name, out Role game))
             {
                 DiscordRole role = ctx.Guild.Roles.FirstOrDefault(x => x.Value.Name.ToLower() == game.Name.ToLower()).Value;
                 Database.RemoveGame(game.Id);

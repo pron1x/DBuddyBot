@@ -19,9 +19,9 @@ namespace DBuddyBot.Data
 
 
         #region publicmethods
-        public Game GetGame(string name)
+        public Role GetGame(string name)
         {
-            Game game = null;
+            Role game = null;
             using (SqlConnection _connection = new(_connectionString))
             {
                 using SqlCommand command = new("SELECT * FROM games WHERE lower(name) = $name;", _connection);
@@ -40,9 +40,9 @@ namespace DBuddyBot.Data
         }
 
 
-        public Game GetGame(int id)
+        public Role GetGame(int id)
         {
-            Game game = null;
+            Role game = null;
             using (SqlConnection _connection = new(_connectionString))
             {
                 using SqlCommand command = new("SELECT * FROM games WHERE id = $id;", _connection);
@@ -61,21 +61,21 @@ namespace DBuddyBot.Data
         }
 
 
-        public bool TryGetGame(string name, out Game game)
+        public bool TryGetGame(string name, out Role game)
         {
             game = GetGame(name);
             return game != null;
         }
 
 
-        public bool TryGetGame(int id, out Game game)
+        public bool TryGetGame(int id, out Role game)
         {
             game = GetGame(id);
             return game != null;
         }
 
 
-        public void AddGame(Game game)
+        public void AddGame(Role game)
         {
             using SqlConnection _connection = new(_connectionString);
             using SqlCommand command = new("INSERT INTO games (id, name, emoji) VALUES ($id, $name, $emoji);", _connection);

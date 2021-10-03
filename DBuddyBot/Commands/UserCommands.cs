@@ -29,7 +29,7 @@ namespace DBuddyBot.Commands
         public async Task AddGameToUser(CommandContext ctx, [RemainingText] string name)
         {
             name = name.ToTitleCase();
-            if (Database.TryGetGame(name, out Game game))
+            if (Database.TryGetGame(name, out Role game))
             {
                 DiscordRole role = ctx.Guild.Roles.FirstOrDefault(x => x.Value.Name.ToLower() == game.Name.ToLower()).Value;
                 await ctx.Member.GrantRoleAsync(role, $"User added {game.Name} to their collection.");
@@ -55,7 +55,7 @@ namespace DBuddyBot.Commands
         public async Task RemoveGameFromUser(CommandContext ctx, [RemainingText] string name)
         {
             name = name.ToTitleCase();
-            if (Database.TryGetGame(name, out Game game))
+            if (Database.TryGetGame(name, out Role game))
             {
                 DiscordRole role = ctx.Guild.Roles.FirstOrDefault(x => x.Value.Name.ToLower() == game.Name.ToLower()).Value;
                 if (ctx.Member.Roles.Contains(role))
@@ -84,7 +84,7 @@ namespace DBuddyBot.Commands
         {
             name = name.ToTitleCase();
             // In future versions this could call the igdb api to retrieve more information about games.
-            if (Database.TryGetGame(name, out Game game))
+            if (Database.TryGetGame(name, out Role game))
             {
                 DiscordRole role = ctx.Guild.Roles.FirstOrDefault(x => x.Value.Name.ToLower() == game.Name.ToLower()).Value;
                 int amount = ctx.Guild.Members.Count(member => member.Value.Roles.Contains(role));
