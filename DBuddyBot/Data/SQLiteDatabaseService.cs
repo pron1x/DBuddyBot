@@ -81,7 +81,7 @@ namespace DBuddyBot.Data
             using SQLiteCommand command = new("INSERT INTO games (id, name, emoji) VALUES ($id, $name, $emoji);", _connection);
             command.Parameters.AddWithValue("$id", game.Id);
             command.Parameters.AddWithValue("$name", game.Name);
-            command.Parameters.AddWithValue("$emoji", game.Emoji);
+            command.Parameters.AddWithValue("$emoji", game.EmoteId);
 
             _connection.Open();
             command.ExecuteNonQueryAsync();

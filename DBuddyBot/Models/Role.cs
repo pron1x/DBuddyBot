@@ -5,40 +5,29 @@
     /// </summary>
     public class Role
     {
-        /// <summary>
-        /// Simple internal ID counter to auto increment game IDs.
-        /// </summary>
-        #region staticfields
-        private static int idCounter = 0;
-        #endregion staticfields
-
         #region backingfields
-        private readonly int _id;
+        private readonly ulong _id;
         private readonly string _name;
-        private readonly string _emoji;
+        private readonly ulong _emoteId;
+        private readonly bool _isGame;
         #endregion backingfields
 
         #region properties
-        public int Id { get => _id; }
-        public string Name { get => _name; }
-        public string Emoji { get => _emoji; }
+        public ulong Id => _id;
+        public string Name => _name;
+        public ulong EmoteId => _emoteId;
+        public bool IsGame => _isGame;
         #endregion properties
 
 
         #region constructors
-        public Role(string name, string emoji)
-        {
-            _id = System.Threading.Interlocked.Increment(ref idCounter);
-            _name = name;
-            _emoji = emoji;
-        }
 
-
-        public Role(int id, string name, string emoji)
+        public Role(ulong id, string name, ulong emoteId, bool isGame = false)
         {
             _id = id;
             _name = name;
-            _emoji = emoji;
+            _emoteId = emoteId;
+            _isGame = isGame;
         }
 
         #endregion constructors
@@ -56,15 +45,15 @@
             {
                 return false;
             }
-            Role game = (Role)obj;
+            Role role = (Role)obj;
 
-            return game.Id == Id;
+            return role.Id == Id;
         }
 
 
         public override int GetHashCode()
         {
-            return Id;
+            return Id.GetHashCode();
         }
 
 
