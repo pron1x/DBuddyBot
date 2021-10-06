@@ -3,7 +3,7 @@ using System.Data.SQLite;
 
 namespace DBuddyBot.Data
 {
-    public class SQLiteDatabaseService : IAppDatabase
+    public class SQLiteDatabaseService : IDatabaseService
     {
         #region backingfields
         private readonly string _connectionString;
@@ -98,6 +98,21 @@ namespace DBuddyBot.Data
             _connection.Open();
             command.ExecuteNonQueryAsync();
             _connection.Close();
+        }
+
+        public Category GetCategory(int id)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public Category GetCategory(string name)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void Save(Category category)
+        {
+            throw new System.NotImplementedException();
         }
 
         #endregion publicmethods

@@ -3,7 +3,7 @@ using System.Data.SqlClient;
 
 namespace DBuddyBot.Data
 {
-    class SQLDatabaseService : IAppDatabase
+    class SQLDatabaseService : IDatabaseService
     {
         #region backingfields
         private readonly string _connectionString;
@@ -99,6 +99,23 @@ namespace DBuddyBot.Data
             command.ExecuteNonQueryAsync();
             _connection.Close();
         }
+
+        public Category GetCategory(int id)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public Category GetCategory(string name)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void Save(Category category)
+        {
+            throw new System.NotImplementedException();
+        }
+
+
 
         #endregion publicmethods
     }
