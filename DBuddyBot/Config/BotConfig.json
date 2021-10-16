@@ -5,5 +5,8 @@
     },
     "database": {
         "connection_string": ""
+    },
+    "categories": {
+        "categoryName": 10000000
     }
 }

@@ -1,4 +1,5 @@
 ﻿using DBuddyBot.Data;
+using DBuddyBot.Models;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -14,13 +15,13 @@ namespace DBuddyBot
     {
         #region constants
         private static readonly string _configFilePath = @".\Config\BotConfig.json";
-        private static readonly string _defaultDatabase = @"Data Source=.\Data\buddybotdb.sqlite;Version=3;Pooling=True;Max Pool Size=20;";
+        private static readonly string _defaultDatabase = @"Data Source=.\Data\buddybotdb.sqlite;Version=3;Pooling=True;Max Pool Size=50;";
         #endregion constants
 
         #region backingfields
         private static string _discordToken;
         private static List<string> _commandPrefixes;
-        private static IAppDatabase _database;
+        private static IDatabaseService _database;
         private static string _databaseConnectionString;
         private static string _databaseFilePath;
         #endregion backingfields
@@ -28,7 +29,7 @@ namespace DBuddyBot
         #region properties
         public static string DiscordToken { get => _discordToken; }
         public static string[] CommandPrefixes { get => _commandPrefixes.ToArray(); }
-        public static IAppDatabase Database { get => _database; }
+        public static IDatabaseService Database { get => _database; }
         #endregion properties
 
 
@@ -55,11 +56,21 @@ namespace DBuddyBot
                 if (json.RootElement.TryGetProperty("database", out JsonElement database))
                 {
                     ReadDatabaseConfig(database);
+                    SetupDatabase();
                 }
                 else
                 {
                     _databaseConnectionString = _defaultDatabase;
                     Log.Logger.Warning("Config is missing database section. Using default SQLite database.");
+                }
+
+                if (json.RootElement.TryGetProperty("categories", out JsonElement categories))
+                {
+                    GetCategories(categories);
+                }
+                else
+                {
+                    Log.Logger.Warning("Config is missing categories section. Cannot manage roles without categories.");
                 }
             }
             else
@@ -68,7 +79,6 @@ namespace DBuddyBot
                 CreateNewConfigFile();
                 Environment.Exit(78);
             }
-            SetupDatabase();
         }
 
         #endregion publicmethods
@@ -114,10 +124,16 @@ namespace DBuddyBot
 
                     using SQLiteConnection conn = new(_databaseConnectionString);
                     Log.Logger.Information($"Setting up SQLite database {conn.DataSource}.");
-                    using SQLiteCommand command = new("CREATE TABLE IF NOT EXISTS games (id INT PRIMARY KEY , name TEXT, emoji TEXT);", conn);
+                    using SQLiteCommand createCategories = new("CREATE TABLE IF NOT EXISTS categories (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL UNIQUE);", conn);
+                    using SQLiteCommand createRoles = new("CREATE TABLE IF NOT EXISTS roles (id UNSIGNED BIG INTEGER PRIMARY KEY NOT NULL, name TEXT NOT NULL UNIQUE, emote UNSIGNED BIG INT NOT NULL UNIQUE, game BOOL, category_id UNSIGNED BIG INT NOT NULL, FOREIGN KEY(category_id) REFERENCES categories(id));", conn);
+                    using SQLiteCommand createChannels = new("CREATE TABLE IF NOT EXISTS channels ( id UNSIGNED BIG INTEGER PRIMARY KEY NOT NULL, name TEXT, category_id UNSIGNED BIG INT	NOT NULL, FOREIGN KEY(category_id) REFERENCES categories(id));", conn);
+                    using SQLiteCommand createRoleMessages = new("CREATE TABLE IF NOT EXISTS role_messages ( id UNSIGNED BIG INTEGER PRIMARY KEY NOT NULL, channel_id UNSIGNED BIG INT, FOREIGN KEY(channel_id) REFERENCES channels(id));", conn);
 
                     conn.Open();
-                    command.ExecuteNonQueryAsync();
+                    createCategories.ExecuteNonQuery();
+                    createRoles.ExecuteNonQuery();
+                    createChannels.ExecuteNonQuery();
+                    createRoleMessages.ExecuteNonQuery();
                     conn.Close();
                 }
                 using SQLiteConnection connection = new(_databaseConnectionString);
@@ -138,9 +154,15 @@ namespace DBuddyBot
                 using SqlConnection connection = new(_databaseConnectionString);
                 try
                 {
-                    using SqlCommand command = new("CREATE TABLE IF NOT EXISTS games (id INT PRIMARY KEY , name TEXT, emoji TEXT);", connection);
+                    using SqlCommand createCategories = new("CREATE TABLE IF NOT EXISTS categories (id UNSIGNED BIG INT PRIMARY KEY NOT NULL, name TEXT NOT NULL UNIQUE);", connection);
+                    using SqlCommand createRoles = new("CREATE TABLE IF NOT EXISTS roles (id UNSIGNED BIG INT PRIMARY KEY NOT NULL, name TEXT NOT NULL UNIQUE, emote UNSIGNED BIG INT NOT NULL UNIQUE, game BOOL, category_id UNSIGNED BIG INT NOT NULL, FOREIGN KEY(category_id) REFERENCES categories(id));", connection);
+                    using SqlCommand createChannels = new("CREATE TABLE IF NOT EXISTS channels ( id UNSIGNED BIG INT PRIMARY KEY NOT NULL, name TEXT, category_id UNSIGNED BIG INT	NOT NULL, FOREIGN KEY(category_id) REFERENCES categories(id));", connection);
+                    using SqlCommand createRoleMessages = new("CREATE TABLE IF NOT EXISTS role_messages ( id UNSIGNED BIG INT PRIMARY KEY NOT NULL, channel_id UNSIGNED BIG INT, FOREIGN KEY(channel_id) REFERENCES channels(id));", connection);
                     connection.Open();
-                    command.ExecuteNonQuery();
+                    createCategories.ExecuteNonQuery();
+                    createRoles.ExecuteNonQuery();
+                    createChannels.ExecuteNonQuery();
+                    createRoleMessages.ExecuteNonQuery();
                     connection.Close();
                 }
                 catch (Exception e)
@@ -216,6 +238,16 @@ namespace DBuddyBot
             {
                 _databaseConnectionString = _defaultDatabase;
                 Log.Logger.Warning("Config is missing connection_string element. Using default SQLite database.");
+            }
+        }
+
+
+        private static void GetCategories(JsonElement categories)
+        {
+            foreach (JsonProperty property in categories.EnumerateObject())
+            {
+                int categoryId = Database.AddCategory(property.Name);
+                Database.AddChannel(property.Value.GetUInt64(), categoryId);
             }
         }
 

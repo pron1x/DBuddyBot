@@ -24,6 +24,14 @@ namespace DBuddyBot.Models
         #endregion properties
 
         #region constructors
+
+        public Category(string name, Channel channel)
+        {
+            _name = name;
+            _channel = channel;
+            _roles = new();
+        }
+
         public Category(int id, string name, Channel channel)
         {
             _id = id;

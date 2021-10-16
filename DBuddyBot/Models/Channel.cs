@@ -26,6 +26,7 @@ namespace DBuddyBot.Models
         {
             _id = id;
             _name = name;
+            _messages = new();
         }
 
         #endregion constructors

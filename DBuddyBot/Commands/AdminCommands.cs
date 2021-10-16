@@ -24,30 +24,31 @@ namespace DBuddyBot.Commands
         /// <param name="name">Name of the game to add</param>
         /// <returns></returns>
         [Command("add"), RequirePermissions(DSharpPlus.Permissions.ManageRoles)]
-        public async Task AddGame(CommandContext ctx, string categoryName, DiscordEmoji emoji, [RemainingText] string name)
+        public async Task AddRole(CommandContext ctx, string categoryName, DiscordEmoji emoji, [RemainingText] string name)
         {
             categoryName = categoryName.ToTitleCase();
             name = name.ToTitleCase();
             Category category = Database.GetCategory(categoryName);
             if (category == null)
             {
-                await ctx.Channel.SendMessageAsync($"No category {categoryName} exists. Can not add role.");
+                await ctx.Channel.SendMessageAsync($"No category {categoryName} exists. Can not add role to it.");
                 return;
             }
-
-            if (category.Roles.Any(role => role.Name == name))
+            else if (category.Roles.Any(role => role.Name == name))
             {
                 await ctx.Channel.SendMessageAsync($"Role {name} already exists in managed context, no need to add it again.");
                 return;
             }
             else
             {
-                DiscordRole role = ctx.Guild.Roles.First(role => role.Value.Name == name).Value;
+                ctx.Client.Logger.LogDebug("Role does not exist in managed context, searching existing discord roles...");
+                DiscordRole role = ctx.Guild.Roles.FirstOrDefault(role => role.Value.Name == name).Value;
                 if (role == null)
                 {
                     role = await ctx.Guild.CreateRoleAsync(name, DSharpPlus.Permissions.None, DiscordColor.Brown, mentionable: true);
+                    ctx.Client.Logger.LogDebug("No existing role found, created new role...");
                 }
-                category.Roles.Add(new(role.Id, role.Name, emoji.Id));
+                Database.AddRole(new(role.Id, role.Name, emoji.Id), category.Id);
                 await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":white_check_mark:"));
                 ctx.Client.Logger.Log(LogLevel.Information, $"{ctx.Member.Username} added {role.Name} to database.");
             }
@@ -61,15 +62,32 @@ namespace DBuddyBot.Commands
         /// <param name="name">Name of the game to remove</param>
         /// <returns></returns>
         [Command("remove"), RequirePermissions(DSharpPlus.Permissions.ManageRoles)]
-        public async Task RemoveGame(CommandContext ctx, [RemainingText] string name)
+        public async Task RemoveGame(CommandContext ctx, string categoryName, [RemainingText] string name)
         {
             /*
-             * Needs rework to select Category based on if it contains the game, then delete it.
-             * Own Database command for easier use?
+             * TODO: Remove category name parameter
              */
+            categoryName = categoryName.ToTitleCase();
+            name = name.ToTitleCase();
+            Category category = Database.GetCategory(categoryName);
 
-            //name = name.ToTitleCase();
-            //if (Database.TryGetGame(name, out Role game))
+            if (category == null)
+            {
+                await ctx.Channel.SendMessageAsync($"No category {categoryName} exists. Can not remove role from it.");
+                return;
+            }
+            Role role = category.Roles.FirstOrDefault(role => role.Name == name);
+            if (role == null)
+            {
+                await ctx.Channel.SendMessageAsync($"No role {name} exists in category. Can not remove role.");
+                return;
+            }
+            else
+            {
+
+            }
+
+            //if (Database.TryGetRole(name, out Role game))
             //{
             //    DiscordRole role = ctx.Guild.Roles.FirstOrDefault(x => x.Value.Name.ToLower() == game.Name.ToLower()).Value;
             //    Database.RemoveGame(game.Id);
