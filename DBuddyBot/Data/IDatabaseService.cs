@@ -15,6 +15,7 @@ namespace DBuddyBot.Data
         public bool TryGetRole(string name, out Role role);
         public Role GetRole(ulong id);
         public bool TryGetRole(ulong id, out Role role);
+        public Role GetRoleFromEmote(ulong emoteId);
         public Channel GetChannel(ulong channelId);
         public void RemoveRole(ulong id);
 

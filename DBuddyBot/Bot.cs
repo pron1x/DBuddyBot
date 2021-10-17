@@ -1,4 +1,5 @@
 ﻿using DBuddyBot.Commands;
+using DBuddyBot.EventHandlers;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using Microsoft.Extensions.DependencyInjection;
@@ -43,6 +44,8 @@ namespace DBuddyBot
 
             Commands.RegisterCommands<UserCommands>();
             Commands.RegisterCommands<AdminCommands>();
+
+            Client.MessageReactionAdded += MessageReactionHandler.BaseMessageReactionEventHandler;
 
         }
 

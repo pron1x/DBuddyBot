@@ -182,6 +182,24 @@ namespace DBuddyBot.Data
             return role != null;
         }
 
+        public Role GetRoleFromEmote(ulong emoteId)
+        {
+            Role role = null;
+            using (SqlConnection connection = new(_connectionString))
+            {
+                using SqlCommand command = new("SELECT * FROM roles WHERE emote = $emote;", connection);
+                command.Parameters.AddWithValue("$emote", emoteId);
+                connection.Open();
+                using SqlDataReader reader = command.ExecuteReader();
+                if (reader.Read())
+                {
+                    role = new((ulong)reader.GetInt64(0), reader.GetString(1), (ulong)reader.GetInt64(2), reader.GetBoolean(3));
+                }
+                connection.Close();
+            }
+            return role;
+        }
+
         public Channel GetChannel(ulong channelId)
         {
             Channel channel = null;
