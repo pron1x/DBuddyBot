@@ -18,7 +18,7 @@ namespace DBuddyBot.Commands
 
         #region commandmethods
         /// <summary>
-        /// Adds a game to the database and creates the corresponding discord role
+        /// Adds a role to the database and creates the corresponding discord role
         /// </summary>
         /// <param name="ctx"></param>
         /// <param name="name">Name of the game to add</param>
@@ -56,49 +56,29 @@ namespace DBuddyBot.Commands
 
 
         /// <summary>
-        /// Removes a game from the database and deletes the corresponding discord role
+        /// Removes a role from the database
         /// </summary>
         /// <param name="ctx"></param>
         /// <param name="name">Name of the game to remove</param>
         /// <returns></returns>
         [Command("remove"), RequirePermissions(DSharpPlus.Permissions.ManageRoles)]
-        public async Task RemoveGame(CommandContext ctx, string categoryName, [RemainingText] string name)
+        public async Task RemoveRole(CommandContext ctx, [RemainingText] string name)
         {
-            /*
-             * TODO: Remove category name parameter
-             */
-            categoryName = categoryName.ToTitleCase();
             name = name.ToTitleCase();
-            Category category = Database.GetCategory(categoryName);
+            Role role = Database.GetRole(name);
+            ctx.Client.Logger.LogDebug($"Fetched role from database. Id: {(role == null ? "none" : role.Id)}");
 
-            if (category == null)
-            {
-                await ctx.Channel.SendMessageAsync($"No category {categoryName} exists. Can not remove role from it.");
-                return;
-            }
-            Role role = category.Roles.FirstOrDefault(role => role.Name == name);
             if (role == null)
             {
-                await ctx.Channel.SendMessageAsync($"No role {name} exists in category. Can not remove role.");
+                await ctx.Channel.SendMessageAsync($"No role {name} exists. Can not remove it.");
                 return;
             }
             else
             {
-
+                Database.RemoveRole(role.Id);
+                ctx.Client.Logger.LogInformation($"{ctx.Member.Username} removed role {role.Name} from database.");
+                await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":white_check_mark:"));
             }
-
-            //if (Database.TryGetRole(name, out Role game))
-            //{
-            //    DiscordRole role = ctx.Guild.Roles.FirstOrDefault(x => x.Value.Name.ToLower() == game.Name.ToLower()).Value;
-            //    Database.RemoveGame(game.Id);
-            //    ctx.Client.Logger.Log(LogLevel.Information, $"{ctx.Member.Username} removed {game.Name} from database.");
-            //    await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":white_check_mark:"));
-            //}
-            //else
-            //{
-            //    await ctx.Channel.SendMessageAsync($"Game {name} does not exist in the database, no need to remove it.");
-            //    ctx.Client.Logger.Log(LogLevel.Information, $"{ctx.Member.Username} tried to remove {name} from database, but does not exist.");
-            //}
         }
 
         #endregion commandmethods

@@ -33,7 +33,7 @@ namespace DBuddyBot.Data
                 if (reader.HasRows)
                 {
                     reader.Read();
-                    role = new((ulong)reader["id"], (string)reader["name"], (ulong)reader["emote"], (bool)reader["game"]);
+                    role = new((ulong)reader.GetInt64(0), reader.GetString(1), (ulong)reader.GetInt64(2), reader.GetBoolean(3));
                 }
                 connection.Close();
             }
@@ -54,7 +54,7 @@ namespace DBuddyBot.Data
                 if (reader.HasRows)
                 {
                     reader.Read();
-                    role = new((ulong)reader["id"], (string)reader["name"], (ulong)reader["emote"], (bool)reader["game"]);
+                    role = new((ulong)reader.GetInt64(0), reader.GetString(1), (ulong)reader.GetInt64(2), reader.GetBoolean(3));
                 }
                 connection.Close();
             }
