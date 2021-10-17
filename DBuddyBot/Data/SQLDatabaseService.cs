@@ -1,4 +1,5 @@
 ﻿using DBuddyBot.Models;
+using Serilog;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 
@@ -20,117 +21,51 @@ namespace DBuddyBot.Data
 
 
         #region publicmethods
-        public Role GetRole(string name)
-        {
-            Role role = null;
-            using (SqlConnection connection = new(_connectionString))
-            {
-                using SqlCommand command = new("SELECT * FROM roles WHERE lower(name) = $name;", connection);
-                command.Parameters.AddWithValue("$name", name.ToLower());
 
+        public int AddCategory(string name)
+        {
+            if (GetCategory(name) == null)
+            {
+                using SqlConnection connection = new(_connectionString);
+                using SqlCommand command = new("INSERT INTO categories(name) VALUES ($name);", connection);
+                command.Parameters.AddWithValue("$name", name.ToTitleCase());
                 connection.Open();
-                SqlDataReader reader = command.ExecuteReader();
-                if (reader.HasRows)
-                {
-                    reader.Read();
-                    role = new((ulong)reader.GetInt64(0), reader.GetString(1), (ulong)reader.GetInt64(2), reader.GetBoolean(3));
-                }
+                command.ExecuteNonQuery();
                 connection.Close();
             }
-            return role;
+            Category category = GetCategory(name);
+            return category == null ? -1 : category.Id;
         }
-
-
-        public Role GetRole(ulong id)
-        {
-            Role role = null;
-            using (SqlConnection connection = new(_connectionString))
-            {
-                using SqlCommand command = new("SELECT * FROM roles WHERE id = $id;", connection);
-                command.Parameters.AddWithValue("$name", id);
-
-                connection.Open();
-                SqlDataReader reader = command.ExecuteReader();
-                if (reader.HasRows)
-                {
-                    reader.Read();
-                    role = new((ulong)reader.GetInt64(0), reader.GetString(1), (ulong)reader.GetInt64(2), reader.GetBoolean(3));
-                }
-                connection.Close();
-            }
-            return role;
-        }
-
-
-        public bool TryGetRole(string name, out Role game)
-        {
-            game = GetRole(name);
-            return game != null;
-        }
-
-
-        public bool TryGetRole(ulong id, out Role game)
-        {
-            game = GetRole(id);
-            return game != null;
-        }
-
 
         public void AddRole(Role role, int categoryId)
         {
-            //using SqlConnection _connection = new(_connectionString);
-            //using SqlCommand command = new("INSERT INTO games (id, name, emoji) VALUES ($id, $name, $emoji);", _connection);
-            //command.Parameters.AddWithValue("$id", role.Id);
-            //command.Parameters.AddWithValue("$name", role.Name);
-            //command.Parameters.AddWithValue("$emoji", role.EmoteId);
-
-            //_connection.Open();
-            //command.ExecuteNonQueryAsync();
-            //_connection.Close();
-        }
-
-
-        public void RemoveRole(ulong id)
-        {
-            using SqlConnection _connection = new(_connectionString);
-            using SqlCommand command = new("DELETE FROM roles WHERE id = $id;", _connection);
-            command.Parameters.AddWithValue("$id", id);
-
-            _connection.Open();
-            command.ExecuteNonQueryAsync();
-            _connection.Close();
-        }
-
-        public Category GetCategory(int id)
-        {
-            Category category = null;
-            List<Role> roles = new();
-            RoleMessage message = null;
-            using (SqlConnection connection = new(_connectionString))
+            if (GetRole(role.Id) == null)
             {
-                using SqlCommand command = new("SELECT categories.id, categories.name, channels.id as channelId, channels.name as channelName, roles.id as roleId, roles.name as roleName, roles.emote as roleEmote, roles.game as roleGame, role_messages.id as messageId"
-                                                    + "FROM categories, channels, roles, role_messages WHERE channels.category_id = categories.id AND roles.category_id = categories.id and role_messages.channel_id = channels.id and categories.id = $id;", connection);
-                command.Parameters.AddWithValue("$id", id);
+                using SqlConnection connection = new(_connectionString);
+                using SqlCommand command = new("INSERT INTO roles(id, name, emote, game, category_id) VALUES ($roleId, $roleName, $roleEmote, $roleIsGame, $categoryId)", connection);
+                command.Parameters.AddWithValue("$roleId", role.Id);
+                command.Parameters.AddWithValue("$roleName", role.Name);
+                command.Parameters.AddWithValue("$roleEmote", role.EmoteId);
+                command.Parameters.AddWithValue("$roleIsGame", role.IsGame);
+                command.Parameters.AddWithValue("$categoryId", categoryId);
                 connection.Open();
-                SqlDataReader reader = command.ExecuteReader();
-                while (reader.Read())
-                {
-                    if (category == null)
-                    {
-                        category = new((int)reader["id"], (string)reader["name"], new Channel((ulong)reader["channelId"]));
-                    }
-                    if (message == null)
-                    {
-                        message = new((ulong)reader["messageId"]);
-                    }
-                    roles.Add(new((ulong)reader["roleId"], (string)reader["roleName"], (ulong)reader["roleEmote"], (bool)reader["roleGame"]));
-                }
+                command.ExecuteNonQuery();
                 connection.Close();
             }
-            category.Channel.Messages.Add(message);
-            category.Roles.AddRange(roles);
+        }
 
-            return category;
+        public void AddChannel(ulong channelId, int categoryId)
+        {
+            if (GetChannel(channelId) == null)
+            {
+                using SqlConnection connection = new(_connectionString);
+                using SqlCommand command = new("INSERT INTO channels(id, category_id) VALUES ($channelId, $categoryId);", connection);
+                command.Parameters.AddWithValue("$channelId", channelId);
+                command.Parameters.AddWithValue("$categoryId", categoryId);
+                connection.Open();
+                command.ExecuteNonQuery();
+                connection.Close();
+            }
         }
 
         public Category GetCategory(string name)
@@ -140,46 +75,139 @@ namespace DBuddyBot.Data
             RoleMessage message = null;
             using (SqlConnection connection = new(_connectionString))
             {
-                using SqlCommand command = new("SELECT categories.id, categories.name, channels.id as channelId, channels.name as channelName, roles.id as roleId, roles.name as roleName, roles.emote as roleEmote, roles.game as roleGame, role_messages.id as messageId"
-                                                    + "FROM categories, channels, roles, role_messages WHERE channels.category_id = categories.id AND roles.category_id = categories.id and role_messages.channel_id = channels.id and categories.name = $name;", connection);
-                command.Parameters.AddWithValue("$name", name);
+                using SqlCommand command = new("SELECT ca.id AS categoryId, ca.name AS categoryName, ch.id AS channelId, ro.id AS roleId, ro.name AS roleName, ro.emote AS roleEmote, ro.game AS roleGame, rm.id AS messageId "
+                                                    + "FROM categories ca LEFT JOIN channels ch ON ca.id = ch.category_id LEFT JOIN role_messages rm ON ch.id = rm.channel_id LEFT JOIN roles ro ON ca.id = ro.category_id WHERE lower(categoryName) = $name;", connection);
+                command.Parameters.AddWithValue("$name", name.ToLower());
                 connection.Open();
                 SqlDataReader reader = command.ExecuteReader();
-                while (reader.Read())
+                Log.Logger.Debug($"Command executed, reading response... Rows? {reader.HasRows}");
+                if (reader.HasRows)
                 {
-                    if (category == null)
+                    while (reader.Read())
                     {
-                        category = new((int)reader["id"], (string)reader["name"], new Channel((ulong)reader["channelId"]));
+                        int categoryId = reader.IsDBNull(0) ? -1 : reader.GetInt32(0);
+                        Log.Logger.Debug($"categorId done... Is: {categoryId}");
+                        string categoryName = reader.IsDBNull(1) ? string.Empty : reader.GetString(1);
+                        Log.Logger.Debug($"categoryName done... Is: {categoryName}");
+                        ulong channelId = reader.IsDBNull(2) ? 0 : (ulong)reader.GetInt64(2);
+                        Log.Logger.Debug($"channelId done... Is: {channelId}");
+                        ulong roleId = reader.IsDBNull(3) ? 0 : (ulong)reader.GetInt64(3);
+                        Log.Logger.Debug($"roleId done... Is: {roleId}");
+                        string roleName = reader.IsDBNull(4) ? string.Empty : reader.GetString(4);
+                        Log.Logger.Debug($"roleName done... Is: {roleName}");
+                        ulong roleEmote = reader.IsDBNull(5) ? 0 : (ulong)reader.GetInt64(5);
+                        Log.Logger.Debug($"roleEmote done... Is: {roleEmote}");
+                        bool roleIsGame = reader.IsDBNull(6) ? false : reader.GetBoolean(6);
+                        Log.Logger.Debug($"roleIsGame done... Is: {roleIsGame}");
+                        ulong messageId = reader.IsDBNull(7) ? 0 : (ulong)reader.GetInt64(7);
+                        Log.Logger.Debug($"messageId done... Is: {messageId}");
+                        Log.Logger.Debug($"All fields parsed...");
+
+                        if (category == null && categoryId != -1 && categoryName != string.Empty)
+                        {
+                            Channel channel = null;
+                            if (channelId != 0)
+                            {
+                                channel = new(channelId);
+                            }
+                            category = new(categoryId, categoryName, channel);
+                        }
+                        if (message == null && messageId != 0)
+                        {
+                            message = new(messageId);
+                        }
+                        if (roleId != 0)
+                        {
+                            Role role = new(roleId, roleName, roleEmote, roleIsGame);
+                            roles.Add(role);
+                        }
                     }
-                    if (message == null)
-                    {
-                        message = new((ulong)reader["messageId"]);
-                    }
-                    roles.Add(new((ulong)reader["roleId"], (string)reader["roleName"], (ulong)reader["roleEmote"], (bool)reader["roleGame"]));
+                    category.Channel?.Messages.Add(message);
+                    category.Roles.AddRange(roles);
                 }
                 connection.Close();
             }
-            category.Channel.Messages.Add(message);
-            category.Roles.AddRange(roles);
-
             return category;
         }
 
-        public void Save(Category category)
+        public Role GetRole(string name)
         {
-            throw new System.NotImplementedException();
+            Role role = null;
+            using (SqlConnection connection = new(_connectionString))
+            {
+                using SqlCommand command = new("SELECT * FROM roles WHERE lower(name) = $name;", connection);
+                command.Parameters.AddWithValue("$name", name.ToLower());
+
+                connection.Open();
+                using SqlDataReader reader = command.ExecuteReader();
+                if (reader.HasRows)
+                {
+                    reader.Read();
+                    role = new((ulong)reader.GetInt64(0), reader.GetString(1), (ulong)reader.GetInt64(2), reader.GetBoolean(3));
+                }
+                connection.Close();
+            }
+            return role;
         }
 
-        public int AddCategory(string name)
+        public bool TryGetRole(string name, out Role role)
         {
-            throw new System.NotImplementedException();
+            role = GetRole(name);
+            return role != null;
         }
 
-        public void AddChannel(ulong channelId, int categoryId)
+        public Role GetRole(ulong id)
         {
-            throw new System.NotImplementedException();
+            Role role = null;
+            using (SqlConnection connection = new(_connectionString))
+            {
+                using SqlCommand command = new("SELECT * FROM roles WHERE id = $id;", connection);
+                command.Parameters.AddWithValue("$id", id);
+
+                connection.Open();
+                using SqlDataReader reader = command.ExecuteReader();
+                if (reader.HasRows)
+                {
+                    reader.Read();
+                    role = new((ulong)reader.GetInt64(0), reader.GetString(1), (ulong)reader.GetInt64(2), reader.GetBoolean(3));
+                }
+                connection.Close();
+            }
+            return role;
         }
 
+        public bool TryGetRole(ulong id, out Role role)
+        {
+            role = GetRole(id);
+            return role != null;
+        }
+
+        public Channel GetChannel(ulong channelId)
+        {
+            Channel channel = null;
+            using SqlConnection connection = new(_connectionString);
+            using SqlCommand command = new("SELECT * FROM channels WHERE id=$id;", connection);
+            command.Parameters.AddWithValue("$id", channelId);
+            connection.Open();
+            using SqlDataReader reader = command.ExecuteReader();
+            if (reader.Read())
+            {
+                ulong id = (ulong)reader.GetInt64(0);
+                channel = new(id);
+            }
+            return channel;
+        }
+
+        public void RemoveRole(ulong id)
+        {
+            using SqlConnection connection = new(_connectionString);
+            using SqlCommand command = new("DELETE FROM roles WHERE id = $id;", connection);
+            command.Parameters.AddWithValue("$id", id);
+
+            connection.Open();
+            command.ExecuteNonQueryAsync();
+            connection.Close();
+        }
 
 
         #endregion publicmethods
