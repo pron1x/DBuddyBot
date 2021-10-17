@@ -1,5 +1,4 @@
 ﻿using DBuddyBot.Data;
-using DBuddyBot.Models;
 using Serilog;
 using System;
 using System.Collections.Generic;
