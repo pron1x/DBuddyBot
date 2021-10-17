@@ -104,7 +104,6 @@ namespace DBuddyBot.Data
         public Category GetCategory(int id)
         {
             Category category = null;
-            Channel channel = null;
             List<Role> roles = new();
             RoleMessage message = null;
             using (SqlConnection connection = new(_connectionString))
@@ -118,11 +117,7 @@ namespace DBuddyBot.Data
                 {
                     if (category == null)
                     {
-                        category = new((int)reader["id"], (string)reader["name"], new Channel((ulong)reader["channelId"], (string)reader["channelName"]));
-                    }
-                    if (channel == null)
-                    {
-                        channel = new((ulong)reader["channelId"], (string)reader["channelName"]);
+                        category = new((int)reader["id"], (string)reader["name"], new Channel((ulong)reader["channelId"]));
                     }
                     if (message == null)
                     {
@@ -141,7 +136,6 @@ namespace DBuddyBot.Data
         public Category GetCategory(string name)
         {
             Category category = null;
-            Channel channel = null;
             List<Role> roles = new();
             RoleMessage message = null;
             using (SqlConnection connection = new(_connectionString))
@@ -155,11 +149,7 @@ namespace DBuddyBot.Data
                 {
                     if (category == null)
                     {
-                        category = new((int)reader["id"], (string)reader["name"], new Channel((ulong)reader["channelId"], (string)reader["channelName"]));
-                    }
-                    if (channel == null)
-                    {
-                        channel = new((ulong)reader["channelId"], (string)reader["channelName"]);
+                        category = new((int)reader["id"], (string)reader["name"], new Channel((ulong)reader["channelId"]));
                     }
                     if (message == null)
                     {
