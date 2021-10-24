@@ -68,6 +68,25 @@ namespace DBuddyBot.Data
             }
         }
 
+        public List<Category> GetAllCategories()
+        {
+            List<Category> categories = new();
+            using (SqlConnection connection = new(_connectionString))
+            {
+                using SqlCommand command = new("SELECT name FROM categories;", connection);
+
+                connection.Open();
+                SqlDataReader reader = command.ExecuteReader();
+                while (reader.Read())
+                {
+                    string categoryName = reader.GetString(0);
+                    categories.Add(GetCategory(categoryName));
+                }
+                connection.Close();
+            }
+            return categories;
+        }
+
         public Category GetCategory(string name)
         {
             Category category = null;

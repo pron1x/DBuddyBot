@@ -1,4 +1,5 @@
 ﻿using DBuddyBot.Models;
+using System.Collections.Generic;
 
 namespace DBuddyBot.Data
 {
@@ -10,6 +11,7 @@ namespace DBuddyBot.Data
         public int AddCategory(string name);
         public void AddRole(Role role, int categoryId);
         public void AddChannel(ulong channelId, int categoryId);
+        public List<Category> GetAllCategories();
         public Category GetCategory(string name);
         public Role GetRole(string name);
         public bool TryGetRole(string name, out Role role);

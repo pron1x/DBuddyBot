@@ -68,6 +68,25 @@ namespace DBuddyBot.Data
             }
         }
 
+        public List<Category> GetAllCategories()
+        {
+            List<Category> categories = new();
+            using (SQLiteConnection connection = new(_connectionString))
+            {
+                using SQLiteCommand command = new("SELECT name FROM categories;", connection);
+
+                connection.Open();
+                SQLiteDataReader reader = command.ExecuteReader();
+                while (reader.Read())
+                {
+                    string categoryName = reader.GetString(0);
+                    categories.Add(GetCategory(categoryName));
+                }
+                connection.Close();
+            }
+            return categories;
+        }
+
         public Category GetCategory(string name)
         {
             Category category = null;
@@ -191,7 +210,7 @@ namespace DBuddyBot.Data
                 command.Parameters.AddWithValue("$emote", emoteId);
                 connection.Open();
                 using SQLiteDataReader reader = command.ExecuteReader();
-                if(reader.Read())
+                if (reader.Read())
                 {
                     role = new((ulong)reader.GetInt64(0), reader.GetString(1), (ulong)reader.GetInt64(2), reader.GetBoolean(3));
                 }
