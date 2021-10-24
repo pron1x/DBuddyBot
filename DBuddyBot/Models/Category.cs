@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using DSharpPlus;
+using DSharpPlus.Entities;
+using System.Collections.Generic;
+using System.Text;
 
 namespace DBuddyBot.Models
 {
@@ -34,6 +37,22 @@ namespace DBuddyBot.Models
             _name = name;
             _channel = channel;
             _roles = new();
+        }
+
+        public DiscordEmbed GetEmbed(DiscordClient client)
+        {
+            DiscordEmbedBuilder builder = new();
+            builder.Title = Name;
+            builder.Description = $"Roles in the {Name} category";
+            builder.Color = DiscordColor.Orange;
+            StringBuilder roleString = new();
+            foreach(Role role in Roles)
+            {
+                roleString.AppendLine($"{role.Name} {DiscordEmoji.FromGuildEmote(client, role.EmoteId)}");
+            }
+            builder.AddField("Sign up to roles by reacting with the given emote", roleString.ToString());
+
+            return builder.Build();
         }
 
         #endregion constructors
