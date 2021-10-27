@@ -99,7 +99,7 @@ namespace DBuddyBot
 #endif
         }
 
-
+        //TODO: Simplify database (merge message table into category table)
         private static void SetupDatabase()
         {
             bool sqliteDatabase = !_databaseConnectionString.ToLower().Contains("uid");

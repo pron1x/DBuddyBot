@@ -39,6 +39,7 @@ namespace DBuddyBot.Models
             _roles = new();
         }
 
+        //TODO: Allow sorting of roles in specific orders (Alphabetically, certain roles first etc.)
         public DiscordEmbed GetEmbed(DiscordClient client)
         {
             DiscordEmbedBuilder builder = new();
