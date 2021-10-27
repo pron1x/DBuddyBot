@@ -46,9 +46,14 @@ namespace DBuddyBot.Models
             builder.Description = $"Roles in the {Name} category";
             builder.Color = DiscordColor.Orange;
             StringBuilder roleString = new();
-            foreach(Role role in Roles)
+            foreach (Role role in Roles)
             {
                 roleString.AppendLine($"{role.Name} {DiscordEmoji.FromGuildEmote(client, role.EmoteId)}");
+            }
+            if (string.IsNullOrWhiteSpace(roleString.ToString()))
+            {
+                roleString.Clear();
+                roleString.Append("No roles available in this category.");
             }
             builder.AddField("Sign up to roles by reacting with the given emote", roleString.ToString());
 
