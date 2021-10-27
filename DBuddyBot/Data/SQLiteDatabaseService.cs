@@ -141,7 +141,10 @@ namespace DBuddyBot.Data
                             roles.Add(role);
                         }
                     }
-                    category.Channel?.Messages.Add(message);
+                    if (message != null)
+                    {
+                        category.Channel?.Messages.Add(message);
+                    }
                     category.Roles.AddRange(roles);
                 }
                 connection.Close();
