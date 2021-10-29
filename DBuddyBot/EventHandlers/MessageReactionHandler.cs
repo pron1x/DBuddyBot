@@ -19,7 +19,7 @@ namespace DBuddyBot.EventHandlers
         {
             if (_database.GetChannel(e.Channel.Id) != null)
             {
-                Role role = _database.GetRoleFromEmote(e.Emoji.Id);
+                Role role = _database.GetRoleFromEmote(e.Emoji.GetDiscordName());
                 if (role == null)
                 {
                     e.Message.DeleteReactionAsync(e.Emoji, e.User, "Emoji not mapped to a role");

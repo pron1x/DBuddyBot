@@ -39,13 +39,14 @@ namespace DBuddyBot.Data
 
         public void AddRole(Role role, int categoryId)
         {
+            Log.Logger.Debug($"Emote Id (ulong) is: {role.Emote}");
             if (GetRole(role.Id) == null)
             {
                 using SQLiteConnection connection = new(_connectionString);
                 using SQLiteCommand command = new("INSERT INTO roles(id, name, emote, game, category_id) VALUES ($roleId, $roleName, $roleEmote, $roleIsGame, $categoryId)", connection);
                 command.Parameters.AddWithValue("$roleId", role.Id);
                 command.Parameters.AddWithValue("$roleName", role.Name);
-                command.Parameters.AddWithValue("$roleEmote", role.EmoteId);
+                command.Parameters.AddWithValue("$roleEmote", role.Emote);
                 command.Parameters.AddWithValue("$roleIsGame", role.IsGame);
                 command.Parameters.AddWithValue("$categoryId", categoryId);
                 connection.Open();
@@ -94,8 +95,8 @@ namespace DBuddyBot.Data
             RoleMessage message = null;
             using (SQLiteConnection connection = new(_connectionString))
             {
-                using SQLiteCommand command = new("SELECT ca.id AS categoryId, ca.name AS categoryName, ch.id AS channelId, ro.id AS roleId, ro.name AS roleName, ro.emote AS roleEmote, ro.game AS roleGame, rm.id AS messageId "
-                                                    + "FROM categories ca LEFT JOIN channels ch ON ca.id = ch.category_id LEFT JOIN role_messages rm ON ch.id = rm.channel_id LEFT JOIN roles ro ON ca.id = ro.category_id WHERE lower(categoryName) = $name;", connection);
+                using SQLiteCommand command = new("SELECT ca.id AS categoryId, ca.name AS categoryName, ca.message as categoryMessage, ch.id AS channelId, ro.id AS roleId, ro.name AS roleName, ro.emote AS roleEmote, ro.game AS roleGame "
+                                                    + "FROM categories ca LEFT JOIN channels ch ON ca.id = ch.category_id LEFT JOIN roles ro ON ca.id = ro.category_id WHERE lower(categoryName) = $name;", connection);
                 command.Parameters.AddWithValue("$name", name.ToLower());
                 connection.Open();
                 SQLiteDataReader reader = command.ExecuteReader();
@@ -108,18 +109,18 @@ namespace DBuddyBot.Data
                         Log.Logger.Debug($"categorId done... Is: {categoryId}");
                         string categoryName = reader.IsDBNull(1) ? string.Empty : reader.GetString(1);
                         Log.Logger.Debug($"categoryName done... Is: {categoryName}");
-                        ulong channelId = reader.IsDBNull(2) ? 0 : (ulong)reader.GetInt64(2);
-                        Log.Logger.Debug($"channelId done... Is: {channelId}");
-                        ulong roleId = reader.IsDBNull(3) ? 0 : (ulong)reader.GetInt64(3);
-                        Log.Logger.Debug($"roleId done... Is: {roleId}");
-                        string roleName = reader.IsDBNull(4) ? string.Empty : reader.GetString(4);
-                        Log.Logger.Debug($"roleName done... Is: {roleName}");
-                        ulong roleEmote = reader.IsDBNull(5) ? 0 : (ulong)reader.GetInt64(5);
-                        Log.Logger.Debug($"roleEmote done... Is: {roleEmote}");
-                        bool roleIsGame = reader.IsDBNull(6) ? false : reader.GetBoolean(6);
-                        Log.Logger.Debug($"roleIsGame done... Is: {roleIsGame}");
-                        ulong messageId = reader.IsDBNull(7) ? 0 : (ulong)reader.GetInt64(7);
+                        ulong messageId = reader.IsDBNull(2) ? 0 : (ulong)reader.GetInt64(2);
                         Log.Logger.Debug($"messageId done... Is: {messageId}");
+                        ulong channelId = reader.IsDBNull(3) ? 0 : (ulong)reader.GetInt64(3);
+                        Log.Logger.Debug($"channelId done... Is: {channelId}");
+                        ulong roleId = reader.IsDBNull(4) ? 0 : (ulong)reader.GetInt64(4);
+                        Log.Logger.Debug($"roleId done... Is: {roleId}");
+                        string roleName = reader.IsDBNull(5) ? string.Empty : reader.GetString(5);
+                        Log.Logger.Debug($"roleName done... Is: {roleName}");
+                        string roleEmote = reader.IsDBNull(6) ? string.Empty : reader.GetString(6);
+                        Log.Logger.Debug($"roleEmote done... Is: {roleEmote}");
+                        bool roleIsGame = reader.IsDBNull(7) ? false : reader.GetBoolean(7);
+                        Log.Logger.Debug($"roleIsGame done... Is: {roleIsGame}");
                         Log.Logger.Debug($"All fields parsed...");
 
                         if (category == null && categoryId != -1 && categoryName != string.Empty)
@@ -129,21 +130,17 @@ namespace DBuddyBot.Data
                             {
                                 channel = new(channelId);
                             }
-                            category = new(categoryId, categoryName, channel);
-                        }
-                        if (message == null && messageId != 0)
-                        {
-                            message = new(messageId);
+                            if (message == null && messageId != 0)
+                            {
+                                message = new(messageId);
+                            }
+                            category = new(categoryId, categoryName, channel, message);
                         }
                         if (roleId != 0)
                         {
                             Role role = new(roleId, roleName, roleEmote, roleIsGame);
                             roles.Add(role);
                         }
-                    }
-                    if (message != null)
-                    {
-                        category.Channel?.Messages.Add(message);
                     }
                     category.Roles.AddRange(roles);
                 }
@@ -165,7 +162,7 @@ namespace DBuddyBot.Data
                 if (reader.HasRows)
                 {
                     reader.Read();
-                    role = new((ulong)reader.GetInt64(0), reader.GetString(1), (ulong)reader.GetInt64(2), reader.GetBoolean(3));
+                    role = new((ulong)reader.GetInt64(0), reader.GetString(1), reader.GetString(2), reader.GetBoolean(3));
                 }
                 connection.Close();
             }
@@ -191,7 +188,7 @@ namespace DBuddyBot.Data
                 if (reader.HasRows)
                 {
                     reader.Read();
-                    role = new((ulong)reader.GetInt64(0), reader.GetString(1), (ulong)reader.GetInt64(2), reader.GetBoolean(3));
+                    role = new((ulong)reader.GetInt64(0), reader.GetString(1), reader.GetString(2), reader.GetBoolean(3));
                 }
                 connection.Close();
             }
@@ -204,18 +201,18 @@ namespace DBuddyBot.Data
             return role != null;
         }
 
-        public Role GetRoleFromEmote(ulong emoteId)
+        public Role GetRoleFromEmote(string emote)
         {
             Role role = null;
             using (SQLiteConnection connection = new(_connectionString))
             {
                 using SQLiteCommand command = new("SELECT * FROM roles WHERE emote = $emote;", connection);
-                command.Parameters.AddWithValue("$emote", emoteId);
+                command.Parameters.AddWithValue("$emote", emote);
                 connection.Open();
                 using SQLiteDataReader reader = command.ExecuteReader();
                 if (reader.Read())
                 {
-                    role = new((ulong)reader.GetInt64(0), reader.GetString(1), (ulong)reader.GetInt64(2), reader.GetBoolean(3));
+                    role = new((ulong)reader.GetInt64(0), reader.GetString(1), reader.GetString(2), reader.GetBoolean(3));
                 }
                 connection.Close();
             }

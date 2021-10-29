@@ -123,16 +123,14 @@ namespace DBuddyBot
 
                     using SQLiteConnection conn = new(_databaseConnectionString);
                     Log.Logger.Information($"Setting up SQLite database {conn.DataSource}.");
-                    using SQLiteCommand createCategories = new("CREATE TABLE IF NOT EXISTS categories (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL UNIQUE);", conn);
-                    using SQLiteCommand createRoles = new("CREATE TABLE IF NOT EXISTS roles (id UNSIGNED BIG INTEGER PRIMARY KEY NOT NULL, name TEXT NOT NULL UNIQUE, emote UNSIGNED BIG INT NOT NULL UNIQUE, game BOOL, category_id UNSIGNED BIG INT NOT NULL, FOREIGN KEY(category_id) REFERENCES categories(id));", conn);
+                    using SQLiteCommand createCategories = new("CREATE TABLE IF NOT EXISTS categories (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL UNIQUE, message UNSIGNED BIG INTEGER UNIQUE);", conn);
+                    using SQLiteCommand createRoles = new("CREATE TABLE IF NOT EXISTS roles (id UNSIGNED BIG INTEGER PRIMARY KEY NOT NULL, name TEXT NOT NULL UNIQUE, emote TEXT NOT NULL UNIQUE, game BOOL, category_id UNSIGNED BIG INT NOT NULL, FOREIGN KEY(category_id) REFERENCES categories(id));", conn);
                     using SQLiteCommand createChannels = new("CREATE TABLE IF NOT EXISTS channels ( id UNSIGNED BIG INTEGER PRIMARY KEY NOT NULL, category_id UNSIGNED BIG INT	NOT NULL, FOREIGN KEY(category_id) REFERENCES categories(id));", conn);
-                    using SQLiteCommand createRoleMessages = new("CREATE TABLE IF NOT EXISTS role_messages ( id UNSIGNED BIG INTEGER PRIMARY KEY NOT NULL, channel_id UNSIGNED BIG INT, FOREIGN KEY(channel_id) REFERENCES channels(id));", conn);
 
                     conn.Open();
                     createCategories.ExecuteNonQuery();
                     createRoles.ExecuteNonQuery();
                     createChannels.ExecuteNonQuery();
-                    createRoleMessages.ExecuteNonQuery();
                     conn.Close();
                 }
                 using SQLiteConnection connection = new(_databaseConnectionString);
@@ -153,15 +151,13 @@ namespace DBuddyBot
                 using SqlConnection connection = new(_databaseConnectionString);
                 try
                 {
-                    using SqlCommand createCategories = new("CREATE TABLE IF NOT EXISTS categories (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL UNIQUE);", connection);
-                    using SqlCommand createRoles = new("CREATE TABLE IF NOT EXISTS roles (id UNSIGNED BIG INT PRIMARY KEY NOT NULL, name TEXT NOT NULL UNIQUE, emote UNSIGNED BIG INT NOT NULL UNIQUE, game BOOL, category_id UNSIGNED BIG INT NOT NULL, FOREIGN KEY(category_id) REFERENCES categories(id));", connection);
+                    using SqlCommand createCategories = new("CREATE TABLE IF NOT EXISTS categories (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL UNIQUE, message UNSIGNED BIG INTEGER UNIQUE);", connection);
+                    using SqlCommand createRoles = new("CREATE TABLE IF NOT EXISTS roles (id UNSIGNED BIG INT PRIMARY KEY NOT NULL, name TEXT NOT NULL UNIQUE, emote TEXT NOT NULL UNIQUE, game BOOL, category_id UNSIGNED BIG INT NOT NULL, FOREIGN KEY(category_id) REFERENCES categories(id));", connection);
                     using SqlCommand createChannels = new("CREATE TABLE IF NOT EXISTS channels ( id UNSIGNED BIG INTEGER PRIMARY KEY NOT NULL, category_id UNSIGNED BIG INT	NOT NULL, FOREIGN KEY(category_id) REFERENCES categories(id));", connection);
-                    using SqlCommand createRoleMessages = new("CREATE TABLE IF NOT EXISTS role_messages ( id UNSIGNED BIG INT PRIMARY KEY NOT NULL, channel_id UNSIGNED BIG INT, FOREIGN KEY(channel_id) REFERENCES channels(id));", connection);
                     connection.Open();
                     createCategories.ExecuteNonQuery();
                     createRoles.ExecuteNonQuery();
                     createChannels.ExecuteNonQuery();
-                    createRoleMessages.ExecuteNonQuery();
                     connection.Close();
                 }
                 catch (Exception e)
