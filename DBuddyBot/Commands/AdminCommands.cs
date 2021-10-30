@@ -42,16 +42,14 @@ namespace DBuddyBot.Commands
             }
             else
             {
-                ctx.Client.Logger.LogDebug("Role does not exist in managed context, searching existing discord roles...");
                 DiscordRole role = ctx.Guild.Roles.FirstOrDefault(role => role.Value.Name == name).Value;
                 if (role == null)
                 {
                     role = await ctx.Guild.CreateRoleAsync(name, DSharpPlus.Permissions.None, DiscordColor.Brown, mentionable: true);
-                    ctx.Client.Logger.LogDebug("No existing role found, created new role...");
                 }
                 Database.AddRole(new(role.Id, role.Name, new(emoji.Id, emoji.GetDiscordName())), category.Id);
                 await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":white_check_mark:"));
-                ctx.Client.Logger.Log(LogLevel.Information, $"{ctx.Member.Username} added {role.Name} to database.");
+                ctx.Client.Logger.LogInformation($"{ctx.Member.Username} added {role.Name} to database.");
             }
         }
 
@@ -67,7 +65,6 @@ namespace DBuddyBot.Commands
         {
             name = name.ToTitleCase();
             Role role = Database.GetRole(name);
-            ctx.Client.Logger.LogDebug($"Fetched role from database. Id: {(role == null ? "none" : role.Id)}");
 
             if (role == null)
             {

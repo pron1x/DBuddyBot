@@ -1,7 +1,7 @@
 ﻿using DBuddyBot.Models;
-using Serilog;
 using System.Collections.Generic;
 using System.Data.SQLite;
+
 using static DBuddyBot.Data.SqlStrings;
 
 namespace DBuddyBot.Data
@@ -103,30 +103,19 @@ namespace DBuddyBot.Data
                 command.Parameters.AddWithValue("$name", name.ToLower());
                 connection.Open();
                 SQLiteDataReader reader = command.ExecuteReader();
-                Log.Logger.Debug($"Command executed, reading response... Rows? {reader.HasRows}");
                 if (reader.HasRows)
                 {
                     while (reader.Read())
                     {
                         int categoryId = reader.IsDBNull(0) ? -1 : reader.GetInt32(0);
-                        Log.Logger.Debug($"categorId done... Is: {categoryId}");
                         string categoryName = reader.IsDBNull(1) ? string.Empty : reader.GetString(1);
-                        Log.Logger.Debug($"categoryName done... Is: {categoryName}");
                         ulong messageId = reader.IsDBNull(2) ? 0 : (ulong)reader.GetInt64(2);
-                        Log.Logger.Debug($"messageId done... Is: {messageId}");
                         ulong channelId = reader.IsDBNull(3) ? 0 : (ulong)reader.GetInt64(3);
-                        Log.Logger.Debug($"channelId done... Is: {channelId}");
                         ulong roleId = reader.IsDBNull(4) ? 0 : (ulong)reader.GetInt64(4);
-                        Log.Logger.Debug($"roleId done... Is: {roleId}");
                         string roleName = reader.IsDBNull(5) ? string.Empty : reader.GetString(5);
-                        Log.Logger.Debug($"roleName done... Is: {roleName}");
                         bool roleIsGame = reader.IsDBNull(6) ? false : reader.GetBoolean(6);
-                        Log.Logger.Debug($"roleIsGame done... Is: {roleIsGame}");
                         ulong emojiId = reader.IsDBNull(7) ? 0 : (ulong)reader.GetInt64(7);
-                        Log.Logger.Debug($"emojiId done... Is: {emojiId}");
                         string emojiName = reader.IsDBNull(8) ? string.Empty : reader.GetString(8);
-                        Log.Logger.Debug($"emojiName done... Is: {emojiName}");
-                        Log.Logger.Debug($"All fields parsed...");
 
                         if (category == null && categoryId != -1 && categoryName != string.Empty)
                         {
