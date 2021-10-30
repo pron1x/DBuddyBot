@@ -7,18 +7,18 @@ using System.Threading.Tasks;
 
 namespace DBuddyBot.EventHandlers
 {
-    public static class ClientReadyEventHandler
+    public static class ClientGuildEventHandler
     {
         private static IDatabaseService _database;
 
-        static ClientReadyEventHandler()
+        static ClientGuildEventHandler()
         {
             _database = Bootstrapper.Database;
         }
 
         //TODO: Add created messages to database
         //TODO: Only send message if category contains roles. Otherwise send when roles get added.
-        public static async Task SendRoleMessages(DiscordClient sender, DSharpPlus.EventArgs.ReadyEventArgs e)
+        public static async Task SendRoleMessages(DiscordClient sender, DSharpPlus.EventArgs.GuildDownloadCompletedEventArgs e)
         {
             List<Category> categories = _database.GetAllCategories();
             foreach (Category category in categories)

@@ -45,7 +45,7 @@ namespace DBuddyBot
             Commands.RegisterCommands<UserCommands>();
             Commands.RegisterCommands<AdminCommands>();
 
-            Client.Ready += ClientReadyEventHandler.SendRoleMessages;
+            Client.GuildDownloadCompleted += ClientGuildEventHandler.SendRoleMessages;
             Client.MessageReactionAdded += MessageReactionHandler.BaseMessageReactionEventHandler;
 
         }
