@@ -42,14 +42,18 @@ namespace DBuddyBot.Data
             if (GetRole(role.Id) == null)
             {
                 using SqlConnection connection = new(_connectionString);
-                using SqlCommand command = new("INSERT INTO roles(id, name, emote, game, category_id) VALUES ($roleId, $roleName, $roleEmote, $roleIsGame, $categoryId)", connection);
-                command.Parameters.AddWithValue("$roleId", role.Id);
-                command.Parameters.AddWithValue("$roleName", role.Name);
-                command.Parameters.AddWithValue("$roleEmote", role.Emote);
-                command.Parameters.AddWithValue("$roleIsGame", role.IsGame);
-                command.Parameters.AddWithValue("$categoryId", categoryId);
+                using SqlCommand commandRole = new("INSERT INTO roles(id, name, game, category_id) VALUES ($roleId, $roleName, $roleIsGame, $categoryId)", connection);
+                using SqlCommand commandEmoji = new("INSERT INTO emojis(id, name, role) VALUES ($emojiId, $emojiName, $emojiRole)", connection);
+                commandRole.Parameters.AddWithValue("$roleId", role.Id);
+                commandRole.Parameters.AddWithValue("$roleName", role.Name);
+                commandRole.Parameters.AddWithValue("$roleIsGame", role.IsGame);
+                commandRole.Parameters.AddWithValue("$categoryId", categoryId);
+                commandEmoji.Parameters.AddWithValue("$emojiId", role.Emoji.Id);
+                commandEmoji.Parameters.AddWithValue("emojiName", role.Emoji.Name);
+                commandEmoji.Parameters.AddWithValue("emojiRole", role.Id);
                 connection.Open();
-                command.ExecuteNonQuery();
+                commandRole.ExecuteNonQuery();
+                commandEmoji.ExecuteNonQuery();
                 connection.Close();
             }
         }
@@ -116,10 +120,12 @@ namespace DBuddyBot.Data
                         Log.Logger.Debug($"roleId done... Is: {roleId}");
                         string roleName = reader.IsDBNull(5) ? string.Empty : reader.GetString(5);
                         Log.Logger.Debug($"roleName done... Is: {roleName}");
-                        string roleEmote = reader.IsDBNull(6) ? string.Empty : reader.GetString(6);
-                        Log.Logger.Debug($"roleEmote done... Is: {roleEmote}");
-                        bool roleIsGame = reader.IsDBNull(7) ? false : reader.GetBoolean(7);
+                        bool roleIsGame = reader.IsDBNull(6) ? false : reader.GetBoolean(6);
                         Log.Logger.Debug($"roleIsGame done... Is: {roleIsGame}");
+                        ulong emojiId = reader.IsDBNull(7) ? 0 : (ulong)reader.GetInt64(7);
+                        Log.Logger.Debug($"emojiId done... Is: {emojiId}");
+                        string emojiName = reader.IsDBNull(8) ? string.Empty : reader.GetString(8);
+                        Log.Logger.Debug($"emojiName done... Is: {emojiName}");
                         Log.Logger.Debug($"All fields parsed...");
 
                         if (category == null && categoryId != -1 && categoryName != string.Empty)
@@ -137,7 +143,7 @@ namespace DBuddyBot.Data
                         }
                         if (roleId != 0)
                         {
-                            Role role = new(roleId, roleName, roleEmote, roleIsGame);
+                            Role role = new(roleId, roleName, new(emojiId, emojiName), roleIsGame);
                             roles.Add(role);
                         }
                     }
@@ -153,15 +159,15 @@ namespace DBuddyBot.Data
             Role role = null;
             using (SqlConnection connection = new(_connectionString))
             {
-                using SqlCommand command = new("SELECT * FROM roles WHERE lower(name) = $name;", connection);
+                using SqlCommand command = new("SELECT roles.id, roles.name, roles.game, emojis.id, emojis.name FROM roles JOIN emojis ON roles.id = emojis.role WHERE lower(roles.name) = $name;", connection);
                 command.Parameters.AddWithValue("$name", name.ToLower());
 
                 connection.Open();
                 using SqlDataReader reader = command.ExecuteReader();
-                if (reader.HasRows)
+                if (reader.Read())
                 {
-                    reader.Read();
-                    role = new((ulong)reader.GetInt64(0), reader.GetString(1), reader.GetString(2), reader.GetBoolean(3));
+                    Emoji emoji = new((ulong)reader.GetInt64(3), reader.GetString(4));
+                    role = new((ulong)reader.GetInt64(0), reader.GetString(1), emoji, reader.GetBoolean(2));
                 }
                 connection.Close();
             }
@@ -179,15 +185,15 @@ namespace DBuddyBot.Data
             Role role = null;
             using (SqlConnection connection = new(_connectionString))
             {
-                using SqlCommand command = new("SELECT * FROM roles WHERE id = $id;", connection);
+                using SqlCommand command = new("SELECT roles.id, roles.name, roles.game, emojis.id, emojis.name FROM roles JOIN emojis ON roles.id = emojis.role WHERE roles.id = $id;", connection);
                 command.Parameters.AddWithValue("$id", id);
 
                 connection.Open();
                 using SqlDataReader reader = command.ExecuteReader();
-                if (reader.HasRows)
+                if (reader.Read())
                 {
-                    reader.Read();
-                    role = new((ulong)reader.GetInt64(0), reader.GetString(1), reader.GetString(2), reader.GetBoolean(3));
+                    Emoji emoji = new((ulong)reader.GetInt64(3), reader.GetString(4));
+                    role = new((ulong)reader.GetInt64(0), reader.GetString(1), emoji, reader.GetBoolean(2));
                 }
                 connection.Close();
             }
@@ -200,18 +206,19 @@ namespace DBuddyBot.Data
             return role != null;
         }
 
-        public Role GetRoleFromEmote(string emote)
+        public Role GetRoleFromEmote(string emojiName)
         {
             Role role = null;
             using (SqlConnection connection = new(_connectionString))
             {
-                using SqlCommand command = new("SELECT * FROM roles WHERE emote = $emote;", connection);
-                command.Parameters.AddWithValue("$emote", emote);
+                using SqlCommand command = new("SELECT roles.id, roles.name, roles.game, emojis.id, emojis.name FROM roles JOIN emojis ON roles.id = emojis.role WHERE emojis.name = $emojiName;", connection);
+                command.Parameters.AddWithValue("$emojiName", emojiName);
                 connection.Open();
                 using SqlDataReader reader = command.ExecuteReader();
                 if (reader.Read())
                 {
-                    role = new((ulong)reader.GetInt64(0), reader.GetString(1), reader.GetString(2), reader.GetBoolean(3));
+                    Emoji emoji = new((ulong)reader.GetInt64(3), reader.GetString(4));
+                    role = new((ulong)reader.GetInt64(0), reader.GetString(1), emoji, reader.GetBoolean(2));
                 }
                 connection.Close();
             }
@@ -237,11 +244,14 @@ namespace DBuddyBot.Data
         public void RemoveRole(ulong id)
         {
             using SqlConnection connection = new(_connectionString);
-            using SqlCommand command = new("DELETE FROM roles WHERE id = $id;", connection);
-            command.Parameters.AddWithValue("$id", id);
+            using SqlCommand commandEmojis = new("DELETE FROM emojis WHERE role = $id;", connection);
+            using SqlCommand commandRoles = new("DELETE FROM roles WHERE id = $id;", connection);
+            commandEmojis.Parameters.AddWithValue("$id", id);
+            commandRoles.Parameters.AddWithValue("$id", id);
 
             connection.Open();
-            command.ExecuteNonQueryAsync();
+            commandEmojis.ExecuteNonQueryAsync();
+            commandRoles.ExecuteNonQueryAsync();
             connection.Close();
         }
 

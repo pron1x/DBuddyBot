@@ -29,9 +29,14 @@ namespace DBuddyBot.EventHandlers
                     DiscordMessage message = await channel.SendMessageAsync(category.GetEmbed(sender));
                     foreach (Role role in category.Roles)
                     {
-                        //TODO: Change to TryFromName
-                        DiscordEmoji emoji = DiscordEmoji.FromName(sender, role.Emote);
-                        await message.CreateReactionAsync(emoji);
+                        if (DiscordEmoji.TryFromName(sender, role.Emoji.Name, out DiscordEmoji emoji))
+                        {
+                            await message.CreateReactionAsync(emoji);
+                        }
+                        else if (DiscordEmoji.TryFromGuildEmote(sender, role.Emoji.Id, out emoji))
+                        {
+                            await message.CreateReactionAsync(emoji);
+                        }
                     }
 
                 }

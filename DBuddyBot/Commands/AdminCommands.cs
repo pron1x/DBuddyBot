@@ -49,7 +49,7 @@ namespace DBuddyBot.Commands
                     role = await ctx.Guild.CreateRoleAsync(name, DSharpPlus.Permissions.None, DiscordColor.Brown, mentionable: true);
                     ctx.Client.Logger.LogDebug("No existing role found, created new role...");
                 }
-                Database.AddRole(new(role.Id, role.Name, emoji.GetDiscordName()), category.Id);
+                Database.AddRole(new(role.Id, role.Name, new(emoji.Id, emoji.GetDiscordName())), category.Id);
                 await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":white_check_mark:"));
                 ctx.Client.Logger.Log(LogLevel.Information, $"{ctx.Member.Username} added {role.Name} to database.");
             }

@@ -8,25 +8,25 @@
         #region backingfields
         private readonly ulong _id;
         private readonly string _name;
-        private readonly string _emote;
+        private readonly Emoji _emoji;
         private readonly bool _isGame;
         #endregion backingfields
 
         #region properties
         public ulong Id => _id;
         public string Name => _name;
-        public string Emote => _emote;
+        public Emoji Emoji => _emoji;
         public bool IsGame => _isGame;
         #endregion properties
 
 
         #region constructors
 
-        public Role(ulong id, string name, string emote, bool isGame = false)
+        public Role(ulong id, string name, Emoji emoji, bool isGame = false)
         {
             _id = id;
             _name = name;
-            _emote = emote;
+            _emoji = emoji;
             _isGame = isGame;
         }
 

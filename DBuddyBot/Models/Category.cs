@@ -45,7 +45,6 @@ namespace DBuddyBot.Models
         }
 
         //TODO: Allow sorting of roles in specific orders (Alphabetically, certain roles first etc.)
-        //TODO!!!: Check why guild emotes cannot be fetched from name!
         public DiscordEmbed GetEmbed(DiscordClient client)
         {
             DiscordEmbedBuilder builder = new();
@@ -55,12 +54,14 @@ namespace DBuddyBot.Models
             StringBuilder roleString = new();
             foreach (Role role in Roles)
             {
-                if (!DiscordEmoji.TryFromName(client, role.Emote, out DiscordEmoji emoji))
+                if (!DiscordEmoji.TryFromName(client, role.Emoji.Name, true, out DiscordEmoji emoji))
                 {
-                    Log.Logger.Debug($"Could not get {role.Emote} from name");
-                    continue;
+                    if(!DiscordEmoji.TryFromGuildEmote(client, role.Emoji.Id, out emoji))
+                    {
+                        Log.Logger.Debug($"Could not get Emoji({role.Emoji.Id},{role.Emoji.Name}) from name or id");
+                    }
                 }
-                roleString.AppendLine($"{role.Name} {emoji}");
+                roleString.AppendLine($"{role.Name} {(emoji ?? "'No emoji found'")}");
             }
             if (string.IsNullOrWhiteSpace(roleString.ToString()))
             {
