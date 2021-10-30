@@ -2,6 +2,7 @@
 using Serilog;
 using System.Collections.Generic;
 using System.Data.SQLite;
+using static DBuddyBot.Data.SqlStrings;
 
 namespace DBuddyBot.Data
 {
@@ -27,7 +28,7 @@ namespace DBuddyBot.Data
             if (GetCategory(name) == null)
             {
                 using SQLiteConnection connection = new(_connectionString);
-                using SQLiteCommand command = new("INSERT INTO categories(name) VALUES ($name);", connection);
+                using SQLiteCommand command = new(InsertCategory, connection);
                 command.Parameters.AddWithValue("$name", name.ToTitleCase());
                 connection.Open();
                 command.ExecuteNonQuery();
@@ -42,8 +43,8 @@ namespace DBuddyBot.Data
             if (GetRole(role.Id) == null)
             {
                 using SQLiteConnection connection = new(_connectionString);
-                using SQLiteCommand commandRole = new("INSERT INTO roles(id, name, game, category_id) VALUES ($roleId, $roleName, $roleIsGame, $categoryId)", connection);
-                using SQLiteCommand commandEmoji = new("INSERT INTO emojis(id, name, role) VALUES ($emojiId, $emojiName, $emojiRole)", connection);
+                using SQLiteCommand commandRole = new(InsertRole, connection);
+                using SQLiteCommand commandEmoji = new(InsertEmoji, connection);
                 commandRole.Parameters.AddWithValue("$roleId", role.Id);
                 commandRole.Parameters.AddWithValue("$roleName", role.Name);
                 commandRole.Parameters.AddWithValue("$roleIsGame", role.IsGame);
@@ -63,7 +64,7 @@ namespace DBuddyBot.Data
             if (GetChannel(channelId) == null)
             {
                 using SQLiteConnection connection = new(_connectionString);
-                using SQLiteCommand command = new("INSERT INTO channels(id, category_id) VALUES ($channelId, $categoryId);", connection);
+                using SQLiteCommand command = new(InsertChannel, connection);
                 command.Parameters.AddWithValue("$channelId", channelId);
                 command.Parameters.AddWithValue("$categoryId", categoryId);
                 connection.Open();
@@ -77,7 +78,7 @@ namespace DBuddyBot.Data
             List<Category> categories = new();
             using (SQLiteConnection connection = new(_connectionString))
             {
-                using SQLiteCommand command = new("SELECT name FROM categories;", connection);
+                using SQLiteCommand command = new(SelectCategoryNames, connection);
 
                 connection.Open();
                 SQLiteDataReader reader = command.ExecuteReader();
@@ -98,8 +99,7 @@ namespace DBuddyBot.Data
             RoleMessage message = null;
             using (SQLiteConnection connection = new(_connectionString))
             {
-                using SQLiteCommand command = new("SELECT ca.id AS categoryId, ca.name AS categoryName, ca.message as categoryMessage, ch.id AS channelId, ro.id AS roleId, ro.name AS roleName, ro.game AS roleGame, em.id as emojiId, em.name as emojiName "
-                                                    + "FROM categories ca LEFT JOIN channels ch ON ca.id = ch.category_id LEFT JOIN roles ro ON ca.id = ro.category_id LEFT JOIN emojis em on ro.id = em.role WHERE lower(categoryName) = $name;", connection);
+                using SQLiteCommand command = new(SelectCategoryOnName, connection);
                 command.Parameters.AddWithValue("$name", name.ToLower());
                 connection.Open();
                 SQLiteDataReader reader = command.ExecuteReader();
@@ -159,7 +159,7 @@ namespace DBuddyBot.Data
             Role role = null;
             using (SQLiteConnection connection = new(_connectionString))
             {
-                using SQLiteCommand command = new("SELECT roles.id, roles.name, roles.game, emojis.id, emojis.name FROM roles JOIN emojis ON roles.id = emojis.role WHERE lower(roles.name) = $name;", connection);
+                using SQLiteCommand command = new(SelectRoleOnName, connection);
                 command.Parameters.AddWithValue("$name", name.ToLower());
 
                 connection.Open();
@@ -185,7 +185,7 @@ namespace DBuddyBot.Data
             Role role = null;
             using (SQLiteConnection connection = new(_connectionString))
             {
-                using SQLiteCommand command = new("SELECT roles.id, roles.name, roles.game, emojis.id, emojis.name FROM roles JOIN emojis ON roles.id = emojis.role WHERE roles.id = $id;", connection);
+                using SQLiteCommand command = new(SelectRoleOnId, connection);
                 command.Parameters.AddWithValue("$id", id);
 
                 connection.Open();
@@ -211,7 +211,7 @@ namespace DBuddyBot.Data
             Role role = null;
             using (SQLiteConnection connection = new(_connectionString))
             {
-                using SQLiteCommand command = new("SELECT roles.id, roles.name, roles.game, emojis.id, emojis.name FROM roles JOIN emojis ON roles.id = emojis.role WHERE emojis.name = $emojiName;", connection);
+                using SQLiteCommand command = new(SelectRoleOnEmoji, connection);
                 command.Parameters.AddWithValue("$emojiName", emojiName);
                 connection.Open();
                 using SQLiteDataReader reader = command.ExecuteReader();
@@ -229,7 +229,7 @@ namespace DBuddyBot.Data
         {
             Channel channel = null;
             using SQLiteConnection connection = new(_connectionString);
-            using SQLiteCommand command = new("SELECT * FROM channels WHERE id=$id;", connection);
+            using SQLiteCommand command = new(SelectChannelOnId, connection);
             command.Parameters.AddWithValue("$id", channelId);
             connection.Open();
             using SQLiteDataReader reader = command.ExecuteReader();
@@ -244,8 +244,8 @@ namespace DBuddyBot.Data
         public void RemoveRole(ulong id)
         {
             using SQLiteConnection connection = new(_connectionString);
-            using SQLiteCommand commandEmojis = new("DELETE FROM emojis WHERE role = $id;", connection);
-            using SQLiteCommand commandRoles = new("DELETE FROM roles WHERE id = $id;", connection);
+            using SQLiteCommand commandEmojis = new(DeleteEmojiOnRoleId, connection);
+            using SQLiteCommand commandRoles = new(DeleteRoleOnId, connection);
             commandEmojis.Parameters.AddWithValue("$id", id);
             commandRoles.Parameters.AddWithValue("$id", id);
 

@@ -2,6 +2,7 @@
 using Serilog;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using static DBuddyBot.Data.SqlStrings;
 
 namespace DBuddyBot.Data
 {
@@ -27,7 +28,7 @@ namespace DBuddyBot.Data
             if (GetCategory(name) == null)
             {
                 using SqlConnection connection = new(_connectionString);
-                using SqlCommand command = new("INSERT INTO categories(name) VALUES ($name);", connection);
+                using SqlCommand command = new(InsertCategory, connection);
                 command.Parameters.AddWithValue("$name", name.ToTitleCase());
                 connection.Open();
                 command.ExecuteNonQuery();
@@ -42,8 +43,8 @@ namespace DBuddyBot.Data
             if (GetRole(role.Id) == null)
             {
                 using SqlConnection connection = new(_connectionString);
-                using SqlCommand commandRole = new("INSERT INTO roles(id, name, game, category_id) VALUES ($roleId, $roleName, $roleIsGame, $categoryId)", connection);
-                using SqlCommand commandEmoji = new("INSERT INTO emojis(id, name, role) VALUES ($emojiId, $emojiName, $emojiRole)", connection);
+                using SqlCommand commandRole = new(InsertRole, connection);
+                using SqlCommand commandEmoji = new(InsertEmoji, connection);
                 commandRole.Parameters.AddWithValue("$roleId", role.Id);
                 commandRole.Parameters.AddWithValue("$roleName", role.Name);
                 commandRole.Parameters.AddWithValue("$roleIsGame", role.IsGame);
@@ -63,7 +64,7 @@ namespace DBuddyBot.Data
             if (GetChannel(channelId) == null)
             {
                 using SqlConnection connection = new(_connectionString);
-                using SqlCommand command = new("INSERT INTO channels(id, category_id) VALUES ($channelId, $categoryId);", connection);
+                using SqlCommand command = new(InsertChannel, connection);
                 command.Parameters.AddWithValue("$channelId", channelId);
                 command.Parameters.AddWithValue("$categoryId", categoryId);
                 connection.Open();
@@ -77,7 +78,7 @@ namespace DBuddyBot.Data
             List<Category> categories = new();
             using (SqlConnection connection = new(_connectionString))
             {
-                using SqlCommand command = new("SELECT name FROM categories;", connection);
+                using SqlCommand command = new(SelectCategoryNames, connection);
 
                 connection.Open();
                 SqlDataReader reader = command.ExecuteReader();
@@ -98,8 +99,7 @@ namespace DBuddyBot.Data
             RoleMessage message = null;
             using (SqlConnection connection = new(_connectionString))
             {
-                using SqlCommand command = new("SELECT ca.id AS categoryId, ca.name AS categoryName, ca.message as categoryMessage, ch.id AS channelId, ro.id AS roleId, ro.name AS roleName, ro.emote AS roleEmote, ro.game AS roleGame "
-                                                    + "FROM categories ca LEFT JOIN channels ch ON ca.id = ch.category_id LEFT JOIN roles ro ON ca.id = ro.category_id WHERE lower(categoryName) = $name;", connection);
+                using SqlCommand command = new(SelectCategoryOnName, connection);
                 command.Parameters.AddWithValue("$name", name.ToLower());
                 connection.Open();
                 SqlDataReader reader = command.ExecuteReader();
@@ -159,7 +159,7 @@ namespace DBuddyBot.Data
             Role role = null;
             using (SqlConnection connection = new(_connectionString))
             {
-                using SqlCommand command = new("SELECT roles.id, roles.name, roles.game, emojis.id, emojis.name FROM roles JOIN emojis ON roles.id = emojis.role WHERE lower(roles.name) = $name;", connection);
+                using SqlCommand command = new(SelectRoleOnName, connection);
                 command.Parameters.AddWithValue("$name", name.ToLower());
 
                 connection.Open();
@@ -185,7 +185,7 @@ namespace DBuddyBot.Data
             Role role = null;
             using (SqlConnection connection = new(_connectionString))
             {
-                using SqlCommand command = new("SELECT roles.id, roles.name, roles.game, emojis.id, emojis.name FROM roles JOIN emojis ON roles.id = emojis.role WHERE roles.id = $id;", connection);
+                using SqlCommand command = new(SelectRoleOnId, connection);
                 command.Parameters.AddWithValue("$id", id);
 
                 connection.Open();
@@ -211,7 +211,7 @@ namespace DBuddyBot.Data
             Role role = null;
             using (SqlConnection connection = new(_connectionString))
             {
-                using SqlCommand command = new("SELECT roles.id, roles.name, roles.game, emojis.id, emojis.name FROM roles JOIN emojis ON roles.id = emojis.role WHERE emojis.name = $emojiName;", connection);
+                using SqlCommand command = new(SelectRoleOnEmoji, connection);
                 command.Parameters.AddWithValue("$emojiName", emojiName);
                 connection.Open();
                 using SqlDataReader reader = command.ExecuteReader();
@@ -229,7 +229,7 @@ namespace DBuddyBot.Data
         {
             Channel channel = null;
             using SqlConnection connection = new(_connectionString);
-            using SqlCommand command = new("SELECT * FROM channels WHERE id=$id;", connection);
+            using SqlCommand command = new(SelectChannelOnId, connection);
             command.Parameters.AddWithValue("$id", channelId);
             connection.Open();
             using SqlDataReader reader = command.ExecuteReader();
@@ -244,8 +244,8 @@ namespace DBuddyBot.Data
         public void RemoveRole(ulong id)
         {
             using SqlConnection connection = new(_connectionString);
-            using SqlCommand commandEmojis = new("DELETE FROM emojis WHERE role = $id;", connection);
-            using SqlCommand commandRoles = new("DELETE FROM roles WHERE id = $id;", connection);
+            using SqlCommand commandEmojis = new(DeleteEmojiOnRoleId, connection);
+            using SqlCommand commandRoles = new(DeleteRoleOnId, connection);
             commandEmojis.Parameters.AddWithValue("$id", id);
             commandRoles.Parameters.AddWithValue("$id", id);
 
