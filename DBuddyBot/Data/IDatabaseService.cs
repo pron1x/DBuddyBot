@@ -11,6 +11,7 @@ namespace DBuddyBot.Data
         public int AddCategory(string name);
         public void AddRole(Role role, int categoryId);
         public void AddChannel(ulong channelId, int categoryId);
+        public void UpdateMessage(int categorId, ulong messageId);
         public List<Category> GetAllCategories();
         public Category GetCategory(string name);
         public Role GetRole(string name);
@@ -20,6 +21,5 @@ namespace DBuddyBot.Data
         public Role GetRoleFromEmote(string emote);
         public Channel GetChannel(ulong channelId);
         public void RemoveRole(ulong id);
-
     }
 }

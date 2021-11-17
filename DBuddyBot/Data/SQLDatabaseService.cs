@@ -73,6 +73,17 @@ namespace DBuddyBot.Data
             }
         }
 
+        public void UpdateMessage(int categorId, ulong messageId)
+        {
+            using SqlConnection connection = new(_connectionString);
+            using SqlCommand command = new(UpdateCategoryMessage, connection);
+            command.Parameters.AddWithValue("$messageId", messageId);
+            command.Parameters.AddWithValue("$categoryId", categorId);
+            connection.Open();
+            command.ExecuteNonQuery();
+            connection.Close();
+        }
+
         public List<Category> GetAllCategories()
         {
             List<Category> categories = new();

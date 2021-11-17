@@ -23,6 +23,11 @@
         /// </summary>
         public const string InsertChannel = "INSERT INTO channels(id, category_id) VALUES ($channelId, $categoryId);";
 
+        /// <summary>
+        /// Parameters: $messageId, $categoryId
+        /// </summary>
+        public const string UpdateCategoryMessage = "UPDATE categories SET message = $messageId WHERE id = $categoryId;";
+
         public const string SelectCategoryNames = "SELECT name FROM categories;";
 
         /// <summary>

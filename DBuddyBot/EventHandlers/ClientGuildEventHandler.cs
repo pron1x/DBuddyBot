@@ -38,7 +38,7 @@ namespace DBuddyBot.EventHandlers
                             await message.CreateReactionAsync(emoji);
                         }
                     }
-
+                    _database.UpdateMessage(category.Id, message.Id);
                 }
             }
         }
