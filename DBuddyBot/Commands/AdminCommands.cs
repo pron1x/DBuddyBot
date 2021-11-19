@@ -4,6 +4,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -51,6 +52,7 @@ namespace DBuddyBot.Commands
                 await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":white_check_mark:"));
                 ctx.Client.Logger.LogInformation($"{ctx.Member.Username} added {role.Name} to database.");
             }
+            UpdateRoleMessage(ctx.Client, category.Name);
         }
 
 
@@ -80,5 +82,70 @@ namespace DBuddyBot.Commands
         }
 
         #endregion commandmethods
+
+        #region privatemethods
+
+        private async void UpdateRoleMessage(DSharpPlus.DiscordClient client, string categoryName)
+        {
+            Category category = Database.GetCategory(categoryName);
+            DiscordChannel channel = await client.GetChannelAsync(category.Channel.Id);
+            DiscordEmbed embed = category.GetEmbed(client);
+            if (category.Message == null)
+            {
+                DiscordMessage message = await channel.SendMessageAsync(embed);
+                foreach (Role role in category.Roles)
+                {
+                    if (DiscordEmoji.TryFromName(client, role.Emoji.Name, out DiscordEmoji emoji))
+                    {
+                        await message.CreateReactionAsync(emoji);
+                    }
+                    else if (DiscordEmoji.TryFromGuildEmote(client, role.Emoji.Id, out emoji))
+                    {
+                        await message.CreateReactionAsync(emoji);
+                    }
+                }
+                Database.UpdateMessage(category.Id, message.Id);
+            }
+            else
+            {
+                DiscordMessage message = await channel.GetMessageAsync(category.Message.Id);
+                if (embed == null)
+                {
+                    await message.DeleteAsync();
+                    Database.UpdateMessage(category.Id, 0);
+                    return;
+                }
+                else
+                {
+                    await message.ModifyAsync(embed);
+                    List<DiscordEmoji> messageEmojis = message.Reactions.Select(reaction => reaction.Emoji).ToList();
+                    foreach (Role role in category.Roles)
+                    {
+                        bool success = role.Emoji.Name == "" ? DiscordEmoji.TryFromGuildEmote(client, role.Emoji.Id, out DiscordEmoji emoji)
+                            : DiscordEmoji.TryFromName(client, role.Emoji.Name, out emoji);
+                        if (success)
+                        {
+                            if (messageEmojis.Contains(emoji))
+                            {
+                                messageEmojis.Remove(emoji);
+                            }
+                            else
+                            {
+                                await message.CreateReactionAsync(emoji);
+                            }
+                        }
+                    }
+                    if(messageEmojis.Count > 0)
+                    {
+                        foreach(DiscordEmoji emoji in messageEmojis)
+                        {
+                            await message.DeleteReactionsEmojiAsync(emoji);
+                        }
+                    }
+                }
+            }
+        }
+
+        #endregion privatemthods
     }
 }
