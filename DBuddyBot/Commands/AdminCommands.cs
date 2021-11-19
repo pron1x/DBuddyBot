@@ -60,13 +60,15 @@ namespace DBuddyBot.Commands
         /// Removes a role from the database
         /// </summary>
         /// <param name="ctx"></param>
+        /// <param name="categoryName">Name of the category the role resides in</param>
         /// <param name="name">Name of the game to remove</param>
         /// <returns></returns>
         [Command("remove"), RequirePermissions(DSharpPlus.Permissions.ManageRoles)]
-        public async Task RemoveRole(CommandContext ctx, [RemainingText] string name)
+        public async Task RemoveRole(CommandContext ctx, string categoryName, [RemainingText] string name)
         {
             name = name.ToTitleCase();
-            Role role = Database.GetRole(name);
+            Category category = Database.GetCategory(categoryName);
+            Role role = category.Roles.FirstOrDefault(role => role.Name == name);
 
             if (role == null)
             {
@@ -79,6 +81,7 @@ namespace DBuddyBot.Commands
                 ctx.Client.Logger.LogInformation($"{ctx.Member.Username} removed role {role.Name} from database.");
                 await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":white_check_mark:"));
             }
+            UpdateRoleMessage(ctx.Client, categoryName);
         }
 
         #endregion commandmethods
