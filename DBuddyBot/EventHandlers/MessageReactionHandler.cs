@@ -49,7 +49,7 @@ namespace DBuddyBot.EventHandlers
             if (category != null)
             {
                 Role role = category.Roles.FirstOrDefault(r => r.Emoji.Name == string.Empty ? r.Emoji.Id == e.Emoji.Id : r.Emoji.Name == e.Emoji.GetDiscordName());
-                if(role != null)
+                if (role != null)
                 {
                     DiscordMember member = (DiscordMember)e.User;
                     member.RevokeRoleAsync(e.Guild.GetRole(role.Id));

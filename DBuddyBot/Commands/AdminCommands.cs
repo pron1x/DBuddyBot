@@ -138,9 +138,9 @@ namespace DBuddyBot.Commands
                             }
                         }
                     }
-                    if(messageEmojis.Count > 0)
+                    if (messageEmojis.Count > 0)
                     {
-                        foreach(DiscordEmoji emoji in messageEmojis)
+                        foreach (DiscordEmoji emoji in messageEmojis)
                         {
                             await message.DeleteReactionsEmojiAsync(emoji);
                         }
