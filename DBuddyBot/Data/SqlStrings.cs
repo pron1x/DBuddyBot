@@ -3,6 +3,15 @@
     internal static class SqlStrings
     {
         #region constants
+
+        internal const string CreateTableCategories = "CREATE TABLE IF NOT EXISTS categories (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL UNIQUE, message UNSIGNED BIG INTEGER UNIQUE);";
+
+        internal const string CreateTableRoles = "CREATE TABLE IF NOT EXISTS roles (id UNSIGNED BIG INTEGER PRIMARY KEY NOT NULL, name TEXT NOT NULL UNIQUE, game BOOL, category_id UNSIGNED BIG INT NOT NULL, FOREIGN KEY(category_id) REFERENCES categories(id));";
+
+        internal const string CreateTableChannels = "CREATE TABLE IF NOT EXISTS channels ( id UNSIGNED BIG INTEGER PRIMARY KEY NOT NULL, category_id UNSIGNED BIG INT	NOT NULL, FOREIGN KEY(category_id) REFERENCES categories(id));";
+
+        internal const string CreateTableEmojis = "CREATE TABLE IF NOT EXISTS emojis (id UNSIGNED BIG INTEGER NOT NULL, name TEXT NOT NULL UNIQUE, role UNSIGNED BIG INTEGER NOT NULL, PRIMARY KEY (id, name), FOREIGN KEY(role) REFERENCES roles(id));";
+
         /// <summary>
         /// Parameters: $name
         /// </summary>

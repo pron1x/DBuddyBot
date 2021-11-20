@@ -123,10 +123,10 @@ namespace DBuddyBot
 
                     using SQLiteConnection conn = new(_databaseConnectionString);
                     Log.Logger.Information($"Setting up SQLite database {conn.DataSource}.");
-                    using SQLiteCommand createCategories = new("CREATE TABLE IF NOT EXISTS categories (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL UNIQUE, message UNSIGNED BIG INTEGER UNIQUE);", conn);
-                    using SQLiteCommand createRoles = new("CREATE TABLE IF NOT EXISTS roles (id UNSIGNED BIG INTEGER PRIMARY KEY NOT NULL, name TEXT NOT NULL UNIQUE, game BOOL, category_id UNSIGNED BIG INT NOT NULL, FOREIGN KEY(category_id) REFERENCES categories(id));", conn);
-                    using SQLiteCommand createChannels = new("CREATE TABLE IF NOT EXISTS channels ( id UNSIGNED BIG INTEGER PRIMARY KEY NOT NULL, category_id UNSIGNED BIG INT	NOT NULL, FOREIGN KEY(category_id) REFERENCES categories(id));", conn);
-                    using SQLiteCommand createEmojis = new("CREATE TABLE IF NOT EXISTS emojis (id UNSIGNED BIG INTEGER NOT NULL, name TEXT NOT NULL UNIQUE, role UNSIGNED BIG INTEGER NOT NULL, PRIMARY KEY (id, name), FOREIGN KEY(role) REFERENCES roles(id));", conn);
+                    using SQLiteCommand createCategories = new(SqlStrings.CreateTableCategories, conn);
+                    using SQLiteCommand createRoles = new(SqlStrings.CreateTableRoles, conn);
+                    using SQLiteCommand createChannels = new(SqlStrings.CreateTableChannels, conn);
+                    using SQLiteCommand createEmojis = new(SqlStrings.CreateTableEmojis, conn);
 
                     conn.Open();
                     createCategories.ExecuteNonQuery();
@@ -153,10 +153,10 @@ namespace DBuddyBot
                 using SqlConnection connection = new(_databaseConnectionString);
                 try
                 {
-                    using SqlCommand createCategories = new("CREATE TABLE IF NOT EXISTS categories (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL UNIQUE, message UNSIGNED BIG INTEGER UNIQUE);", connection);
-                    using SqlCommand createRoles = new("CREATE TABLE IF NOT EXISTS roles (id UNSIGNED BIG INT PRIMARY KEY NOT NULL, name TEXT NOT NULL UNIQUE, game BOOL, category_id UNSIGNED BIG INT NOT NULL, FOREIGN KEY(category_id) REFERENCES categories(id));", connection);
-                    using SqlCommand createChannels = new("CREATE TABLE IF NOT EXISTS channels ( id UNSIGNED BIG INTEGER PRIMARY KEY NOT NULL, category_id UNSIGNED BIG INT	NOT NULL, FOREIGN KEY(category_id) REFERENCES categories(id));", connection);
-                    using SqlCommand createEmojis = new("CREATE TABLE IF NOT EXISTS emojis (id UNSIGNED BIG INTEGER NOT NULL, name TEXT NOT NULL UNIQUE, role UNSIGNED BIG INTEGER NOT NULL, PRIMARY KEY (id, name), FOREIGN KEY(role) REFERENCES roles(id));", connection);
+                    using SqlCommand createCategories = new(SqlStrings.CreateTableCategories, connection);
+                    using SqlCommand createRoles = new(SqlStrings.CreateTableRoles, connection);
+                    using SqlCommand createChannels = new(SqlStrings.CreateTableChannels, connection);
+                    using SqlCommand createEmojis = new(SqlStrings.CreateTableEmojis, connection);
                     connection.Open();
                     createCategories.ExecuteNonQuery();
                     createRoles.ExecuteNonQuery();
