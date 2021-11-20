@@ -65,11 +65,9 @@ namespace DBuddyBot.Models
             }
             if (string.IsNullOrWhiteSpace(roleString.ToString()))
             {
-                roleString.Clear();
-                roleString.Append("No roles available in this category.");
+                return null;
             }
             builder.AddField("Sign up to roles by reacting with the given emote", roleString.ToString());
-
             return builder.Build();
         }
 
