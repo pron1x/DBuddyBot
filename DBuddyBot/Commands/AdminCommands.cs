@@ -98,11 +98,9 @@ namespace DBuddyBot.Commands
                 DiscordMessage message = await channel.SendMessageAsync(embed);
                 foreach (Role role in category.Roles)
                 {
-                    if (DiscordEmoji.TryFromName(client, role.Emoji.Name, out DiscordEmoji emoji))
-                    {
-                        await message.CreateReactionAsync(emoji);
-                    }
-                    else if (DiscordEmoji.TryFromGuildEmote(client, role.Emoji.Id, out emoji))
+                    bool success = role.Emoji.Name == string.Empty ? DiscordEmoji.TryFromGuildEmote(client, role.Emoji.Id, out DiscordEmoji emoji)
+                               : DiscordEmoji.TryFromName(client, role.Emoji.Name, out emoji);
+                    if (success)
                     {
                         await message.CreateReactionAsync(emoji);
                     }
@@ -124,15 +122,11 @@ namespace DBuddyBot.Commands
                     List<DiscordEmoji> messageEmojis = message.Reactions.Select(reaction => reaction.Emoji).ToList();
                     foreach (Role role in category.Roles)
                     {
-                        bool success = role.Emoji.Name == "" ? DiscordEmoji.TryFromGuildEmote(client, role.Emoji.Id, out DiscordEmoji emoji)
+                        bool success = role.Emoji.Name == string.Empty ? DiscordEmoji.TryFromGuildEmote(client, role.Emoji.Id, out DiscordEmoji emoji)
                             : DiscordEmoji.TryFromName(client, role.Emoji.Name, out emoji);
                         if (success)
                         {
-                            if (messageEmojis.Contains(emoji))
-                            {
-                                messageEmojis.Remove(emoji);
-                            }
-                            else
+                            if (!messageEmojis.Remove(emoji))
                             {
                                 await message.CreateReactionAsync(emoji);
                             }
