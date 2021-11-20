@@ -124,7 +124,7 @@ namespace DBuddyBot.Data
                         ulong channelId = reader.IsDBNull(3) ? 0 : (ulong)reader.GetInt64(3);
                         ulong roleId = reader.IsDBNull(4) ? 0 : (ulong)reader.GetInt64(4);
                         string roleName = reader.IsDBNull(5) ? string.Empty : reader.GetString(5);
-                        bool roleIsGame = reader.IsDBNull(6) ? false : reader.GetBoolean(6);
+                        bool roleIsGame = !reader.IsDBNull(6) && reader.GetBoolean(6);
                         ulong emojiId = reader.IsDBNull(7) ? 0 : (ulong)reader.GetInt64(7);
                         string emojiName = reader.IsDBNull(8) ? string.Empty : reader.GetString(8);
 
@@ -175,7 +175,7 @@ namespace DBuddyBot.Data
                         ulong channelId = reader.IsDBNull(3) ? 0 : (ulong)reader.GetInt64(3);
                         ulong roleId = reader.IsDBNull(4) ? 0 : (ulong)reader.GetInt64(4);
                         string roleName = reader.IsDBNull(5) ? string.Empty : reader.GetString(5);
-                        bool roleIsGame = reader.IsDBNull(6) ? false : reader.GetBoolean(6);
+                        bool roleIsGame = !reader.IsDBNull(6) && reader.GetBoolean(6);
                         ulong emojiId = reader.IsDBNull(7) ? 0 : (ulong)reader.GetInt64(7);
                         string emojiName = reader.IsDBNull(8) ? string.Empty : reader.GetString(8);
 
