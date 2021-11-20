@@ -2,6 +2,7 @@
 using DBuddyBot.Models;
 using DSharpPlus;
 using DSharpPlus.Entities;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace DBuddyBot.EventHandlers
@@ -21,9 +22,10 @@ namespace DBuddyBot.EventHandlers
             {
                 return Task.CompletedTask;
             }
-            if (_database.GetChannel(e.Channel.Id) != null)
+            Category category = _database.GetCategoryFromMessage(e.Message.Id);
+            if (category != null)
             {
-                Role role = _database.GetRoleFromEmote(e.Emoji.GetDiscordName());
+                Role role = category.Roles.FirstOrDefault(r => r.Emoji.Name == string.Empty ? r.Emoji.Id == e.Emoji.Id : r.Emoji.Name == e.Emoji.GetDiscordName());
                 if (role == null)
                 {
                     e.Message.DeleteReactionAsync(e.Emoji, e.User, "Emoji not mapped to a role");

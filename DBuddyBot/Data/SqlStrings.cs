@@ -37,6 +37,12 @@
                                                    + "FROM categories ca LEFT JOIN channels ch ON ca.id = ch.category_id LEFT JOIN roles ro ON ca.id = ro.category_id LEFT JOIN emojis em on ro.id = em.role WHERE lower(categoryName) = $name;";
 
         /// <summary>
+        /// Parameters: $messageId
+        /// </summary>
+        public const string SelectCategoryOnMessage = "SELECT ca.id AS categoryId, ca.name AS categoryName, ca.message as categoryMessage, ch.id AS channelId, ro.id AS roleId, ro.name AS roleName, ro.game AS roleGame, em.id as emojiId, em.name as emojiName "
+                                                   + "FROM categories ca LEFT JOIN channels ch ON ca.id = ch.category_id LEFT JOIN roles ro ON ca.id = ro.category_id LEFT JOIN emojis em on ro.id = em.role WHERE categoryMessage = $messageId;";
+
+        /// <summary>
         /// Parameters: $name
         /// </summary>
         public const string SelectRoleOnName = "SELECT roles.id, roles.name, roles.game, emojis.id, emojis.name FROM roles JOIN emojis ON roles.id = emojis.role WHERE lower(roles.name) = $name;";

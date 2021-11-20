@@ -14,6 +14,7 @@ namespace DBuddyBot.Data
         public void UpdateMessage(int categorId, ulong messageId);
         public List<Category> GetAllCategories();
         public Category GetCategory(string name);
+        public Category GetCategoryFromMessage(ulong id);
         public Role GetRole(string name);
         public bool TryGetRole(string name, out Role role);
         public Role GetRole(ulong id);
