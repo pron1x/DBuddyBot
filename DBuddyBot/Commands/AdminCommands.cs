@@ -48,11 +48,13 @@ namespace DBuddyBot.Commands
                 {
                     role = await ctx.Guild.CreateRoleAsync(name, DSharpPlus.Permissions.None, DiscordColor.Brown, mentionable: true);
                 }
-                Database.AddRole(new(role.Id, role.Name, new(emoji.Id, emoji.GetDiscordName())), category.Id);
+                Role newRole = new(role.Id, role.Name, new(emoji.Id, emoji.GetDiscordName()));
+                category.Roles.Add(newRole);
+                Database.AddRole(newRole, category.Id);
                 await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":white_check_mark:"));
                 ctx.Client.Logger.LogInformation($"{ctx.Member.Username} added {role.Name} to database.");
             }
-            UpdateRoleMessage(ctx.Client, category.Name);
+            UpdateRoleMessage(ctx.Client, category);
         }
 
 
@@ -77,20 +79,20 @@ namespace DBuddyBot.Commands
             }
             else
             {
+                category.Roles.Remove(role);
                 Database.RemoveRole(role.Id);
                 ctx.Client.Logger.LogInformation($"{ctx.Member.Username} removed role {role.Name} from database.");
                 await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":white_check_mark:"));
             }
-            UpdateRoleMessage(ctx.Client, categoryName);
+            UpdateRoleMessage(ctx.Client, category);
         }
 
         #endregion commandmethods
 
         #region privatemethods
 
-        private async void UpdateRoleMessage(DSharpPlus.DiscordClient client, string categoryName)
+        private async void UpdateRoleMessage(DSharpPlus.DiscordClient client, Category category)
         {
-            Category category = Database.GetCategory(categoryName);
             DiscordChannel channel = await client.GetChannelAsync(category.Channel.Id);
             DiscordEmbed embed = category.GetEmbed(client);
             if (category.Message == null)
@@ -132,12 +134,9 @@ namespace DBuddyBot.Commands
                             }
                         }
                     }
-                    if (messageEmojis.Count > 0)
+                    foreach (DiscordEmoji emoji in messageEmojis)
                     {
-                        foreach (DiscordEmoji emoji in messageEmojis)
-                        {
-                            await message.DeleteReactionsEmojiAsync(emoji);
-                        }
+                        await message.DeleteReactionsEmojiAsync(emoji);
                     }
                 }
             }
