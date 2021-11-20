@@ -44,6 +44,10 @@ namespace DBuddyBot.Models
             _roles = new();
         }
 
+        #endregion constructors
+
+
+        #region publicmethods
         //TODO: Allow sorting of roles in specific orders (Alphabetically, certain roles first etc.)
         public DiscordEmbed GetEmbed(DiscordClient client)
         {
@@ -54,14 +58,16 @@ namespace DBuddyBot.Models
             StringBuilder roleString = new();
             foreach (Role role in Roles)
             {
-                if (!DiscordEmoji.TryFromName(client, role.Emoji.Name, true, out DiscordEmoji emoji))
+                bool success = role.Emoji.Name == "" ? DiscordEmoji.TryFromGuildEmote(client, role.Emoji.Id, out DiscordEmoji emoji)
+                            : DiscordEmoji.TryFromName(client, role.Emoji.Name, out emoji);
+                if (success)
                 {
-                    if(!DiscordEmoji.TryFromGuildEmote(client, role.Emoji.Id, out emoji))
-                    {
-                        Log.Logger.Debug($"Could not get Emoji({role.Emoji.Id},{role.Emoji.Name}) from name or id");
-                    }
+                    roleString.AppendLine($"{role.Name} {(emoji ?? "'No emoji found'")}");
                 }
-                roleString.AppendLine($"{role.Name} {(emoji ?? "'No emoji found'")}");
+                else
+                {
+                    Log.Logger.Debug($"Could not get Emoji({role.Emoji.Id},{role.Emoji.Name}) from name or id");
+                }
             }
             if (string.IsNullOrWhiteSpace(roleString.ToString()))
             {
@@ -71,6 +77,6 @@ namespace DBuddyBot.Models
             return builder.Build();
         }
 
-        #endregion constructors
+        #endregion publicmethods
     }
 }
