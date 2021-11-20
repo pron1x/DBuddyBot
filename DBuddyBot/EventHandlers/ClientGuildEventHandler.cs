@@ -9,7 +9,7 @@ namespace DBuddyBot.EventHandlers
 {
     public static class ClientGuildEventHandler
     {
-        private static IDatabaseService _database;
+        private static readonly IDatabaseService _database;
 
         static ClientGuildEventHandler()
         {

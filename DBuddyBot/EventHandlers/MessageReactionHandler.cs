@@ -9,7 +9,7 @@ namespace DBuddyBot.EventHandlers
 {
     public static class MessageReactionHandler
     {
-        private static IDatabaseService _database;
+        private static readonly IDatabaseService _database;
 
         static MessageReactionHandler()
         {
