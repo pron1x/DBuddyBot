@@ -16,7 +16,7 @@ namespace DBuddyBot.Commands
         public IDatabaseService Database { private get; set; }
         #endregion properties
 
-        //TODO: Update rolemessages on adding/removing roles.
+
         #region commandmethods
         /// <summary>
         /// Adds a role to the database and creates the corresponding discord role

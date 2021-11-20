@@ -16,8 +16,6 @@ namespace DBuddyBot.EventHandlers
             _database = Bootstrapper.Database;
         }
 
-        //TODO: Add created messages to database
-        //TODO: Only send message if category contains roles. Otherwise send when roles get added.
         public static async Task SendRoleMessages(DiscordClient sender, DSharpPlus.EventArgs.GuildDownloadCompletedEventArgs e)
         {
             List<Category> categories = _database.GetAllCategories();
