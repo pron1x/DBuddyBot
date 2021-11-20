@@ -77,7 +77,7 @@ namespace DBuddyBot.Data
         {
             using SQLiteConnection connection = new(_connectionString);
             using SQLiteCommand command = new(UpdateCategoryMessage, connection);
-            command.Parameters.AddWithValue("$messageId", messageId);
+            command.Parameters.AddWithValue("$messageId", messageId == 0 ? null : messageId);
             command.Parameters.AddWithValue("$categoryId", categorId);
             connection.Open();
             command.ExecuteNonQuery();
