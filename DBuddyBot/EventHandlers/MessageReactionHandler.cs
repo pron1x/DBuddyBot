@@ -17,6 +17,10 @@ namespace DBuddyBot.EventHandlers
 
         public static Task BaseMessageReactionEventHandler(DiscordClient sender, DSharpPlus.EventArgs.MessageReactionAddEventArgs e)
         {
+            if(e.User == sender.CurrentUser)
+            {
+                return Task.CompletedTask;
+            }
             if (_database.GetChannel(e.Channel.Id) != null)
             {
                 Role role = _database.GetRoleFromEmote(e.Emoji.GetDiscordName());
