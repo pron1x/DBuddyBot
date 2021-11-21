@@ -27,7 +27,6 @@ namespace DBuddyBot.Commands
         [Command("add"), RequirePermissions(DSharpPlus.Permissions.ManageRoles)]
         public async Task AddRole(CommandContext ctx, string categoryName, DiscordEmoji emoji, [RemainingText] string name)
         {
-            ctx.Client.Logger.LogDebug($"Emoji info. Id: {emoji.Id} discordname: {emoji.GetDiscordName()} name:{emoji.Name}");
             categoryName = categoryName.ToTitleCase();
             name = name.ToTitleCase();
             Category category = Database.GetCategory(categoryName);
