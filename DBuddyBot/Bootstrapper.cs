@@ -2,6 +2,7 @@
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
 using System.Data.SQLite;
 using System.IO;
@@ -103,6 +104,7 @@ namespace DBuddyBot
         private static void SetupDatabase()
         {
             bool sqliteDatabase = !_databaseConnectionString.ToLower().Contains("uid");
+            DatabaseType databaseType = sqliteDatabase ? DatabaseType.SQLite : DatabaseType.Sql;
             if (sqliteDatabase)
             {
                 try
@@ -120,57 +122,47 @@ namespace DBuddyBot
                     Log.Logger.Warning("No database found. Creating new SQLite database.");
                     Directory.CreateDirectory(Path.GetDirectoryName(_databaseFilePath));
                     SQLiteConnection.CreateFile(_databaseFilePath);
-
-                    using SQLiteConnection conn = new(_databaseConnectionString);
-                    Log.Logger.Information($"Setting up SQLite database {conn.DataSource}.");
-                    using SQLiteCommand createCategories = new(SqlStrings.CreateTableCategories, conn);
-                    using SQLiteCommand createRoles = new(SqlStrings.CreateTableRoles, conn);
-                    using SQLiteCommand createChannels = new(SqlStrings.CreateTableChannels, conn);
-                    using SQLiteCommand createEmojis = new(SqlStrings.CreateTableEmojis, conn);
-
-                    conn.Open();
-                    createCategories.ExecuteNonQuery();
-                    createRoles.ExecuteNonQuery();
-                    createChannels.ExecuteNonQuery();
-                    createEmojis.ExecuteNonQuery();
-                    conn.Close();
                 }
-                using SQLiteConnection connection = new(_databaseConnectionString);
-                try
-                {
-                    connection.Open();
-                    connection.Close();
-                }
-                catch (Exception e)
-                {
-                    Log.Logger.Fatal($"Could not connect to SQLite database. Shutting down...\nError: {e.Message}");
-                    Environment.Exit(74);
-                }
-                _database = new DatabaseService(_databaseConnectionString, DatabaseType.SQLite);
             }
-            else
+            Log.Logger.Information("Setting up database with required tables.");
+            using IDbConnection connection = databaseType switch
             {
-                using SqlConnection connection = new(_databaseConnectionString);
-                try
-                {
-                    using SqlCommand createCategories = new(SqlStrings.CreateTableCategories, connection);
-                    using SqlCommand createRoles = new(SqlStrings.CreateTableRoles, connection);
-                    using SqlCommand createChannels = new(SqlStrings.CreateTableChannels, connection);
-                    using SqlCommand createEmojis = new(SqlStrings.CreateTableEmojis, connection);
-                    connection.Open();
-                    createCategories.ExecuteNonQuery();
-                    createRoles.ExecuteNonQuery();
-                    createChannels.ExecuteNonQuery();
-                    createEmojis.ExecuteNonQuery();
-                    connection.Close();
-                }
-                catch (Exception e)
-                {
-                    Log.Logger.Fatal($"Could not connect to SQL database. Shutting down...\nError: {e.Message}");
-                    Environment.Exit(74);
-                }
-                _database = new DatabaseService(_databaseConnectionString, DatabaseType.Sql);
+                DatabaseType.SQLite => new SQLiteConnection(_databaseConnectionString),
+                DatabaseType.Sql => new SqlConnection(_databaseConnectionString),
+                _ => null
+            };
+            using IDbCommand createCategories = CreateCommand(SqlStrings.CreateTableCategories, connection, databaseType);
+            using IDbCommand createRoles = CreateCommand(SqlStrings.CreateTableRoles, connection, databaseType);
+            using IDbCommand createChannels = CreateCommand(SqlStrings.CreateTableChannels, connection, databaseType);
+            using IDbCommand createEmojis = CreateCommand(SqlStrings.CreateTableEmojis, connection, databaseType);
+            try
+            {
+                connection.Open();
+                createCategories.ExecuteNonQuery();
+                createRoles.ExecuteNonQuery();
+                createChannels.ExecuteNonQuery();
+                createEmojis.ExecuteNonQuery();
+                connection.Close();
             }
+            catch (Exception e)
+            {
+                Log.Logger.Fatal($"Could not connect to database. Shutting down...\nError: {e.Message}");
+                Environment.Exit(74);
+            };
+            _database = new DatabaseService(_databaseConnectionString, databaseType);
+        }
+
+
+        private static IDbCommand CreateCommand(string query, IDbConnection connection, DatabaseType type)
+        {
+            IDbCommand command = type switch
+            {
+                DatabaseType.SQLite => new SQLiteCommand(query),
+                DatabaseType.Sql => new SqlCommand(query),
+                _ => null
+            };
+            command.Connection = connection;
+            return command;
         }
 
 
