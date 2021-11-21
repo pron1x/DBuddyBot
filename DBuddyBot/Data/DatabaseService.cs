@@ -2,22 +2,31 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Data.SQLite;
 
 using static DBuddyBot.Data.SqlStrings;
 
 namespace DBuddyBot.Data
 {
-    class SQLDatabaseService : IDatabaseService
+    public enum DatabaseType
+    {
+        SQLite,
+        Sql
+    }
+
+    public class DatabaseService : IDatabaseService
     {
         #region backingfields
         private readonly string _connectionString;
+        private readonly DatabaseType _databaseType;
         #endregion backingfields
 
 
         #region constructors
-        public SQLDatabaseService(string connectionString)
+        public DatabaseService(string connectionString, DatabaseType type)
         {
             _connectionString = connectionString;
+            _databaseType = type;
         }
         #endregion constructors
 
@@ -28,9 +37,9 @@ namespace DBuddyBot.Data
         {
             if (GetCategory(name) == null)
             {
-                using SqlConnection connection = new(_connectionString);
-                using SqlCommand command = new(InsertCategory, connection);
-                command.Parameters.AddWithValue("$name", name.ToTitleCase());
+                using IDbConnection connection = GetConnection(_connectionString);
+                using IDbCommand command = GetCommand(InsertCategory, connection);
+                command.Parameters.Add(GetParameterWithValue(command.CreateParameter(), "$name", name.ToTitleCase()));
                 connection.Open();
                 command.ExecuteNonQuery();
                 connection.Close();
@@ -43,16 +52,17 @@ namespace DBuddyBot.Data
         {
             if (GetRole(role.Id) == null)
             {
-                using SqlConnection connection = new(_connectionString);
-                using SqlCommand commandRole = new(InsertRole, connection);
-                using SqlCommand commandEmoji = new(InsertEmoji, connection);
-                commandRole.Parameters.AddWithValue("$roleId", role.Id);
-                commandRole.Parameters.AddWithValue("$roleName", role.Name);
-                commandRole.Parameters.AddWithValue("$roleIsGame", role.IsGame);
-                commandRole.Parameters.AddWithValue("$categoryId", categoryId);
-                commandEmoji.Parameters.AddWithValue("$emojiId", role.Emoji.Id);
-                commandEmoji.Parameters.AddWithValue("emojiName", role.Emoji.Name);
-                commandEmoji.Parameters.AddWithValue("emojiRole", role.Id);
+                using IDbConnection connection = GetConnection(_connectionString);
+                using IDbCommand commandRole = GetCommand(InsertRole, connection);
+                using IDbCommand commandEmoji = GetCommand(InsertEmoji, connection);
+                commandRole.Parameters.Add(GetParameterWithValue(commandRole.CreateParameter(), "$roleId", role.Id));
+                commandRole.Parameters.Add(GetParameterWithValue(commandRole.CreateParameter(), "$roleName", role.Name));
+                commandRole.Parameters.Add(GetParameterWithValue(commandRole.CreateParameter(), "$roleIsGame", role.IsGame));
+                commandRole.Parameters.Add(GetParameterWithValue(commandRole.CreateParameter(), "$categoryId", categoryId));
+
+                commandEmoji.Parameters.Add(GetParameterWithValue(commandEmoji.CreateParameter(), "$emojiId", role.Emoji.Id));
+                commandEmoji.Parameters.Add(GetParameterWithValue(commandEmoji.CreateParameter(), "emojiName", role.Emoji.Name));
+                commandEmoji.Parameters.Add(GetParameterWithValue(commandEmoji.CreateParameter(), "emojiRole", role.Id));
                 connection.Open();
                 commandRole.ExecuteNonQuery();
                 commandEmoji.ExecuteNonQuery();
@@ -64,10 +74,10 @@ namespace DBuddyBot.Data
         {
             if (GetChannel(channelId) == null)
             {
-                using SqlConnection connection = new(_connectionString);
-                using SqlCommand command = new(InsertChannel, connection);
-                command.Parameters.AddWithValue("$channelId", channelId);
-                command.Parameters.AddWithValue("$categoryId", categoryId);
+                using IDbConnection connection = GetConnection(_connectionString);
+                using IDbCommand command = GetCommand(InsertChannel, connection);
+                command.Parameters.Add(GetParameterWithValue(command.CreateParameter(), "$channelId", channelId));
+                command.Parameters.Add(GetParameterWithValue(command.CreateParameter(), "$categoryId", categoryId));
                 connection.Open();
                 command.ExecuteNonQuery();
                 connection.Close();
@@ -76,10 +86,10 @@ namespace DBuddyBot.Data
 
         public void UpdateMessage(int categorId, ulong messageId)
         {
-            using SqlConnection connection = new(_connectionString);
-            using SqlCommand command = new(UpdateCategoryMessage, connection);
-            command.Parameters.AddWithValue("$messageId", messageId == 0 ? null : messageId);
-            command.Parameters.AddWithValue("$categoryId", categorId);
+            using IDbConnection connection = GetConnection(_connectionString);
+            using IDbCommand command = GetCommand(UpdateCategoryMessage, connection);
+            command.Parameters.Add(GetParameterWithValue(command.CreateParameter(), "$messageId", messageId == 0 ? null : messageId));
+            command.Parameters.Add(GetParameterWithValue(command.CreateParameter(), "$categoryId", categorId));
             connection.Open();
             command.ExecuteNonQuery();
             connection.Close();
@@ -88,12 +98,12 @@ namespace DBuddyBot.Data
         public List<Category> GetAllCategories()
         {
             List<Category> categories = new();
-            using (SqlConnection connection = new(_connectionString))
+            using (IDbConnection connection = GetConnection(_connectionString))
             {
-                using SqlCommand command = new(SelectCategoryNames, connection);
+                using IDbCommand command = GetCommand(SelectCategoryNames, connection);
 
                 connection.Open();
-                SqlDataReader reader = command.ExecuteReader();
+                IDataReader reader = command.ExecuteReader();
                 while (reader.Read())
                 {
                     string categoryName = reader.GetString(0);
@@ -107,13 +117,14 @@ namespace DBuddyBot.Data
         public Category GetCategory(string name)
         {
             Category category = null;
-            using (SqlConnection connection = new(_connectionString))
+            using (IDbConnection connection = GetConnection(_connectionString))
             {
-                using SqlCommand command = new(SelectCategoryOnName, connection);
-                command.Parameters.AddWithValue("$name", name.ToLower());
+                using IDbCommand command = GetCommand(SelectCategoryOnName, connection);
+                command.Parameters.Add(GetParameterWithValue(command.CreateParameter(), "$name", name.ToLower()));
                 connection.Open();
-                SqlDataReader reader = command.ExecuteReader();
+                IDataReader reader = command.ExecuteReader();
                 category = ParseCategory(reader);
+
                 connection.Close();
             }
             return category;
@@ -122,12 +133,12 @@ namespace DBuddyBot.Data
         public Category GetCategoryFromMessage(ulong id)
         {
             Category category = null;
-            using (SqlConnection connection = new(_connectionString))
+            using (IDbConnection connection = GetConnection(_connectionString))
             {
-                using SqlCommand command = new(SelectCategoryOnMessage, connection);
-                command.Parameters.AddWithValue("messageId", id);
+                using IDbCommand command = GetCommand(SelectCategoryOnMessage, connection);
+                command.Parameters.Add(GetParameterWithValue(command.CreateParameter(), "messageId", id));
                 connection.Open();
-                SqlDataReader reader = command.ExecuteReader();
+                IDataReader reader = command.ExecuteReader();
                 category = ParseCategory(reader);
                 connection.Close();
             }
@@ -137,13 +148,13 @@ namespace DBuddyBot.Data
         public Role GetRole(string name)
         {
             Role role = null;
-            using (SqlConnection connection = new(_connectionString))
+            using (IDbConnection connection = GetConnection(_connectionString))
             {
-                using SqlCommand command = new(SelectRoleOnName, connection);
-                command.Parameters.AddWithValue("$name", name.ToLower());
+                using IDbCommand command = GetCommand(SelectRoleOnName, connection);
+                command.Parameters.Add(GetParameterWithValue(command.CreateParameter(), "$name", name.ToLower()));
 
                 connection.Open();
-                using SqlDataReader reader = command.ExecuteReader();
+                using IDataReader reader = command.ExecuteReader();
                 if (reader.Read())
                 {
                     Emoji emoji = new((ulong)reader.GetInt64(3), reader.GetString(4));
@@ -163,13 +174,13 @@ namespace DBuddyBot.Data
         public Role GetRole(ulong id)
         {
             Role role = null;
-            using (SqlConnection connection = new(_connectionString))
+            using (IDbConnection connection = GetConnection(_connectionString))
             {
-                using SqlCommand command = new(SelectRoleOnId, connection);
-                command.Parameters.AddWithValue("$id", id);
+                using IDbCommand command = GetCommand(SelectRoleOnId, connection);
+                command.Parameters.Add(GetParameterWithValue(command.CreateParameter(), "$id", id));
 
                 connection.Open();
-                using SqlDataReader reader = command.ExecuteReader();
+                using IDataReader reader = command.ExecuteReader();
                 if (reader.Read())
                 {
                     Emoji emoji = new((ulong)reader.GetInt64(3), reader.GetString(4));
@@ -189,12 +200,12 @@ namespace DBuddyBot.Data
         public Role GetRoleFromEmote(string emojiName)
         {
             Role role = null;
-            using (SqlConnection connection = new(_connectionString))
+            using (IDbConnection connection = GetConnection(_connectionString))
             {
-                using SqlCommand command = new(SelectRoleOnEmoji, connection);
-                command.Parameters.AddWithValue("$emojiName", emojiName);
+                using IDbCommand command = GetCommand(SelectRoleOnEmoji, connection);
+                command.Parameters.Add(GetParameterWithValue(command.CreateParameter(), "$emojiName", emojiName));
                 connection.Open();
-                using SqlDataReader reader = command.ExecuteReader();
+                using IDataReader reader = command.ExecuteReader();
                 if (reader.Read())
                 {
                     Emoji emoji = new((ulong)reader.GetInt64(3), reader.GetString(4));
@@ -208,11 +219,11 @@ namespace DBuddyBot.Data
         public Channel GetChannel(ulong channelId)
         {
             Channel channel = null;
-            using SqlConnection connection = new(_connectionString);
-            using SqlCommand command = new(SelectChannelOnId, connection);
-            command.Parameters.AddWithValue("$id", channelId);
+            using IDbConnection connection = GetConnection(_connectionString);
+            using IDbCommand command = GetCommand(SelectChannelOnId, connection);
+            command.Parameters.Add(GetParameterWithValue(command.CreateParameter(), "$id", channelId));
             connection.Open();
-            using SqlDataReader reader = command.ExecuteReader();
+            using IDataReader reader = command.ExecuteReader();
             if (reader.Read())
             {
                 ulong id = (ulong)reader.GetInt64(0);
@@ -223,23 +234,52 @@ namespace DBuddyBot.Data
 
         public void RemoveRole(ulong id)
         {
-            using SqlConnection connection = new(_connectionString);
-            using SqlCommand commandEmojis = new(DeleteEmojiOnRoleId, connection);
-            using SqlCommand commandRoles = new(DeleteRoleOnId, connection);
-            commandEmojis.Parameters.AddWithValue("$id", id);
-            commandRoles.Parameters.AddWithValue("$id", id);
+            using IDbConnection connection = GetConnection(_connectionString);
+            using IDbCommand commandEmojis = GetCommand(DeleteEmojiOnRoleId, connection);
+            using IDbCommand commandRoles = GetCommand(DeleteRoleOnId, connection);
+            commandEmojis.Parameters.Add(GetParameterWithValue(commandEmojis.CreateParameter(), "$id", id));
+            commandRoles.Parameters.Add(GetParameterWithValue(commandRoles.CreateParameter(), "$id", id));
 
             connection.Open();
-            commandEmojis.ExecuteNonQueryAsync();
-            commandRoles.ExecuteNonQueryAsync();
+            commandEmojis.ExecuteNonQuery();
+            commandRoles.ExecuteNonQuery();
             connection.Close();
         }
-
 
         #endregion publicmethods
 
 
         #region privatemethods
+
+        private IDbConnection GetConnection(string connectionString)
+        {
+            IDbConnection connection = _databaseType switch
+            {
+                DatabaseType.SQLite => new SQLiteConnection(connectionString),
+                DatabaseType.Sql => new SqlConnection(connectionString),
+                _ => null
+            };
+            return connection;
+        }
+
+        private IDbCommand GetCommand(string query, IDbConnection connection)
+        {
+            IDbCommand command = _databaseType switch
+            {
+                DatabaseType.SQLite => new SQLiteCommand(query),
+                DatabaseType.Sql => new SqlCommand(query),
+                _ => null
+            };
+            command.Connection = connection;
+            return command;
+        }
+
+        private static IDbDataParameter GetParameterWithValue(IDbDataParameter parameter, string name, object value)
+        {
+            parameter.ParameterName = name;
+            parameter.Value = value;
+            return parameter;
+        }
 
         private static Category ParseCategory(IDataReader reader)
         {

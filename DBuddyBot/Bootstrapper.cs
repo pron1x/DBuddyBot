@@ -146,7 +146,7 @@ namespace DBuddyBot
                     Log.Logger.Fatal($"Could not connect to SQLite database. Shutting down...\nError: {e.Message}");
                     Environment.Exit(74);
                 }
-                _database = new SQLiteDatabaseService(_databaseConnectionString);
+                _database = new DatabaseService(_databaseConnectionString, DatabaseType.SQLite);
             }
             else
             {
@@ -169,7 +169,7 @@ namespace DBuddyBot
                     Log.Logger.Fatal($"Could not connect to SQL database. Shutting down...\nError: {e.Message}");
                     Environment.Exit(74);
                 }
-                _database = new SQLDatabaseService(_databaseConnectionString);
+                _database = new DatabaseService(_databaseConnectionString, DatabaseType.Sql);
             }
         }
 
