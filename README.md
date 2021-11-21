@@ -1,44 +1,62 @@
 # DBuddyBot
-> *Kind of like Tinder, but without the swiping! And without the dates. Maybe it's not like Tinder after all...*
+> A bot for categorized role assignment on discord servers.
 
 ---
 
 ## Overview
-> <sub>*Some useless text explaining the non-issue this is trying to solve*</sub>
 
+DBuddyBot<sup>1</sup> is a Discord bot for easy role assignment. It features a categorization system for roles,
+so that multiple different role signup messages can be shown in different text channels. This could prove viable
+especially for larger Discord communities that include multiple games or categories with their own role system.\
+<sub><sup>1</sup> Name will probably change in the future<sub/>
 
-Playing games<sup>1</sup> alone can be boring, but there's no reason to play alone! Chances are high that there is someone that plays that game too
-and you just need to find them. DBuddyBot tries to help by letting members of a Discord server subscribe to a game, and getting pinged when someone wants to play.
-It's just that easy, who would've thought!  
-<sub><sup>1</sup> That have a multiplayer mode<sub/>
+Please report bugs either by opening an issue, or sending me a message on Discord.
 
 ### Features
-> <sub>*Actually something useful, explaining what this thing can do!*</sub>
 
-DBuddyBot only includes the most cutting edge features, like:
-+ Adding<sup>1</sup> new Discord roles based on game names
-+ Subscribing and unsubscribing to those games/roles
-+ Getting information on subscriber count of these roles<sup>2</sup>  
-<sub><sup>1</sup> Admin rights are needed, no spam adding new games for normal users, sorry</sub>  
-<sub><sup>2</sup> Probably even more information at some point</sub>
+The bot currently has the following features:
++ Adding new Discord roles (for administrators)
++ Adding/Removing roles by reacting to the corresponding emoji by users
++ Use of a SQLite (standard) or Sql Server database.
 
-### Future Features
-> <sub>*Sometimes I actually plan stuff!*</sub>
+### Roadmap
 
-Everybody loves a roadmap, so here are some things that are planned to be implemented soon<sup>TM</sup>!
-- [ ] More **information** on games! The future is now and the internet can magically print game infos apparently
-- [ ] Better **stability** and **performance**. Enough with those error messages everyone ignores anyways
-- [ ] **More**.. just stuff. More stuff! Feel free to suggest features you'd like to see
-- [x] ~~Use of an actual **database**! Impressive, I know~~
-- [x] ~~Better **configuration**! Write some stuff in a file and you're good to go~~
-- [x] ~~**Logging**! Not cutting down any forests though, just logging some info on bot abuse~~
-
-### License
-> <sub>*You got a license for that, Sir?*</sub>
-
-I'm not a lawyer but licenses are good I think.
-So this thing is licensed under the [**MIT LICENSE**](https://github.com/pron1x/DBuddyBot/blob/master/LICENSE). Very original.
+Roadmap of things to come.
+- [ ] Use Discords button system for role assign/revoke instead of emojis (If the system proves to be viable)
+- [ ] Use Discords slash commands instead of normal text based commands
+- [ ] Add/remove categories via commands
+- [ ] Potentially lower the amount of dependencies
+- [x] SQLite and Sql Server support
+- [x] Configuration improvements (on-going)
 
 ---
+### Configuration
+Currently, the configuration file resides in the `/Config/BotConfig.json` file.
+It is parsed once on startup. In case the configuration file is missing, the bot creates an empty one and shuts down. 
+```json
+{
+    "discord": {
+        "discord_token": "token here",
+        "command_prefixes": [ "?" ]
+    },
+    "database": {
+        "connection_string": ""
+    },
+    "categories": {
+        "categoryName": 10000000,
+        "category2": 10000000,
+        ...
+    }
+}
+```
+The ``"discord_token"`` key holds the bots discord token. Commnd prefixes can be added/changed in the ``"command_prefixes"``
+array. To use a custom database (currently SQLite and Sql Server should be supported) put the connection string in the corresponding
+field. Leave empty to use the default database.\
+Categories are added in the ``"categories:"`` section. The key value pair should be ``"YourCategoryName": DiscordChannelId``.
 
-<sub>Yea all in all this `README` isn't really that good to be honest but whatever, I was bored.</sub>
+
+### License
+I'm not a lawyer but licenses are good I think.
+So this thing is licensed under the [**MIT LICENSE**](https://github.com/pron1x/DBuddyBot/blob/master/LICENSE).
+
+---
