@@ -5,8 +5,8 @@ namespace DBuddyBot
     internal static class Utilities
     {
         #region constants
-        private static CultureInfo _cultureInfo = new("en-US", false);
-        private static TextInfo _textInfo = _cultureInfo.TextInfo;
+        private static readonly CultureInfo _cultureInfo = new("en-US", false);
+        private static readonly TextInfo _textInfo = _cultureInfo.TextInfo;
         #endregion constants
 
 

@@ -3,7 +3,6 @@ using DBuddyBot.Models;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -19,7 +18,7 @@ namespace DBuddyBot.Commands
 
 
         #region commandmethods
-        
+
         /// <summary>
         /// <c>ShowGameInfo</c> shows info about the game.
         /// </summary>
