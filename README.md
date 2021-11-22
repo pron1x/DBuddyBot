@@ -49,7 +49,7 @@ It is parsed once on startup. In case the configuration file is missing, the bot
     }
 }
 ```
-The ``"discord_token"`` key holds the bots discord token. Commnd prefixes can be added/changed in the ``"command_prefixes"``
+The ``"discord_token"`` key holds the bots discord token. Command prefixes can be added/changed in the ``"command_prefixes"``
 array. To use a custom database (currently SQLite and Sql Server should be supported) put the connection string in the corresponding
 field. Leave empty to use the default database.\
 Categories are added in the ``"categories:"`` section. The key value pair should be ``"YourCategoryName": DiscordChannelId``.
