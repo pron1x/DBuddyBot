@@ -93,25 +93,16 @@ namespace DBuddyBot.Commands
         private async void UpdateRoleMessage(DSharpPlus.DiscordClient client, Category category)
         {
             DiscordChannel channel = await client.GetChannelAsync(category.Channel.Id);
-            DiscordEmbed embed = category.GetEmbed(client);
+            DiscordMessageBuilder messageBuilder = category.GetMessage(client);
             if (category.Message == null)
             {
-                DiscordMessage message = await channel.SendMessageAsync(embed);
-                foreach (Role role in category.Roles)
-                {
-                    bool success = role.Emoji.Name == string.Empty ? DiscordEmoji.TryFromGuildEmote(client, role.Emoji.Id, out DiscordEmoji emoji)
-                               : DiscordEmoji.TryFromName(client, role.Emoji.Name, out emoji);
-                    if (success)
-                    {
-                        await message.CreateReactionAsync(emoji);
-                    }
-                }
+                DiscordMessage message = await messageBuilder.SendAsync(channel);
                 Database.UpdateMessage(category.Id, message.Id);
             }
             else
             {
                 DiscordMessage message = await channel.GetMessageAsync(category.Message.Id);
-                if (embed == null)
+                if (messageBuilder == null)
                 {
                     await message.DeleteAsync();
                     Database.UpdateMessage(category.Id, 0);
@@ -119,24 +110,7 @@ namespace DBuddyBot.Commands
                 }
                 else
                 {
-                    await message.ModifyAsync(embed);
-                    List<DiscordEmoji> messageEmojis = message.Reactions.Select(reaction => reaction.Emoji).ToList();
-                    foreach (Role role in category.Roles)
-                    {
-                        bool success = role.Emoji.Name == string.Empty ? DiscordEmoji.TryFromGuildEmote(client, role.Emoji.Id, out DiscordEmoji emoji)
-                            : DiscordEmoji.TryFromName(client, role.Emoji.Name, out emoji);
-                        if (success)
-                        {
-                            if (!messageEmojis.Remove(emoji))
-                            {
-                                await message.CreateReactionAsync(emoji);
-                            }
-                        }
-                    }
-                    foreach (DiscordEmoji emoji in messageEmojis)
-                    {
-                        await message.DeleteReactionsEmojiAsync(emoji);
-                    }
+                    await message.ModifyAsync(messageBuilder);
                 }
             }
         }

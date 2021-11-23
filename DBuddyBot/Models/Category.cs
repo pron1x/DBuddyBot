@@ -49,9 +49,11 @@ namespace DBuddyBot.Models
 
         #region publicmethods
 
-        public DiscordEmbed GetEmbed(DiscordClient client)
+        public DiscordMessageBuilder GetMessage(DiscordClient client)
         {
             DiscordEmbedBuilder builder = new();
+            DiscordMessageBuilder messageBuilder = new();
+            List<DiscordComponent> components = new();
             builder.Title = Name;
             builder.Description = $"Roles in the {Name} category";
             builder.Color = DiscordColor.Orange;
@@ -63,6 +65,7 @@ namespace DBuddyBot.Models
                 if (success)
                 {
                     roleString.AppendLine($"{role.Name} {(emoji ?? "'No emoji found'")}");
+                    components.Add(new DiscordButtonComponent(ButtonStyle.Primary, $"button_{role.Name.ToLower().Replace(' ', '_')}", role.Name));
                 }
                 else
                 {
@@ -74,7 +77,9 @@ namespace DBuddyBot.Models
                 return null;
             }
             builder.AddField("Sign up to roles by reacting with the given emote", roleString.ToString());
-            return builder.Build();
+            messageBuilder.AddEmbed(builder.Build());
+            messageBuilder.AddComponents(components);
+            return messageBuilder;
         }
 
         #endregion publicmethods
