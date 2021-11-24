@@ -51,6 +51,10 @@ namespace DBuddyBot.Models
 
         public DiscordMessageBuilder GetMessage(DiscordClient client)
         {
+            if (Roles.Count == 0)
+            {
+                return null;
+            }
             DiscordEmbedBuilder builder = new();
             DiscordMessageBuilder messageBuilder = new();
             List<List<DiscordComponent>> componentsList = new();
@@ -75,21 +79,10 @@ namespace DBuddyBot.Models
                     }
                     componentsList[^1].Add(new DiscordButtonComponent(ButtonStyle.Primary, role.ComponentId, role.Name));
                 }
-                else
-                {
-                    Log.Logger.Debug($"Could not get Emoji({role.Emoji.Id},{role.Emoji.Name}) from name or id");
-                }
             }
-            if (string.IsNullOrWhiteSpace(roleString.ToString()))
-            {
-                return null;
-            }
-            builder.AddField("Sign up to roles by reacting with the given emote", roleString.ToString());
+            builder.AddField("Sign up to roles by clicking on the button.", roleString.ToString());
             messageBuilder.AddEmbed(builder.Build());
-            foreach (List<DiscordComponent> components in componentsList)
-            {
-                messageBuilder.AddComponents(components);
-            }
+            componentsList.ForEach(x => messageBuilder.AddComponents(x));
             return messageBuilder;
         }
 
