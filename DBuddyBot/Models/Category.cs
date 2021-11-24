@@ -53,19 +53,27 @@ namespace DBuddyBot.Models
         {
             DiscordEmbedBuilder builder = new();
             DiscordMessageBuilder messageBuilder = new();
-            List<DiscordComponent> components = new();
+            List<List<DiscordComponent>> componentsList = new();
             builder.Title = Name;
             builder.Description = $"Roles in the {Name} category";
             builder.Color = DiscordColor.Orange;
             StringBuilder roleString = new();
             foreach (Role role in Roles)
             {
+                if (componentsList.Count == 0)
+                {
+                    componentsList.Add(new List<DiscordComponent>());
+                }
                 bool success = role.Emoji.Name == "" ? DiscordEmoji.TryFromGuildEmote(client, role.Emoji.Id, out DiscordEmoji emoji)
                             : DiscordEmoji.TryFromName(client, role.Emoji.Name, out emoji);
                 if (success)
                 {
                     roleString.AppendLine($"{role.Name} {(emoji ?? "'No emoji found'")}");
-                    components.Add(new DiscordButtonComponent(ButtonStyle.Primary, role.ComponentId, role.Name));
+                    if (componentsList[^1].Count >= 5)
+                    {
+                        componentsList.Add(new List<DiscordComponent>());
+                    }
+                    componentsList[^1].Add(new DiscordButtonComponent(ButtonStyle.Primary, role.ComponentId, role.Name));
                 }
                 else
                 {
@@ -78,7 +86,10 @@ namespace DBuddyBot.Models
             }
             builder.AddField("Sign up to roles by reacting with the given emote", roleString.ToString());
             messageBuilder.AddEmbed(builder.Build());
-            messageBuilder.AddComponents(components);
+            foreach (List<DiscordComponent> components in componentsList)
+            {
+                messageBuilder.AddComponents(components);
+            }
             return messageBuilder;
         }
 
