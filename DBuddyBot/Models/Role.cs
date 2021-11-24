@@ -17,6 +17,7 @@
         public string Name => _name;
         public Emoji Emoji => _emoji;
         public bool IsGame => _isGame;
+        public string ComponentId => $"button_{Name.ToLower().Replace(' ', '_')}";
         #endregion properties
 
 

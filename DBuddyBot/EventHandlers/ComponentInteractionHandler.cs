@@ -3,9 +3,7 @@ using DBuddyBot.Models;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace DBuddyBot.EventHandlers
@@ -25,7 +23,7 @@ namespace DBuddyBot.EventHandlers
             Category category = _database.GetCategoryFromMessage(e.Message.Id);
             foreach(Role role in category.Roles)
             {
-                if(e.Id == $"button_{role.Name.ToLower().Replace(' ', '_')}")
+                if(e.Id == role.ComponentId)
                 {
                     DiscordMember member = (DiscordMember)e.User;
                     DiscordRole discordRole = e.Guild.GetRole(role.Id);

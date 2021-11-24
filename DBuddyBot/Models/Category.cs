@@ -65,7 +65,7 @@ namespace DBuddyBot.Models
                 if (success)
                 {
                     roleString.AppendLine($"{role.Name} {(emoji ?? "'No emoji found'")}");
-                    components.Add(new DiscordButtonComponent(ButtonStyle.Primary, $"button_{role.Name.ToLower().Replace(' ', '_')}", role.Name));
+                    components.Add(new DiscordButtonComponent(ButtonStyle.Primary, role.ComponentId, role.Name));
                 }
                 else
                 {
