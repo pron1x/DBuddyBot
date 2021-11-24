@@ -49,6 +49,16 @@ namespace DBuddyBot.Models
 
         #region publicmethods
 
+        public bool AddRole(Role role)
+        {
+            if(Roles.Count >= 25)
+            {
+                return false;
+            }
+            Roles.Add(role);
+            return true;
+        }
+
         public DiscordMessageBuilder GetMessage(DiscordClient client)
         {
             if (Roles.Count == 0)

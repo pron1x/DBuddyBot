@@ -4,7 +4,6 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Microsoft.Extensions.Logging;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -48,12 +47,18 @@ namespace DBuddyBot.Commands
                     role = await ctx.Guild.CreateRoleAsync(name, DSharpPlus.Permissions.None, DiscordColor.Brown, mentionable: true);
                 }
                 Role newRole = new(role.Id, role.Name, new(emoji.Id, emoji.GetDiscordName()));
-                category.Roles.Add(newRole);
-                Database.AddRole(newRole, category.Id);
-                await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":white_check_mark:"));
-                ctx.Client.Logger.LogInformation($"{ctx.Member.Username} added {role.Name} to database.");
+                if (category.AddRole(newRole))
+                {
+                    Database.AddRole(newRole, category.Id);
+                    await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":white_check_mark:"));
+                    ctx.Client.Logger.LogInformation($"{ctx.Member.Username} added {role.Name} to database.");
+                    UpdateRoleMessage(ctx.Client, category);
+                } else
+                {
+                    await ctx.Channel.SendMessageAsync($"{category.Name} category already has 25 roles, the current maximum supported. " +
+                        $"{role.Name} has been created, but needs to be added to a different category.");
+                }
             }
-            UpdateRoleMessage(ctx.Client, category);
         }
 
 

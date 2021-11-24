@@ -317,7 +317,7 @@ namespace DBuddyBot.Data
                     roles.Add(role);
                 }
             }
-            category?.Roles.AddRange(roles);
+            roles.ForEach(x => category?.AddRole(x));
             return category;
         }
 
