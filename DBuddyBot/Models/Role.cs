@@ -23,11 +23,10 @@
 
         #region constructors
 
-        public Role(ulong id, string name, Emoji emoji, bool isGame = false)
+        public Role(ulong id, string name, bool isGame = false)
         {
             _id = id;
             _name = name;
-            _emoji = emoji;
             _isGame = isGame;
         }
 

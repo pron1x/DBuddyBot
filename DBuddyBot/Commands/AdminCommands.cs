@@ -24,7 +24,7 @@ namespace DBuddyBot.Commands
         /// <param name="name">Name of the game to add</param>
         /// <returns></returns>
         [Command("add"), RequirePermissions(DSharpPlus.Permissions.ManageRoles)]
-        public async Task AddRole(CommandContext ctx, string categoryName, DiscordEmoji emoji, [RemainingText] string name)
+        public async Task AddRole(CommandContext ctx, string categoryName, [RemainingText] string name)
         {
             categoryName = categoryName.ToTitleCase();
             name = name.ToTitleCase();
@@ -46,7 +46,7 @@ namespace DBuddyBot.Commands
                 {
                     role = await ctx.Guild.CreateRoleAsync(name, DSharpPlus.Permissions.None, DiscordColor.Brown, mentionable: true);
                 }
-                Role newRole = new(role.Id, role.Name, new(emoji.Id, emoji.GetDiscordName()));
+                Role newRole = new(role.Id, role.Name);
                 if (category.AddRole(newRole))
                 {
                     Database.AddRole(newRole, category.Id);
