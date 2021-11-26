@@ -1,6 +1,7 @@
 ﻿using DSharpPlus;
 using DSharpPlus.Entities;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace DBuddyBot.Models
@@ -21,18 +22,11 @@ namespace DBuddyBot.Models
         public string Name => _name;
         public Channel Channel => _channel;
         public RoleMessage Message => _message;
-        public List<Role> Roles => _roles;
+        public IEnumerable<Role> Roles => _roles.AsReadOnly();
+        public int RoleCount => _roles.Count;
         #endregion properties
 
         #region constructors
-
-        public Category(string name, Channel channel, RoleMessage message)
-        {
-            _name = name;
-            _channel = channel;
-            _message = message;
-            _roles = new();
-        }
 
         public Category(int id, string name, Channel channel, RoleMessage message)
         {
@@ -48,19 +42,35 @@ namespace DBuddyBot.Models
 
         #region publicmethods
 
+        public Role GetRole(string name)
+        {
+            return Roles.FirstOrDefault(r => r.Name == name);
+        }
+
+        public Role GetRoleFromComponentId(string componentId)
+        {
+            return Roles.FirstOrDefault(role => role.ComponentId == componentId);
+        }
+
         public bool AddRole(Role role)
         {
-            if (Roles.Count >= 25)
+            if (RoleCount >= 25)
             {
                 return false;
             }
-            Roles.Add(role);
+            _roles.Add(role);
             return true;
         }
 
+        public bool RemoveRole(Role role)
+        {
+            return _roles.Remove(role);
+        }
+
+
         public DiscordMessageBuilder GetMessage(DiscordClient client)
         {
-            if (Roles.Count == 0)
+            if (RoleCount == 0)
             {
                 return null;
             }

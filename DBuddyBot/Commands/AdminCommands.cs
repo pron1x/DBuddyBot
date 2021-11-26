@@ -34,7 +34,7 @@ namespace DBuddyBot.Commands
                 await ctx.Channel.SendMessageAsync($"No category {categoryName} exists. Can not add role to it.");
                 return;
             }
-            else if (category.Roles.Any(role => role.Name == name))
+            else if (category.GetRole(name) != null)
             {
                 await ctx.Channel.SendMessageAsync($"Role {name} already exists in managed context, no need to add it again.");
                 return;
@@ -74,7 +74,7 @@ namespace DBuddyBot.Commands
         {
             name = name.ToTitleCase();
             Category category = Database.GetCategory(categoryName);
-            Role role = category.Roles.FirstOrDefault(role => role.Name == name);
+            Role role = category.GetRole(name);
 
             if (role == null)
             {
@@ -83,7 +83,7 @@ namespace DBuddyBot.Commands
             }
             else
             {
-                category.Roles.Remove(role);
+                category.RemoveRole(role);
                 Database.RemoveRole(role.Id);
                 ctx.Client.Logger.LogInformation($"{ctx.Member.Username} removed role {role.Name} from database.");
                 await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":white_check_mark:"));

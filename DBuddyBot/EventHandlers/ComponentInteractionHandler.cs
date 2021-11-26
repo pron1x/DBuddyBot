@@ -21,19 +21,18 @@ namespace DBuddyBot.EventHandlers
         {
             await e.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
             Category category = _database.GetCategoryFromMessage(e.Message.Id);
-            foreach(Role role in category.Roles)
+            Role role = category.GetRoleFromComponentId(e.Id);
+            if (role != null)
             {
-                if(e.Id == role.ComponentId)
+                DiscordMember member = (DiscordMember)e.User;
+                DiscordRole discordRole = e.Guild.GetRole(role.Id);
+                if (member.Roles.Contains(discordRole))
                 {
-                    DiscordMember member = (DiscordMember)e.User;
-                    DiscordRole discordRole = e.Guild.GetRole(role.Id);
-                    if(member.Roles.Contains(discordRole)) {
-                        await member.RevokeRoleAsync(discordRole);
-                    }
-                    else
-                    {
-                        await member.GrantRoleAsync(discordRole);
-                    }
+                    await member.RevokeRoleAsync(discordRole);
+                }
+                else
+                {
+                    await member.GrantRoleAsync(discordRole);
                 }
             }
         }
