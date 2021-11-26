@@ -1,6 +1,5 @@
 ﻿using DSharpPlus;
 using DSharpPlus.Entities;
-using Serilog;
 using System.Collections.Generic;
 using System.Text;
 
@@ -51,7 +50,7 @@ namespace DBuddyBot.Models
 
         public bool AddRole(Role role)
         {
-            if(Roles.Count >= 25)
+            if (Roles.Count >= 25)
             {
                 return false;
             }
@@ -78,17 +77,13 @@ namespace DBuddyBot.Models
                 {
                     componentsList.Add(new List<DiscordComponent>());
                 }
-                bool success = role.Emoji.Name == "" ? DiscordEmoji.TryFromGuildEmote(client, role.Emoji.Id, out DiscordEmoji emoji)
-                            : DiscordEmoji.TryFromName(client, role.Emoji.Name, out emoji);
-                if (success)
+                roleString.AppendLine($"{role.Name}");
+                if (componentsList[^1].Count >= 5)
                 {
-                    roleString.AppendLine($"{role.Name} {(emoji ?? "'No emoji found'")}");
-                    if (componentsList[^1].Count >= 5)
-                    {
-                        componentsList.Add(new List<DiscordComponent>());
-                    }
-                    componentsList[^1].Add(new DiscordButtonComponent(ButtonStyle.Primary, role.ComponentId, role.Name));
+                    componentsList.Add(new List<DiscordComponent>());
                 }
+                componentsList[^1].Add(new DiscordButtonComponent(ButtonStyle.Primary, role.ComponentId, role.Name));
+
             }
             builder.AddField("Sign up to roles by clicking on the button.", roleString.ToString());
             messageBuilder.AddEmbed(builder.Build());
