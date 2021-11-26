@@ -209,13 +209,10 @@ namespace DBuddyBot.Data
         public void RemoveRole(ulong id)
         {
             using IDbConnection connection = GetConnection(_connectionString);
-            using IDbCommand commandEmojis = GetCommand(DeleteEmojiOnRoleId, connection);
             using IDbCommand commandRoles = GetCommand(DeleteRoleOnId, connection);
-            commandEmojis.Parameters.Add(GetParameterWithValue(commandEmojis.CreateParameter(), "$id", id));
             commandRoles.Parameters.Add(GetParameterWithValue(commandRoles.CreateParameter(), "$id", id));
 
             connection.Open();
-            commandEmojis.ExecuteNonQuery();
             commandRoles.ExecuteNonQuery();
             connection.Close();
         }
@@ -269,8 +266,6 @@ namespace DBuddyBot.Data
                 ulong roleId = reader.IsDBNull(4) ? 0 : (ulong)reader.GetInt64(4);
                 string roleName = reader.IsDBNull(5) ? string.Empty : reader.GetString(5);
                 bool roleIsGame = !reader.IsDBNull(6) && reader.GetBoolean(6);
-                ulong emojiId = reader.IsDBNull(7) ? 0 : (ulong)reader.GetInt64(7);
-                string emojiName = reader.IsDBNull(8) ? string.Empty : reader.GetString(8);
 
                 if (category == null && categoryId != -1 && categoryName != string.Empty)
                 {

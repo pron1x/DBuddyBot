@@ -134,14 +134,12 @@ namespace DBuddyBot
             using IDbCommand createCategories = CreateCommand(SqlStrings.CreateTableCategories, connection, databaseType);
             using IDbCommand createRoles = CreateCommand(SqlStrings.CreateTableRoles, connection, databaseType);
             using IDbCommand createChannels = CreateCommand(SqlStrings.CreateTableChannels, connection, databaseType);
-            using IDbCommand createEmojis = CreateCommand(SqlStrings.CreateTableEmojis, connection, databaseType);
             try
             {
                 connection.Open();
                 createCategories.ExecuteNonQuery();
                 createRoles.ExecuteNonQuery();
                 createChannels.ExecuteNonQuery();
-                createEmojis.ExecuteNonQuery();
                 connection.Close();
             }
             catch (Exception e)
