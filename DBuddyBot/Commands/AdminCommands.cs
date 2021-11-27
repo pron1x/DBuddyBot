@@ -68,14 +68,18 @@ namespace DBuddyBot.Commands
         /// </summary>
         /// <param name="ctx"></param>
         /// <param name="categoryName">Name of the category the role resides in</param>
-        /// <param name="name">Name of the game to remove</param>
+        /// <param name="name">Name of the role to remove</param>
         /// <returns></returns>
         [Command("remove"), RequirePermissions(DSharpPlus.Permissions.ManageRoles)]
         public async Task RemoveRole(CommandContext ctx, string categoryName, [RemainingText] string name)
         {
             name = name.ToTitleCase();
             Category category = Database.GetCategory(categoryName);
-            Role role = category.GetRole(name);
+            if(category == null)
+            {
+                await ctx.Channel.SendMessageAsync($"No category {categoryName} exists, cannot remove from it.");
+            }
+            Role role = category?.GetRole(name);
 
             if (role == null)
             {
