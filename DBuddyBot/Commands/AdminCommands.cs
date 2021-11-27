@@ -53,7 +53,8 @@ namespace DBuddyBot.Commands
                     await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":white_check_mark:"));
                     ctx.Client.Logger.LogInformation($"{ctx.Member.Username} added {role.Name} to database.");
                     UpdateRoleMessage(ctx.Client, category);
-                } else
+                }
+                else
                 {
                     await ctx.Channel.SendMessageAsync($"{category.Name} category already has 25 roles, the current maximum supported. " +
                         $"{role.Name} has been created, but needs to be added to a different category.");
@@ -91,13 +92,35 @@ namespace DBuddyBot.Commands
             UpdateRoleMessage(ctx.Client, category);
         }
 
+        [Command("addcategory"), RequirePermissions(DSharpPlus.Permissions.ManageRoles)]
+        public async Task AddCategory(CommandContext ctx, string name, DiscordChannel channel)
+        {
+            name = name.ToTitleCase();
+            Category category = Database.GetCategory(name);
+            if (category == null)
+            {
+                int categoryId = Database.AddCategory(name, channel.Id);
+                if (categoryId == -1)
+                {
+                    await ctx.Channel.SendMessageAsync($"Category {name} already exists, or something went wrong.");
+                    return;
+                }
+                await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":white_check_mark:"));
+            }
+            else
+            {
+                await ctx.Channel.SendMessageAsync($"Category {name} already exists, or something went wrong.");
+            }
+
+        }
+
         #endregion commandmethods
 
         #region privatemethods
 
         private async void UpdateRoleMessage(DSharpPlus.DiscordClient client, Category category)
         {
-            DiscordChannel channel = await client.GetChannelAsync(category.Channel.Id);
+            DiscordChannel channel = await client.GetChannelAsync(category.Channel.DiscordId);
             DiscordMessageBuilder messageBuilder = category.GetMessage(client);
             if (category.Message == null)
             {
