@@ -33,13 +33,16 @@ namespace DBuddyBot.Data
 
         #region publicmethods
 
-        public int AddCategory(string name)
+        public int AddCategory(string name, ulong channelId)
         {
+            Channel channel = GetChannel(channelId);
+            int cId = channel == null ? AddChannel(channelId) : channel.Id;
             if (GetCategory(name) == null)
             {
                 using IDbConnection connection = GetConnection(_connectionString);
                 using IDbCommand command = GetCommand(InsertCategory, connection);
                 command.Parameters.Add(GetParameterWithValue(command.CreateParameter(), "$name", name.ToTitleCase()));
+                command.Parameters.Add(GetParameterWithValue(command.CreateParameter(), "$channelId", cId));
                 connection.Open();
                 command.ExecuteNonQuery();
                 connection.Close();
@@ -65,18 +68,20 @@ namespace DBuddyBot.Data
             }
         }
 
-        public void AddChannel(ulong channelId, int categoryId)
+        public int AddChannel(ulong channelId)
         {
-            if (GetChannel(channelId) == null)
+            Channel channel = GetChannel(channelId);
+            if (channel == null)
             {
                 using IDbConnection connection = GetConnection(_connectionString);
                 using IDbCommand command = GetCommand(InsertChannel, connection);
                 command.Parameters.Add(GetParameterWithValue(command.CreateParameter(), "$channelId", channelId));
-                command.Parameters.Add(GetParameterWithValue(command.CreateParameter(), "$categoryId", categoryId));
                 connection.Open();
                 command.ExecuteNonQuery();
                 connection.Close();
+                channel = GetChannel(channelId);
             }
+            return channel.Id;
         }
 
         public void UpdateMessage(int categorId, ulong messageId)
@@ -200,8 +205,9 @@ namespace DBuddyBot.Data
             using IDataReader reader = command.ExecuteReader();
             if (reader.Read())
             {
-                ulong id = (ulong)reader.GetInt64(0);
-                channel = new(id);
+                int id = reader.GetInt32(0);
+                ulong discordId = (ulong)reader.GetInt64(1);
+                channel = new(id, discordId);
             }
             return channel;
         }
@@ -262,17 +268,18 @@ namespace DBuddyBot.Data
                 int categoryId = reader.IsDBNull(0) ? -1 : reader.GetInt32(0);
                 string categoryName = reader.IsDBNull(1) ? string.Empty : reader.GetString(1);
                 ulong messageId = reader.IsDBNull(2) ? 0 : (ulong)reader.GetInt64(2);
-                ulong channelId = reader.IsDBNull(3) ? 0 : (ulong)reader.GetInt64(3);
-                ulong roleId = reader.IsDBNull(4) ? 0 : (ulong)reader.GetInt64(4);
-                string roleName = reader.IsDBNull(5) ? string.Empty : reader.GetString(5);
-                bool roleIsGame = !reader.IsDBNull(6) && reader.GetBoolean(6);
+                int channelId = reader.IsDBNull(3) ? 0 : reader.GetInt32(3);
+                ulong channelDiscordId = reader.IsDBNull(4) ? 0 : (ulong)reader.GetInt64(4);
+                ulong roleId = reader.IsDBNull(5) ? 0 : (ulong)reader.GetInt64(5);
+                string roleName = reader.IsDBNull(6) ? string.Empty : reader.GetString(6);
+                bool roleIsGame = !reader.IsDBNull(7) && reader.GetBoolean(7);
 
                 if (category == null && categoryId != -1 && categoryName != string.Empty)
                 {
                     Channel channel = null;
                     if (channelId != 0)
                     {
-                        channel = new(channelId);
+                        channel = new(channelId, channelDiscordId);
                     }
                     if (message == null && messageId != 0)
                     {

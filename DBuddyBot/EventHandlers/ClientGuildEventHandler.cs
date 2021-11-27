@@ -23,7 +23,7 @@ namespace DBuddyBot.EventHandlers
             {
                 if (category.Message == null && category.RoleCount > 0)
                 {
-                    DiscordChannel channel = await sender.GetChannelAsync(category.Channel.Id);
+                    DiscordChannel channel = await sender.GetChannelAsync(category.Channel.DiscordId);
                     DiscordMessage message = await channel.SendMessageAsync(category.GetMessage(sender));
                     _database.UpdateMessage(category.Id, message.Id);
                 }

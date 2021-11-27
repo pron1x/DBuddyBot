@@ -3,18 +3,21 @@
     public class Channel
     {
         #region backingfields
-        private readonly ulong _id;
+        private readonly int _id;
+        private readonly ulong _discordId;
 
         #endregion backingfields
 
         #region properties
-        public ulong Id => _id;
+        public int Id => _id;
+        public ulong DiscordId => _discordId;
         #endregion properties
 
         #region constructors
-        public Channel(ulong id)
+        public Channel(int id, ulong discordId)
         {
             _id = id;
+            _discordId = discordId;
         }
 
         #endregion constructors

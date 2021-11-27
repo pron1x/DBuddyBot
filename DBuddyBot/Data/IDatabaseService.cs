@@ -8,9 +8,9 @@ namespace DBuddyBot.Data
     /// </summary>
     public interface IDatabaseService
     {
-        public int AddCategory(string name);
+        public int AddCategory(string name, ulong channelId);
         public void AddRole(Role role, int categoryId);
-        public void AddChannel(ulong channelId, int categoryId);
+        public int AddChannel(ulong channelId);
         public void UpdateMessage(int categorId, ulong messageId);
         public List<Category> GetAllCategories();
         public Category GetCategory(string name);

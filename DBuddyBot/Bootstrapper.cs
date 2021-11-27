@@ -235,8 +235,7 @@ namespace DBuddyBot
         {
             foreach (JsonProperty property in categories.EnumerateObject())
             {
-                int categoryId = Database.AddCategory(property.Name);
-                Database.AddChannel(property.Value.GetUInt64(), categoryId);
+                Database.AddCategory(property.Name, property.Value.GetUInt64());
             }
         }
 
