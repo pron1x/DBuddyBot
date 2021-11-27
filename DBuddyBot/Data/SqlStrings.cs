@@ -6,7 +6,7 @@
 
         internal const string CreateTableCategories = "CREATE TABLE IF NOT EXISTS categories (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL UNIQUE, message UNSIGNED BIG INTEGER UNIQUE, channel_id INTEGER, FOREIGN KEY(channel_id) REFERENCES channels(id));";
 
-        internal const string CreateTableRoles = "CREATE TABLE IF NOT EXISTS roles (id INTEGER PRIMARY KEY AUTOINCREMENT, d_id UNSIGNED BIG INTEGER UNIQUE NOT NULL, name TEXT NOT NULL UNIQUE, game BOOL, category_id UNSIGNED BIG INT NOT NULL, FOREIGN KEY(category_id) REFERENCES categories(id));";
+        internal const string CreateTableRoles = "CREATE TABLE IF NOT EXISTS roles (id INTEGER PRIMARY KEY AUTOINCREMENT, d_id UNSIGNED BIG INTEGER UNIQUE NOT NULL, name TEXT NOT NULL UNIQUE, game BOOL, category_id INTEGER NOT NULL, FOREIGN KEY(category_id) REFERENCES categories(id));";
 
         internal const string CreateTableChannels = "CREATE TABLE IF NOT EXISTS channels (id INTEGER PRIMARY KEY AUTOINCREMENT, d_id UNSIGNED BIG INTEGER UNIQUE NOT NULL);";
 
@@ -35,24 +35,24 @@
         /// <summary>
         /// Parameters: $name
         /// </summary>
-        internal const string SelectCategoryOnName = "SELECT ca.id AS categoryId, ca.name AS categoryName, ca.message as categoryMessage, ch.id AS channelId, ch.d_id AS channelDiscordId, ro.id AS roleId, ro.name AS roleName, ro.game AS roleGame "
+        internal const string SelectCategoryOnName = "SELECT ca.id AS categoryId, ca.name AS categoryName, ca.message as categoryMessage, ch.id AS channelId, ch.d_id AS channelDiscordId, ro.d_id AS roleId, ro.name AS roleName, ro.game AS roleGame "
                                                    + "FROM categories ca LEFT JOIN channels ch ON ca.channel_id = ch.id LEFT JOIN roles ro ON ca.id = ro.category_id WHERE lower(categoryName) = $name;";
 
         /// <summary>
         /// Parameters: $messageId
         /// </summary>
-        internal const string SelectCategoryOnMessage = "SELECT ca.id AS categoryId, ca.name AS categoryName, ca.message as categoryMessage, ch.id AS channelId, ch.d_id AS channelDiscordId, ro.id AS roleId, ro.name AS roleName, ro.game AS roleGame "
+        internal const string SelectCategoryOnMessage = "SELECT ca.id AS categoryId, ca.name AS categoryName, ca.message as categoryMessage, ch.id AS channelId, ch.d_id AS channelDiscordId, ro.d_id AS roleId, ro.name AS roleName, ro.game AS roleGame "
                                                    + "FROM categories ca LEFT JOIN channels ch ON ca.channel_id = ch.id LEFT JOIN roles ro ON ca.id = ro.category_id WHERE categoryMessage = $messageId;";
 
         /// <summary>
         /// Parameters: $name
         /// </summary>
-        internal const string SelectRoleOnName = "SELECT roles.id, roles.name, roles.game FROM roles WHERE lower(roles.name) = $name;";
+        internal const string SelectRoleOnName = "SELECT roles.d_id, roles.name, roles.game FROM roles WHERE lower(roles.name) = $name;";
 
         /// <summary>
         /// Parameters: $id
         /// </summary>
-        internal const string SelectRoleOnId = "SELECT roles.id, roles.name, roles.game FROM roles WHERE roles.id = $id;";
+        internal const string SelectRoleOnId = "SELECT roles.d_id, roles.name, roles.game FROM roles WHERE roles.d_id = $id;";
 
         /// <summary>
         /// Parameters: $id
@@ -62,7 +62,7 @@
         /// <summary>
         /// Parameters: $id
         /// </summary>
-        internal const string DeleteRoleOnId = "DELETE FROM roles WHERE id = $id;";
+        internal const string DeleteRoleOnId = "DELETE FROM roles WHERE d_id = $id;";
 
 
         #endregion constants
