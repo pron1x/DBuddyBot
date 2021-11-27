@@ -4,7 +4,6 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using Microsoft.Extensions.Logging;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -25,7 +24,7 @@ namespace DBuddyBot.Commands
         /// <param name="name">Name of the game to add</param>
         /// <returns></returns>
         [Command("add"), RequirePermissions(DSharpPlus.Permissions.ManageRoles)]
-        public async Task AddRole(CommandContext ctx, string categoryName, DiscordEmoji emoji, [RemainingText] string name)
+        public async Task AddRole(CommandContext ctx, string categoryName, [RemainingText] string name)
         {
             categoryName = categoryName.ToTitleCase();
             name = name.ToTitleCase();
@@ -35,7 +34,7 @@ namespace DBuddyBot.Commands
                 await ctx.Channel.SendMessageAsync($"No category {categoryName} exists. Can not add role to it.");
                 return;
             }
-            else if (category.Roles.Any(role => role.Name == name))
+            else if (category.GetRole(name) != null)
             {
                 await ctx.Channel.SendMessageAsync($"Role {name} already exists in managed context, no need to add it again.");
                 return;
@@ -47,13 +46,19 @@ namespace DBuddyBot.Commands
                 {
                     role = await ctx.Guild.CreateRoleAsync(name, DSharpPlus.Permissions.None, DiscordColor.Brown, mentionable: true);
                 }
-                Role newRole = new(role.Id, role.Name, new(emoji.Id, emoji.GetDiscordName()));
-                category.Roles.Add(newRole);
-                Database.AddRole(newRole, category.Id);
-                await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":white_check_mark:"));
-                ctx.Client.Logger.LogInformation($"{ctx.Member.Username} added {role.Name} to database.");
+                Role newRole = new(role.Id, role.Name);
+                if (category.AddRole(newRole))
+                {
+                    Database.AddRole(newRole, category.Id);
+                    await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":white_check_mark:"));
+                    ctx.Client.Logger.LogInformation($"{ctx.Member.Username} added {role.Name} to database.");
+                    UpdateRoleMessage(ctx.Client, category);
+                } else
+                {
+                    await ctx.Channel.SendMessageAsync($"{category.Name} category already has 25 roles, the current maximum supported. " +
+                        $"{role.Name} has been created, but needs to be added to a different category.");
+                }
             }
-            UpdateRoleMessage(ctx.Client, category);
         }
 
 
@@ -69,7 +74,7 @@ namespace DBuddyBot.Commands
         {
             name = name.ToTitleCase();
             Category category = Database.GetCategory(categoryName);
-            Role role = category.Roles.FirstOrDefault(role => role.Name == name);
+            Role role = category.GetRole(name);
 
             if (role == null)
             {
@@ -78,7 +83,7 @@ namespace DBuddyBot.Commands
             }
             else
             {
-                category.Roles.Remove(role);
+                category.RemoveRole(role);
                 Database.RemoveRole(role.Id);
                 ctx.Client.Logger.LogInformation($"{ctx.Member.Username} removed role {role.Name} from database.");
                 await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":white_check_mark:"));
@@ -93,25 +98,16 @@ namespace DBuddyBot.Commands
         private async void UpdateRoleMessage(DSharpPlus.DiscordClient client, Category category)
         {
             DiscordChannel channel = await client.GetChannelAsync(category.Channel.Id);
-            DiscordEmbed embed = category.GetEmbed(client);
+            DiscordMessageBuilder messageBuilder = category.GetMessage(client);
             if (category.Message == null)
             {
-                DiscordMessage message = await channel.SendMessageAsync(embed);
-                foreach (Role role in category.Roles)
-                {
-                    bool success = role.Emoji.Name == string.Empty ? DiscordEmoji.TryFromGuildEmote(client, role.Emoji.Id, out DiscordEmoji emoji)
-                               : DiscordEmoji.TryFromName(client, role.Emoji.Name, out emoji);
-                    if (success)
-                    {
-                        await message.CreateReactionAsync(emoji);
-                    }
-                }
+                DiscordMessage message = await messageBuilder.SendAsync(channel);
                 Database.UpdateMessage(category.Id, message.Id);
             }
             else
             {
                 DiscordMessage message = await channel.GetMessageAsync(category.Message.Id);
-                if (embed == null)
+                if (messageBuilder == null)
                 {
                     await message.DeleteAsync();
                     Database.UpdateMessage(category.Id, 0);
@@ -119,24 +115,7 @@ namespace DBuddyBot.Commands
                 }
                 else
                 {
-                    await message.ModifyAsync(embed);
-                    List<DiscordEmoji> messageEmojis = message.Reactions.Select(reaction => reaction.Emoji).ToList();
-                    foreach (Role role in category.Roles)
-                    {
-                        bool success = role.Emoji.Name == string.Empty ? DiscordEmoji.TryFromGuildEmote(client, role.Emoji.Id, out DiscordEmoji emoji)
-                            : DiscordEmoji.TryFromName(client, role.Emoji.Name, out emoji);
-                        if (success)
-                        {
-                            if (!messageEmojis.Remove(emoji))
-                            {
-                                await message.CreateReactionAsync(emoji);
-                            }
-                        }
-                    }
-                    foreach (DiscordEmoji emoji in messageEmojis)
-                    {
-                        await message.DeleteReactionsEmojiAsync(emoji);
-                    }
+                    await message.ModifyAsync(messageBuilder);
                 }
             }
         }

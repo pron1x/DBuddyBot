@@ -54,18 +54,13 @@ namespace DBuddyBot.Data
             {
                 using IDbConnection connection = GetConnection(_connectionString);
                 using IDbCommand commandRole = GetCommand(InsertRole, connection);
-                using IDbCommand commandEmoji = GetCommand(InsertEmoji, connection);
                 commandRole.Parameters.Add(GetParameterWithValue(commandRole.CreateParameter(), "$roleId", role.Id));
                 commandRole.Parameters.Add(GetParameterWithValue(commandRole.CreateParameter(), "$roleName", role.Name));
                 commandRole.Parameters.Add(GetParameterWithValue(commandRole.CreateParameter(), "$roleIsGame", role.IsGame));
                 commandRole.Parameters.Add(GetParameterWithValue(commandRole.CreateParameter(), "$categoryId", categoryId));
 
-                commandEmoji.Parameters.Add(GetParameterWithValue(commandEmoji.CreateParameter(), "$emojiId", role.Emoji.Id));
-                commandEmoji.Parameters.Add(GetParameterWithValue(commandEmoji.CreateParameter(), "emojiName", role.Emoji.Name));
-                commandEmoji.Parameters.Add(GetParameterWithValue(commandEmoji.CreateParameter(), "emojiRole", role.Id));
                 connection.Open();
                 commandRole.ExecuteNonQuery();
-                commandEmoji.ExecuteNonQuery();
                 connection.Close();
             }
         }
@@ -157,8 +152,7 @@ namespace DBuddyBot.Data
                 using IDataReader reader = command.ExecuteReader();
                 if (reader.Read())
                 {
-                    Emoji emoji = new((ulong)reader.GetInt64(3), reader.GetString(4));
-                    role = new((ulong)reader.GetInt64(0), reader.GetString(1), emoji, reader.GetBoolean(2));
+                    role = new((ulong)reader.GetInt64(0), reader.GetString(1), reader.GetBoolean(2));
                 }
                 connection.Close();
             }
@@ -183,8 +177,7 @@ namespace DBuddyBot.Data
                 using IDataReader reader = command.ExecuteReader();
                 if (reader.Read())
                 {
-                    Emoji emoji = new((ulong)reader.GetInt64(3), reader.GetString(4));
-                    role = new((ulong)reader.GetInt64(0), reader.GetString(1), emoji, reader.GetBoolean(2));
+                    role = new((ulong)reader.GetInt64(0), reader.GetString(1), reader.GetBoolean(2));
                 }
                 connection.Close();
             }
@@ -195,25 +188,6 @@ namespace DBuddyBot.Data
         {
             role = GetRole(id);
             return role != null;
-        }
-
-        public Role GetRoleFromEmote(string emojiName)
-        {
-            Role role = null;
-            using (IDbConnection connection = GetConnection(_connectionString))
-            {
-                using IDbCommand command = GetCommand(SelectRoleOnEmoji, connection);
-                command.Parameters.Add(GetParameterWithValue(command.CreateParameter(), "$emojiName", emojiName));
-                connection.Open();
-                using IDataReader reader = command.ExecuteReader();
-                if (reader.Read())
-                {
-                    Emoji emoji = new((ulong)reader.GetInt64(3), reader.GetString(4));
-                    role = new((ulong)reader.GetInt64(0), reader.GetString(1), emoji, reader.GetBoolean(2));
-                }
-                connection.Close();
-            }
-            return role;
         }
 
         public Channel GetChannel(ulong channelId)
@@ -235,13 +209,10 @@ namespace DBuddyBot.Data
         public void RemoveRole(ulong id)
         {
             using IDbConnection connection = GetConnection(_connectionString);
-            using IDbCommand commandEmojis = GetCommand(DeleteEmojiOnRoleId, connection);
             using IDbCommand commandRoles = GetCommand(DeleteRoleOnId, connection);
-            commandEmojis.Parameters.Add(GetParameterWithValue(commandEmojis.CreateParameter(), "$id", id));
             commandRoles.Parameters.Add(GetParameterWithValue(commandRoles.CreateParameter(), "$id", id));
 
             connection.Open();
-            commandEmojis.ExecuteNonQuery();
             commandRoles.ExecuteNonQuery();
             connection.Close();
         }
@@ -295,8 +266,6 @@ namespace DBuddyBot.Data
                 ulong roleId = reader.IsDBNull(4) ? 0 : (ulong)reader.GetInt64(4);
                 string roleName = reader.IsDBNull(5) ? string.Empty : reader.GetString(5);
                 bool roleIsGame = !reader.IsDBNull(6) && reader.GetBoolean(6);
-                ulong emojiId = reader.IsDBNull(7) ? 0 : (ulong)reader.GetInt64(7);
-                string emojiName = reader.IsDBNull(8) ? string.Empty : reader.GetString(8);
 
                 if (category == null && categoryId != -1 && categoryName != string.Empty)
                 {
@@ -313,11 +282,11 @@ namespace DBuddyBot.Data
                 }
                 if (roleId != 0)
                 {
-                    Role role = new(roleId, roleName, new(emojiId, emojiName), roleIsGame);
+                    Role role = new(roleId, roleName, roleIsGame);
                     roles.Add(role);
                 }
             }
-            category?.Roles.AddRange(roles);
+            roles.ForEach(x => category?.AddRole(x));
             return category;
         }
 

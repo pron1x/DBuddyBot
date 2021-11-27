@@ -46,8 +46,7 @@ namespace DBuddyBot
             Commands.RegisterCommands<AdminCommands>();
 
             Client.GuildDownloadCompleted += ClientGuildEventHandler.SendRoleMessages;
-            Client.MessageReactionAdded += MessageReactionHandler.MessageReactionAddedEventHandler;
-            Client.MessageReactionRemoved += MessageReactionHandler.MessageReactionRemovedEventHandler;
+            Client.ComponentInteractionCreated += ComponentInteractionHandler.HandleComponentInteraction;
 
         }
 

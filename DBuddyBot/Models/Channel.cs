@@ -1,11 +1,9 @@
-﻿using System.Collections.Generic;
-
-namespace DBuddyBot.Models
+﻿namespace DBuddyBot.Models
 {
     public class Channel
     {
         #region backingfields
-        private ulong _id;
+        private readonly ulong _id;
 
         #endregion backingfields
 

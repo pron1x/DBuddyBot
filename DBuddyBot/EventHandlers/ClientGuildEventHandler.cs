@@ -21,21 +21,10 @@ namespace DBuddyBot.EventHandlers
             List<Category> categories = _database.GetAllCategories();
             foreach (Category category in categories)
             {
-                if (category.Message == null && category.Roles.Count > 0)
+                if (category.Message == null && category.RoleCount > 0)
                 {
                     DiscordChannel channel = await sender.GetChannelAsync(category.Channel.Id);
-                    DiscordMessage message = await channel.SendMessageAsync(category.GetEmbed(sender));
-                    foreach (Role role in category.Roles)
-                    {
-                        if (DiscordEmoji.TryFromName(sender, role.Emoji.Name, out DiscordEmoji emoji))
-                        {
-                            await message.CreateReactionAsync(emoji);
-                        }
-                        else if (DiscordEmoji.TryFromGuildEmote(sender, role.Emoji.Id, out emoji))
-                        {
-                            await message.CreateReactionAsync(emoji);
-                        }
-                    }
+                    DiscordMessage message = await channel.SendMessageAsync(category.GetMessage(sender));
                     _database.UpdateMessage(category.Id, message.Id);
                 }
             }

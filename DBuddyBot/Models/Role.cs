@@ -8,25 +8,23 @@
         #region backingfields
         private readonly ulong _id;
         private readonly string _name;
-        private readonly Emoji _emoji;
         private readonly bool _isGame;
         #endregion backingfields
 
         #region properties
         public ulong Id => _id;
         public string Name => _name;
-        public Emoji Emoji => _emoji;
         public bool IsGame => _isGame;
+        public string ComponentId => $"button_{Name.ToLower().Replace(' ', '_')}";
         #endregion properties
 
 
         #region constructors
 
-        public Role(ulong id, string name, Emoji emoji, bool isGame = false)
+        public Role(ulong id, string name, bool isGame = false)
         {
             _id = id;
             _name = name;
-            _emoji = emoji;
             _isGame = isGame;
         }
 

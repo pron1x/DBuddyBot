@@ -1,7 +1,7 @@
 ﻿using DSharpPlus;
 using DSharpPlus.Entities;
-using Serilog;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace DBuddyBot.Models
@@ -22,18 +22,11 @@ namespace DBuddyBot.Models
         public string Name => _name;
         public Channel Channel => _channel;
         public RoleMessage Message => _message;
-        public List<Role> Roles => _roles;
+        public IEnumerable<Role> Roles => _roles.AsReadOnly();
+        public int RoleCount => _roles.Count;
         #endregion properties
 
         #region constructors
-
-        public Category(string name, Channel channel, RoleMessage message)
-        {
-            _name = name;
-            _channel = channel;
-            _message = message;
-            _roles = new();
-        }
 
         public Category(int id, string name, Channel channel, RoleMessage message)
         {
@@ -49,32 +42,63 @@ namespace DBuddyBot.Models
 
         #region publicmethods
 
-        public DiscordEmbed GetEmbed(DiscordClient client)
+        public Role GetRole(string name)
         {
+            return Roles.FirstOrDefault(r => r.Name == name);
+        }
+
+        public Role GetRoleFromComponentId(string componentId)
+        {
+            return Roles.FirstOrDefault(role => role.ComponentId == componentId);
+        }
+
+        public bool AddRole(Role role)
+        {
+            if (RoleCount >= 25)
+            {
+                return false;
+            }
+            _roles.Add(role);
+            return true;
+        }
+
+        public bool RemoveRole(Role role)
+        {
+            return _roles.Remove(role);
+        }
+
+
+        public DiscordMessageBuilder GetMessage(DiscordClient client)
+        {
+            if (RoleCount == 0)
+            {
+                return null;
+            }
             DiscordEmbedBuilder builder = new();
+            DiscordMessageBuilder messageBuilder = new();
+            List<List<DiscordComponent>> componentsList = new();
             builder.Title = Name;
             builder.Description = $"Roles in the {Name} category";
             builder.Color = DiscordColor.Orange;
             StringBuilder roleString = new();
             foreach (Role role in Roles)
             {
-                bool success = role.Emoji.Name == "" ? DiscordEmoji.TryFromGuildEmote(client, role.Emoji.Id, out DiscordEmoji emoji)
-                            : DiscordEmoji.TryFromName(client, role.Emoji.Name, out emoji);
-                if (success)
+                if (componentsList.Count == 0)
                 {
-                    roleString.AppendLine($"{role.Name} {(emoji ?? "'No emoji found'")}");
+                    componentsList.Add(new List<DiscordComponent>());
                 }
-                else
+                roleString.AppendLine($"{role.Name}");
+                if (componentsList[^1].Count >= 5)
                 {
-                    Log.Logger.Debug($"Could not get Emoji({role.Emoji.Id},{role.Emoji.Name}) from name or id");
+                    componentsList.Add(new List<DiscordComponent>());
                 }
+                componentsList[^1].Add(new DiscordButtonComponent(ButtonStyle.Primary, role.ComponentId, role.Name));
+
             }
-            if (string.IsNullOrWhiteSpace(roleString.ToString()))
-            {
-                return null;
-            }
-            builder.AddField("Sign up to roles by reacting with the given emote", roleString.ToString());
-            return builder.Build();
+            builder.AddField("Sign up to roles by clicking on the button.", roleString.ToString());
+            messageBuilder.AddEmbed(builder.Build());
+            componentsList.ForEach(x => messageBuilder.AddComponents(x));
+            return messageBuilder;
         }
 
         #endregion publicmethods
