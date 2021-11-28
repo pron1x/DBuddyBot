@@ -37,14 +37,14 @@ The following commands are only usable by server members with the `Manage Roles`
 + `add <category name> <role name> [description]`
   + `<category name>` specifies the category the new role is part of
   + `<role name>` specifies the name of the role. Must be surrounded with `""` if it contains spaces. 
-  Checks if a Discord role with name exists before creating a new one
-  + `[description]` specifies and optional description of the role
+  Checks if a Discord role with the name exists before creating a new one
+  + `[description]` specifies an optional description of the role
 + `remove <category name> <role name>`
   + `<category name>` specifies the category the role is part of
   + `<role name>` specifies the name of the role to be removed. Removes it from the bot managed roles, does not delete the Discord role.
 ##### Server Users
-Server users can assign the roles by clicking on the buttons. The buttons work as a toggle, if the user is not part of a role, the role will be assigned,
-if he is not the role will instead be revoked.
+Server users can assign the roles by clicking on the buttons. The buttons work as a toggle, if the user is part of a role, the role will be revoked,
+if he is not the role will instead be granted.
 The bot has a (deprecated) `info` command that anyone can use. `info <role name>` will return the amount of users that have the specified
 role. This will either be removed or changed in future versions.
 
