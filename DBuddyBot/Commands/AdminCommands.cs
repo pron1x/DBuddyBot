@@ -69,7 +69,7 @@ namespace DBuddyBot.Commands
         /// <param name="name">Name of the role to remove</param>
         /// <returns></returns>
         [Command("remove"), RequirePermissions(DSharpPlus.Permissions.ManageRoles)]
-        public async Task RemoveRole(CommandContext ctx, string categoryName, [RemainingText] string name)
+        public async Task RemoveRole(CommandContext ctx, string categoryName, string name)
         {
             Category category = Database.GetCategory(categoryName);
             if (category == null)
