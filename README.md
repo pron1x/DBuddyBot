@@ -16,16 +16,19 @@ Please report bugs either by opening an issue, or sending me a message on Discor
 
 The bot currently has the following features:
 + Adding new Discord roles (for administrators)
-+ Adding/Removing roles by reacting to the corresponding emoji by users
++ Adding new categories (for administrators)
++ Removing Discord roles from categories (does not delete the Discord role)
++ Removing categories
++ Adding/Removing roles by clicking the corresponding button by users
 + Use of a SQLite (standard) or Sql Server database.
 
 ### Roadmap
 
 Roadmap of things to come.
-- [ ] Use Discords button system for role assign/revoke instead of emojis (If the system proves to be viable)
 - [ ] Use Discords slash commands instead of normal text based commands
-- [ ] Add/remove categories via commands
 - [ ] Potentially lower the amount of dependencies
+- [x] Use Discords button system for role assign/revoke instead of emojis (If the system proves to be viable)
+- [x] Add/remove categories via commands
 - [x] SQLite and Sql Server support
 - [x] Configuration improvements (on-going)
 
