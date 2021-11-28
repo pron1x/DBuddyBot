@@ -235,7 +235,7 @@ namespace DBuddyBot
         {
             foreach (JsonProperty property in categories.EnumerateObject())
             {
-                Database.AddCategory(property.Name, property.Value.GetUInt64(), 0);
+                Database.AddCategory(property.Name, string.Empty, property.Value.GetUInt64(), 0);
             }
         }
 

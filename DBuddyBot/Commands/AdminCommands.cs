@@ -24,7 +24,7 @@ namespace DBuddyBot.Commands
         /// <param name="name">Name of the game to add</param>
         /// <returns></returns>
         [Command("add"), RequirePermissions(DSharpPlus.Permissions.ManageRoles)]
-        public async Task AddRole(CommandContext ctx, string categoryName, [RemainingText] string name)
+        public async Task AddRole(CommandContext ctx, string categoryName, string name, [RemainingText] string description = "")
         {
             Category category = Database.GetCategory(categoryName);
             if (category == null)
@@ -44,7 +44,7 @@ namespace DBuddyBot.Commands
                 {
                     role = await ctx.Guild.CreateRoleAsync(name.ToTitleCase(), DSharpPlus.Permissions.None, DiscordColor.Brown, mentionable: true);
                 }
-                Role newRole = new(role.Id, role.Name.ToLower());
+                Role newRole = new(role.Id, role.Name.ToLower(), description);
                 if (category.AddRole(newRole))
                 {
                     Database.AddRole(newRole, category.Id);
@@ -94,12 +94,12 @@ namespace DBuddyBot.Commands
         }
 
         [Command("addcategory"), RequirePermissions(DSharpPlus.Permissions.ManageRoles)]
-        public async Task AddCategory(CommandContext ctx, string name, DiscordChannel channel, DiscordColor color = new DiscordColor())
+        public async Task AddCategory(CommandContext ctx, string name, DiscordChannel channel, DiscordColor color = new DiscordColor(), [RemainingText] string description = "")
         {
             Category category = Database.GetCategory(name);
             if (category == null)
             {
-                int categoryId = Database.AddCategory(name, channel.Id, color.Value);
+                int categoryId = Database.AddCategory(name, description, channel.Id, color.Value);
                 if (categoryId == -1)
                 {
                     await ctx.Channel.SendMessageAsync($"Category {name} already exists, or something went wrong.");

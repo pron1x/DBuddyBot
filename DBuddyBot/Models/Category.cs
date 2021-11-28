@@ -11,6 +11,7 @@ namespace DBuddyBot.Models
         #region backingfields
         private readonly int _id;
         private readonly string _name;
+        private readonly string _description;
         private readonly DiscordColor _color;
         private readonly Channel _channel;
         private readonly RoleMessage _message;
@@ -21,6 +22,7 @@ namespace DBuddyBot.Models
         #region properties
         public int Id => _id;
         public string Name => _name;
+        public string Description => _description;
         public DiscordColor Color => _color;
         public Channel Channel => _channel;
         public RoleMessage Message => _message;
@@ -30,10 +32,11 @@ namespace DBuddyBot.Models
 
         #region constructors
 
-        public Category(int id, string name, DiscordColor color, Channel channel, RoleMessage message)
+        public Category(int id, string name, string description, DiscordColor color, Channel channel, RoleMessage message)
         {
             _id = id;
             _name = name;
+            _description = description;
             _color = color;
             _channel = channel;
             _message = message;
@@ -80,8 +83,8 @@ namespace DBuddyBot.Models
             DiscordEmbedBuilder builder = new();
             DiscordMessageBuilder messageBuilder = new();
             List<List<DiscordComponent>> componentsList = new();
-            builder.Title = Name;
-            builder.Description = $"Roles in the {Name.ToTitleCase()} category";
+            builder.Title = Name.ToTitleCase();
+            builder.Description = $"Roles in the {Name.ToTitleCase()} category\n{Description}";
             builder.Color = Color;
             StringBuilder roleString = new();
             foreach (Role role in Roles)
@@ -91,7 +94,7 @@ namespace DBuddyBot.Models
                 {
                     componentsList.Add(new List<DiscordComponent>());
                 }
-                roleString.AppendLine($"{discordRole.Mention}");
+                roleString.AppendLine($"{discordRole.Mention}{(role.Description == string.Empty ? string.Empty : $": {role.Description}")}");
                 if (componentsList[^1].Count >= 5)
                 {
                     componentsList.Add(new List<DiscordComponent>());
