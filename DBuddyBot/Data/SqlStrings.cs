@@ -64,6 +64,17 @@
         /// </summary>
         internal const string DeleteRoleOnId = "DELETE FROM roles WHERE d_id = $id;";
 
+        /// <summary>
+        /// Parameters: $id
+        /// </summary>
+        internal const string DeleteChannelOnId = "DELETE FROM channels WHERE(SELECT COUNT(categories.channel_id) FROM categories WHERE categories.channel_id == $id) == 1 AND channels.ID == $id;";
+
+        /// <summary>
+        /// Parameters: $id
+        /// </summary>
+        internal const string DeleteCategoryOnId = "DELETE FROM categories WHERE id = $id;";
+
+       
 
         #endregion constants
     }

@@ -75,7 +75,7 @@ namespace DBuddyBot.Commands
         {
             name = name.ToTitleCase();
             Category category = Database.GetCategory(categoryName);
-            if(category == null)
+            if (category == null)
             {
                 await ctx.Channel.SendMessageAsync($"No category {categoryName} exists, cannot remove from it.");
             }
@@ -116,6 +116,26 @@ namespace DBuddyBot.Commands
                 await ctx.Channel.SendMessageAsync($"Category {name} already exists, or something went wrong.");
             }
 
+        }
+
+        [Command("removecategory"), RequirePermissions(DSharpPlus.Permissions.ManageRoles)]
+        public async Task RemoveCategory(CommandContext ctx, string name)
+        {
+            name = name.ToTitleCase();
+            Category category = Database.GetCategory(name);
+            if (category == null)
+            {
+                await ctx.Channel.SendMessageAsync($"Category {name} does not exist, cannot remove it.");
+                return;
+            }
+            else
+            {
+                Database.RemoveCategory(category);
+                DiscordChannel channel = await ctx.Client.GetChannelAsync(category.Channel.DiscordId);
+                DiscordMessage message = await channel.GetMessageAsync(category.Message.Id);
+                await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":white_check_mark:"));
+                await message.DeleteAsync($"Category {name} has been removed by {ctx.Member.Nickname}.");
+            }
         }
 
         #endregion commandmethods

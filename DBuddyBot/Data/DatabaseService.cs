@@ -223,6 +223,24 @@ namespace DBuddyBot.Data
             connection.Close();
         }
 
+        public void RemoveCategory(Category category)
+        {
+            foreach(Role role in category.Roles)
+            {
+                RemoveRole(role.Id);
+            }
+            using IDbConnection connection = GetConnection(_connectionString);
+            using IDbCommand commandChannel = GetCommand(DeleteChannelOnId, connection);
+            using IDbCommand commandCategory = GetCommand(DeleteCategoryOnId, connection);
+            commandChannel.Parameters.Add(GetParameterWithValue(commandChannel.CreateParameter(), "$id", category.Channel.Id));
+            commandCategory.Parameters.Add(GetParameterWithValue(commandCategory.CreateParameter(), "$id", category.Id));
+
+            connection.Open();
+            commandChannel.ExecuteNonQuery();
+            commandCategory.ExecuteNonQuery();
+            connection.Close();
+        }
+
         #endregion publicmethods
 
 
