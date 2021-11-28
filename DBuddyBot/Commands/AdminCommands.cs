@@ -94,12 +94,12 @@ namespace DBuddyBot.Commands
         }
 
         [Command("addcategory"), RequirePermissions(DSharpPlus.Permissions.ManageRoles)]
-        public async Task AddCategory(CommandContext ctx, string name, DiscordChannel channel)
+        public async Task AddCategory(CommandContext ctx, string name, DiscordChannel channel, DiscordColor color = new DiscordColor())
         {
             Category category = Database.GetCategory(name);
             if (category == null)
             {
-                int categoryId = Database.AddCategory(name, channel.Id);
+                int categoryId = Database.AddCategory(name, channel.Id, color.Value);
                 if (categoryId == -1)
                 {
                     await ctx.Channel.SendMessageAsync($"Category {name} already exists, or something went wrong.");

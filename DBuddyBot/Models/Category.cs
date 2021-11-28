@@ -11,6 +11,7 @@ namespace DBuddyBot.Models
         #region backingfields
         private readonly int _id;
         private readonly string _name;
+        private readonly DiscordColor _color;
         private readonly Channel _channel;
         private readonly RoleMessage _message;
         private readonly List<Role> _roles;
@@ -20,6 +21,7 @@ namespace DBuddyBot.Models
         #region properties
         public int Id => _id;
         public string Name => _name;
+        public DiscordColor Color => _color;
         public Channel Channel => _channel;
         public RoleMessage Message => _message;
         public IEnumerable<Role> Roles => _roles.AsReadOnly();
@@ -28,10 +30,11 @@ namespace DBuddyBot.Models
 
         #region constructors
 
-        public Category(int id, string name, Channel channel, RoleMessage message)
+        public Category(int id, string name, DiscordColor color, Channel channel, RoleMessage message)
         {
             _id = id;
             _name = name;
+            _color = color;
             _channel = channel;
             _message = message;
             _roles = new();
@@ -79,7 +82,7 @@ namespace DBuddyBot.Models
             List<List<DiscordComponent>> componentsList = new();
             builder.Title = Name;
             builder.Description = $"Roles in the {Name.ToTitleCase()} category";
-            builder.Color = DiscordColor.Orange;
+            builder.Color = Color;
             StringBuilder roleString = new();
             foreach (Role role in Roles)
             {
