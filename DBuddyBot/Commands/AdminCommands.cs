@@ -26,27 +26,25 @@ namespace DBuddyBot.Commands
         [Command("add"), RequirePermissions(DSharpPlus.Permissions.ManageRoles)]
         public async Task AddRole(CommandContext ctx, string categoryName, [RemainingText] string name)
         {
-            categoryName = categoryName.ToTitleCase();
-            name = name.ToTitleCase();
             Category category = Database.GetCategory(categoryName);
             if (category == null)
             {
                 await ctx.Channel.SendMessageAsync($"No category {categoryName} exists. Can not add role to it.");
                 return;
             }
-            else if (category.GetRole(name) != null)
+            else if (category.GetRole(name.ToLower()) != null)
             {
                 await ctx.Channel.SendMessageAsync($"Role {name} already exists in managed context, no need to add it again.");
                 return;
             }
             else
             {
-                DiscordRole role = ctx.Guild.Roles.FirstOrDefault(role => role.Value.Name == name).Value;
+                DiscordRole role = ctx.Guild.Roles.FirstOrDefault(role => role.Value.Name.ToLower() == name.ToLower()).Value;
                 if (role == null)
                 {
-                    role = await ctx.Guild.CreateRoleAsync(name, DSharpPlus.Permissions.None, DiscordColor.Brown, mentionable: true);
+                    role = await ctx.Guild.CreateRoleAsync(name.ToTitleCase(), DSharpPlus.Permissions.None, DiscordColor.Brown, mentionable: true);
                 }
-                Role newRole = new(role.Id, role.Name);
+                Role newRole = new(role.Id, role.Name.ToLower());
                 if (category.AddRole(newRole))
                 {
                     Database.AddRole(newRole, category.Id);
@@ -73,13 +71,12 @@ namespace DBuddyBot.Commands
         [Command("remove"), RequirePermissions(DSharpPlus.Permissions.ManageRoles)]
         public async Task RemoveRole(CommandContext ctx, string categoryName, [RemainingText] string name)
         {
-            name = name.ToTitleCase();
             Category category = Database.GetCategory(categoryName);
             if (category == null)
             {
                 await ctx.Channel.SendMessageAsync($"No category {categoryName} exists, cannot remove from it.");
             }
-            Role role = category?.GetRole(name);
+            Role role = category?.GetRole(name.ToLower());
 
             if (role == null)
             {
@@ -99,7 +96,6 @@ namespace DBuddyBot.Commands
         [Command("addcategory"), RequirePermissions(DSharpPlus.Permissions.ManageRoles)]
         public async Task AddCategory(CommandContext ctx, string name, DiscordChannel channel)
         {
-            name = name.ToTitleCase();
             Category category = Database.GetCategory(name);
             if (category == null)
             {
@@ -121,7 +117,6 @@ namespace DBuddyBot.Commands
         [Command("removecategory"), RequirePermissions(DSharpPlus.Permissions.ManageRoles)]
         public async Task RemoveCategory(CommandContext ctx, string name)
         {
-            name = name.ToTitleCase();
             Category category = Database.GetCategory(name);
             if (category == null)
             {

@@ -78,7 +78,7 @@ namespace DBuddyBot.Models
             DiscordMessageBuilder messageBuilder = new();
             List<List<DiscordComponent>> componentsList = new();
             builder.Title = Name;
-            builder.Description = $"Roles in the {Name} category";
+            builder.Description = $"Roles in the {Name.ToTitleCase()} category";
             builder.Color = DiscordColor.Orange;
             StringBuilder roleString = new();
             foreach (Role role in Roles)
@@ -87,12 +87,12 @@ namespace DBuddyBot.Models
                 {
                     componentsList.Add(new List<DiscordComponent>());
                 }
-                roleString.AppendLine($"{role.Name}");
+                roleString.AppendLine($"{role.Name.ToTitleCase()}");
                 if (componentsList[^1].Count >= 5)
                 {
                     componentsList.Add(new List<DiscordComponent>());
                 }
-                componentsList[^1].Add(new DiscordButtonComponent(ButtonStyle.Primary, role.ComponentId, role.Name));
+                componentsList[^1].Add(new DiscordButtonComponent(ButtonStyle.Primary, role.ComponentId, role.Name.ToTitleCase()));
 
             }
             builder.AddField("Sign up to roles by clicking on the button.", roleString.ToString());

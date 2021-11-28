@@ -41,7 +41,7 @@ namespace DBuddyBot.Data
             {
                 using IDbConnection connection = GetConnection(_connectionString);
                 using IDbCommand command = GetCommand(InsertCategory, connection);
-                command.Parameters.Add(GetParameterWithValue(command.CreateParameter(), "$name", name.ToTitleCase()));
+                command.Parameters.Add(GetParameterWithValue(command.CreateParameter(), "$name", name.ToLower()));
                 command.Parameters.Add(GetParameterWithValue(command.CreateParameter(), "$channelId", cId));
                 connection.Open();
                 command.ExecuteNonQuery();
@@ -58,7 +58,7 @@ namespace DBuddyBot.Data
                 using IDbConnection connection = GetConnection(_connectionString);
                 using IDbCommand commandRole = GetCommand(InsertRole, connection);
                 commandRole.Parameters.Add(GetParameterWithValue(commandRole.CreateParameter(), "$roleId", role.Id));
-                commandRole.Parameters.Add(GetParameterWithValue(commandRole.CreateParameter(), "$roleName", role.Name));
+                commandRole.Parameters.Add(GetParameterWithValue(commandRole.CreateParameter(), "$roleName", role.Name.ToLower()));
                 commandRole.Parameters.Add(GetParameterWithValue(commandRole.CreateParameter(), "$roleIsGame", role.IsGame));
                 commandRole.Parameters.Add(GetParameterWithValue(commandRole.CreateParameter(), "$categoryId", categoryId));
 
@@ -124,7 +124,6 @@ namespace DBuddyBot.Data
                 connection.Open();
                 IDataReader reader = command.ExecuteReader();
                 category = ParseCategory(reader);
-
                 connection.Close();
             }
             return category;
