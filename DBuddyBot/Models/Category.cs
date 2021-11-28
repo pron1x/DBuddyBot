@@ -68,7 +68,7 @@ namespace DBuddyBot.Models
         }
 
 
-        public DiscordMessageBuilder GetMessage(DiscordClient client)
+        public DiscordMessageBuilder GetMessage(DiscordGuild guild)
         {
             if (RoleCount == 0)
             {
@@ -83,11 +83,12 @@ namespace DBuddyBot.Models
             StringBuilder roleString = new();
             foreach (Role role in Roles)
             {
+                DiscordRole discordRole = guild.GetRole(role.Id);
                 if (componentsList.Count == 0)
                 {
                     componentsList.Add(new List<DiscordComponent>());
                 }
-                roleString.AppendLine($"{role.Name.ToTitleCase()}");
+                roleString.AppendLine($"{discordRole.Mention}");
                 if (componentsList[^1].Count >= 5)
                 {
                     componentsList.Add(new List<DiscordComponent>());

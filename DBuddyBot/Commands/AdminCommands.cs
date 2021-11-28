@@ -140,7 +140,7 @@ namespace DBuddyBot.Commands
         private async void UpdateRoleMessage(DSharpPlus.DiscordClient client, Category category)
         {
             DiscordChannel channel = await client.GetChannelAsync(category.Channel.DiscordId);
-            DiscordMessageBuilder messageBuilder = category.GetMessage(client);
+            DiscordMessageBuilder messageBuilder = category.GetMessage(client.Guilds.Values.First());
             if (category.Message == null)
             {
                 DiscordMessage message = await messageBuilder.SendAsync(channel);

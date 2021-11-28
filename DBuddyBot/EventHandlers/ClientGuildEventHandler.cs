@@ -3,6 +3,7 @@ using DBuddyBot.Models;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace DBuddyBot.EventHandlers
@@ -24,7 +25,7 @@ namespace DBuddyBot.EventHandlers
                 if (category.Message == null && category.RoleCount > 0)
                 {
                     DiscordChannel channel = await sender.GetChannelAsync(category.Channel.DiscordId);
-                    DiscordMessage message = await channel.SendMessageAsync(category.GetMessage(sender));
+                    DiscordMessage message = await channel.SendMessageAsync(category.GetMessage(e.Guilds.Values.First()));
                     _database.UpdateMessage(category.Id, message.Id);
                 }
             }
