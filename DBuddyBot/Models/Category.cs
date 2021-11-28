@@ -84,7 +84,7 @@ namespace DBuddyBot.Models
             DiscordMessageBuilder messageBuilder = new();
             List<List<DiscordComponent>> componentsList = new();
             builder.Title = Name.ToTitleCase();
-            builder.Description = $"Roles in the {Name.ToTitleCase()} category\n{Description}";
+            builder.Description = Description;
             builder.Color = Color;
             StringBuilder roleString = new();
             foreach (Role role in Roles)
