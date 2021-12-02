@@ -4,11 +4,24 @@
     {
         #region constants
 
-        internal const string CreateTableCategories = "CREATE TABLE IF NOT EXISTS categories (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL UNIQUE, color INT NOT NULL, description TEXT, message UNSIGNED BIG INTEGER UNIQUE, channel_id INTEGER, FOREIGN KEY(channel_id) REFERENCES channels(id));";
+        internal const string CreateTableCategories = "CREATE TABLE IF NOT EXISTS categories (id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                                                      + "name TEXT NOT NULL UNIQUE, "
+                                                      + "color INT NOT NULL, "
+                                                      + "description TEXT, "
+                                                      + "message UNSIGNED BIG INTEGER UNIQUE, "
+                                                      + "channel_id INTEGER, "
+                                                      + "FOREIGN KEY(channel_id) REFERENCES channels(id));";
 
-        internal const string CreateTableRoles = "CREATE TABLE IF NOT EXISTS roles (id INTEGER PRIMARY KEY AUTOINCREMENT, d_id UNSIGNED BIG INTEGER UNIQUE NOT NULL, name TEXT NOT NULL UNIQUE, description TEXT, game BOOL, category_id INTEGER NOT NULL, FOREIGN KEY(category_id) REFERENCES categories(id));";
+        internal const string CreateTableRoles = "CREATE TABLE IF NOT EXISTS roles (id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                                                 + "d_id UNSIGNED BIG INTEGER UNIQUE NOT NULL, "
+                                                 + "name TEXT NOT NULL UNIQUE, "
+                                                 + "description TEXT, "
+                                                 + "game BOOL, "
+                                                 + "category_id INTEGER NOT NULL, "
+                                                 + "FOREIGN KEY(category_id) REFERENCES categories(id));";
 
-        internal const string CreateTableChannels = "CREATE TABLE IF NOT EXISTS channels (id INTEGER PRIMARY KEY AUTOINCREMENT, d_id UNSIGNED BIG INTEGER UNIQUE NOT NULL);";
+        internal const string CreateTableChannels = "CREATE TABLE IF NOT EXISTS channels (id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                                                    + "d_id UNSIGNED BIG INTEGER UNIQUE NOT NULL);";
 
         /// <summary>
         /// Parameters: $name, $channelId, $color, $description
@@ -35,14 +48,16 @@
         /// <summary>
         /// Parameters: $name
         /// </summary>
-        internal const string SelectCategoryOnName = "SELECT ca.id AS categoryId, ca.name AS categoryName, ca.description AS categoryDescription, ca.color AS categoryColor, ca.message as categoryMessage, ch.id AS channelId, ch.d_id AS channelDiscordId, ro.d_id AS roleId, ro.name AS roleName, ro.description AS roleDescription, ro.game AS roleGame "
-                                                   + "FROM categories ca LEFT JOIN channels ch ON ca.channel_id = ch.id LEFT JOIN roles ro ON ca.id = ro.category_id WHERE lower(categoryName) = $name;";
+        internal const string SelectCategoryOnName = "SELECT ca.id AS categoryId, ca.name AS categoryName, ca.description AS categoryDescription, ca.color AS categoryColor, ca.message as categoryMessage, "
+                                                     + "ch.id AS channelId, ch.d_id AS channelDiscordId, ro.d_id AS roleId, ro.name AS roleName, ro.description AS roleDescription, ro.game AS roleGame "
+                                                     + "FROM categories ca LEFT JOIN channels ch ON ca.channel_id = ch.id LEFT JOIN roles ro ON ca.id = ro.category_id WHERE lower(categoryName) = $name;";
 
         /// <summary>
         /// Parameters: $messageId
         /// </summary>
-        internal const string SelectCategoryOnMessage = "SELECT ca.id AS categoryId, ca.name AS categoryName, ca.description AS categoryDescription, ca.color AS categoryColor, ca.message as categoryMessage, ch.id AS channelId, ch.d_id AS channelDiscordId, ro.d_id AS roleId, ro.name AS roleName, ro.description AS roleDescription, ro.game AS roleGame "
-                                                   + "FROM categories ca LEFT JOIN channels ch ON ca.channel_id = ch.id LEFT JOIN roles ro ON ca.id = ro.category_id WHERE categoryMessage = $messageId;";
+        internal const string SelectCategoryOnMessage = "SELECT ca.id AS categoryId, ca.name AS categoryName, ca.description AS categoryDescription, ca.color AS categoryColor, ca.message as categoryMessage, "
+                                                        + "ch.id AS channelId, ch.d_id AS channelDiscordId, ro.d_id AS roleId, ro.name AS roleName, ro.description AS roleDescription, ro.game AS roleGame "
+                                                        + "FROM categories ca LEFT JOIN channels ch ON ca.channel_id = ch.id LEFT JOIN roles ro ON ca.id = ro.category_id WHERE categoryMessage = $messageId;";
 
         /// <summary>
         /// Parameters: $name
