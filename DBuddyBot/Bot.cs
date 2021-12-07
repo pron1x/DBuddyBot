@@ -2,6 +2,7 @@
 using DBuddyBot.EventHandlers;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
+using DSharpPlus.SlashCommands;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
@@ -41,9 +42,14 @@ namespace DBuddyBot
             };
 
             Commands = Client.UseCommandsNext(commandsConfig);
+            SlashCommandsExtension slashCommands = Client.UseSlashCommands(new SlashCommandsConfiguration
+            {
+                Services = new ServiceCollection().AddSingleton(Bootstrapper.Database).BuildServiceProvider()
+            });
 
             Commands.RegisterCommands<UserCommands>();
-            Commands.RegisterCommands<AdminCommands>();
+
+            slashCommands.RegisterCommands<AdminSlashCommands>();
 
             Client.GuildDownloadCompleted += ClientGuildEventHandler.SendRoleMessages;
             Client.ComponentInteractionCreated += ComponentInteractionHandler.HandleComponentInteraction;
