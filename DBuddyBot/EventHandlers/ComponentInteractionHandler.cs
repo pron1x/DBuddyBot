@@ -21,7 +21,7 @@ namespace DBuddyBot.EventHandlers
         {
             await e.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
             Category category = _database.GetCategoryFromMessage(e.Message.Id);
-            Role role = category.GetRoleFromComponentId(e.Id);
+            Role role = category?.GetRoleFromComponentId(e.Id);
             if (role != null)
             {
                 DiscordMember member = (DiscordMember)e.User;
