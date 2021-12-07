@@ -9,19 +9,15 @@ using System.Threading.Tasks;
 
 namespace DBuddyBot.Commands
 {
-    public class AdminSlashCommands : ApplicationCommandModule
+
+    [SlashCommandGroup("role", "Manage roles.")]
+    public class RoleCommandsGroupContainer : ApplicationCommandModule
     {
         #region properties
         public IDatabaseService Database { private get; set; }
         #endregion properties
 
-        #region commandmethods
-        /// <summary>
-        /// Adds a role to the database and creates the corresponding discord role
-        /// </summary>
-        /// <param name="ctx"></param>
-        /// <param name="name">Name of the game to add</param>
-        /// <returns></returns>
+
         [SlashCommand("add", "Adds a role to a category."), SlashRequirePermissions(DSharpPlus.Permissions.ManageRoles)]
         public async Task AddRole(InteractionContext ctx,
                                   [Option("category", "Category to add to")] string categoryName,
@@ -64,13 +60,6 @@ namespace DBuddyBot.Commands
         }
 
 
-        /// <summary>
-        /// Removes a role from the database
-        /// </summary>
-        /// <param name="ctx"></param>
-        /// <param name="categoryName">Name of the category the role resides in</param>
-        /// <param name="name">Name of the role to remove</param>
-        /// <returns></returns>
         [SlashCommand("remove", "Removes a role from a category."), SlashRequirePermissions(DSharpPlus.Permissions.ManageRoles)]
         public async Task RemoveRole(InteractionContext ctx,
                                      [Option("category", "Category to remove from")] string categoryName,
@@ -100,56 +89,6 @@ namespace DBuddyBot.Commands
             UpdateRoleMessage(ctx.Client, category);
         }
 
-        [SlashCommand("addcategory", "Adds a new category for roles."), SlashRequirePermissions(DSharpPlus.Permissions.ManageRoles)]
-        public async Task AddCategory(InteractionContext ctx,
-                                      [Option("category", "Category to add")] string name,
-                                      [Option("channel", "Channel for the category message")] DiscordChannel channel,
-                                      [Option("color", "Embed color of the category in hex")] string color = "#000000",
-                                      [Option("description", "Description for the category")] string description = "")
-        {
-            await ctx.CreateResponseAsync(DSharpPlus.InteractionResponseType.DeferredChannelMessageWithSource);
-            Category category = Database.GetCategory(name);
-            if (category == null)
-            {
-                int categoryId = Database.AddCategory(name, description, channel.Id, new DiscordColor(color).Value);
-                if (categoryId == -1)
-                {
-                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"Category {name} already exists, or something went wrong."));
-                    return;
-                }
-                await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"Added {name}"));
-            }
-            else
-            {
-                await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"Category {name} already exists, or something went wrong."));
-            }
-
-        }
-
-        [SlashCommand("removecategory", "Removes a category."), SlashRequirePermissions(DSharpPlus.Permissions.ManageRoles)]
-        public async Task RemoveCategory(InteractionContext ctx, [Option("category", "Category to remove")]string name)
-        {
-            await ctx.CreateResponseAsync(DSharpPlus.InteractionResponseType.DeferredChannelMessageWithSource);
-            Category category = Database.GetCategory(name);
-            if (category == null)
-            {
-                await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"Category {name} does not exist, cannot remove it."));
-                return;
-            }
-            else
-            {
-                Database.RemoveCategory(category);
-                DiscordChannel channel = await ctx.Client.GetChannelAsync(category.Channel.DiscordId);
-                DiscordMessage message = await channel.GetMessageAsync(category.Message.Id);
-                await message.DeleteAsync($"Category {name} has been removed by {ctx.Member.Nickname}.");
-                await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"Removed {category.Name}."));
-            }
-        }
-
-        #endregion commandmethods
-
-        #region privatemethods
-
         private async void UpdateRoleMessage(DSharpPlus.DiscordClient client, Category category)
         {
             DiscordChannel channel = await client.GetChannelAsync(category.Channel.DiscordId);
@@ -174,7 +113,62 @@ namespace DBuddyBot.Commands
                 }
             }
         }
+    }
 
-        #endregion privatemethods
+
+    [SlashCommandGroup("category", "Manage categories.")]
+    public class CategoryCommandsGroupContainer : ApplicationCommandModule
+    {
+        #region properties
+        public IDatabaseService Database { private get; set; }
+        #endregion properties
+
+
+        [SlashCommand("add", "Adds a new category for roles."), SlashRequirePermissions(DSharpPlus.Permissions.ManageRoles)]
+        public async Task AddCategory(InteractionContext ctx,
+                                          [Option("category", "Category to add")] string name,
+                                          [Option("channel", "Channel for the category message")] DiscordChannel channel,
+                                          [Option("color", "Embed color of the category in hex")] string color = "#000000",
+                                          [Option("description", "Description for the category")] string description = "")
+        {
+            await ctx.CreateResponseAsync(DSharpPlus.InteractionResponseType.DeferredChannelMessageWithSource);
+            Category category = Database.GetCategory(name);
+            if (category == null)
+            {
+                int categoryId = Database.AddCategory(name, description, channel.Id, new DiscordColor(color).Value);
+                if (categoryId == -1)
+                {
+                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"Category {name} already exists, or something went wrong."));
+                    return;
+                }
+                await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"Added {name}"));
+            }
+            else
+            {
+                await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"Category {name} already exists, or something went wrong."));
+            }
+
+        }
+
+        [SlashCommand("remove", "Removes a category."), SlashRequirePermissions(DSharpPlus.Permissions.ManageRoles)]
+        public async Task RemoveCategory(InteractionContext ctx, [Option("category", "Category to remove")] string name)
+        {
+            await ctx.CreateResponseAsync(DSharpPlus.InteractionResponseType.DeferredChannelMessageWithSource);
+            Category category = Database.GetCategory(name);
+            if (category == null)
+            {
+                await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"Category {name} does not exist, cannot remove it."));
+                return;
+            }
+            else
+            {
+                Database.RemoveCategory(category);
+                DiscordChannel channel = await ctx.Client.GetChannelAsync(category.Channel.DiscordId);
+                DiscordMessage message = await channel.GetMessageAsync(category.Message.Id);
+                await message.DeleteAsync($"Category {name} has been removed by {ctx.Member.Nickname}.");
+                await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"Removed {category.Name}."));
+            }
+        }
     }
 }
+

@@ -49,7 +49,8 @@ namespace DBuddyBot
 
             Commands.RegisterCommands<UserCommands>();
 
-            slashCommands.RegisterCommands<AdminSlashCommands>();
+            slashCommands.RegisterCommands<RoleCommandsGroupContainer>();
+            slashCommands.RegisterCommands<CategoryCommandsGroupContainer>();
 
             Client.GuildDownloadCompleted += ClientGuildEventHandler.SendRoleMessages;
             Client.ComponentInteractionCreated += ComponentInteractionHandler.HandleComponentInteraction;
