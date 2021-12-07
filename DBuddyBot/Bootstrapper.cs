@@ -235,9 +235,22 @@ namespace DBuddyBot
 
         private static void GetCategories(JsonElement categories)
         {
-            foreach (JsonProperty property in categories.EnumerateObject())
+            foreach (JsonElement element in categories.EnumerateArray())
             {
-                Database.AddCategory(property.Name, string.Empty, property.Value.GetUInt64(), 0);
+                if(element.TryGetProperty("name", out JsonElement name) 
+                    && element.TryGetProperty("channel", out JsonElement channel)
+                    && element.TryGetProperty("color", out JsonElement color)
+                    && element.TryGetProperty("description", out JsonElement description))
+                {
+                    Database.AddCategory(name.GetString(),
+                                         description.GetString(),
+                                         (ulong)channel.GetInt64(),
+                                         new DSharpPlus.Entities.DiscordColor(color.GetString()).Value);
+                }
+                else
+                {
+                    Log.Logger.Warning($"Ignoring a faulty category specified in config.");
+                }
             }
         }
 
