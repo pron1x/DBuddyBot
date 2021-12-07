@@ -16,9 +16,13 @@
                                                  + "d_id UNSIGNED BIG INTEGER UNIQUE NOT NULL, "
                                                  + "name TEXT NOT NULL UNIQUE, "
                                                  + "description TEXT, "
-                                                 + "game BOOL, "
-                                                 + "category_id INTEGER NOT NULL, "
-                                                 + "FOREIGN KEY(category_id) REFERENCES categories(id));";
+                                                 + "game BOOL);";
+
+        internal const string CreateTableCategoriesRoles = "CREATE TABLE IF NOT EXISTS categories_roles (category_id INTEGER, "
+                                                           + "role_id INTEGER, "
+                                                           + "PRIMARY KEY(category_id, role_id), "
+                                                           + "FOREIGN KEY(category_id) REFERENCES categories(id), "
+                                                           + "FOREIGN KEY(role_id) REFERENCES roles(id));";
 
         internal const string CreateTableChannels = "CREATE TABLE IF NOT EXISTS channels (id INTEGER PRIMARY KEY AUTOINCREMENT, "
                                                     + "d_id UNSIGNED BIG INTEGER UNIQUE NOT NULL);";
@@ -29,9 +33,14 @@
         internal const string InsertCategory = "INSERT INTO categories(name, channel_id, color, description) VALUES ($name, $channelId, $color, $description);";
 
         /// <summary>
-        /// Paramters: $roleId, $roleName, $description, $roleIsGame, $categoryId
+        /// Paramters: $roleId, $roleName, $description, $roleIsGame
         /// </summary>
-        internal const string InsertRole = "INSERT INTO roles(d_id, name, description, game, category_id) VALUES ($roleId, $roleName, $description, $roleIsGame, $categoryId);";
+        internal const string InsertRole = "INSERT INTO roles(d_id, name, description, game) VALUES ($roleId, $roleName, $description, $roleIsGame);";
+
+        /// <summary>
+        /// Parameters: $categoryId, $roleId
+        /// </summary>
+        internal const string InsertCategoryRole = "INSERT INTO categories_roles(category_id, role_id) VALUES ($categoryId, $roleId);";
 
         /// <summary>
         /// Parameters: $channelId
@@ -49,25 +58,25 @@
         /// Parameters: $name
         /// </summary>
         internal const string SelectCategoryOnName = "SELECT ca.id AS categoryId, ca.name AS categoryName, ca.description AS categoryDescription, ca.color AS categoryColor, ca.message as categoryMessage, "
-                                                     + "ch.id AS channelId, ch.d_id AS channelDiscordId, ro.d_id AS roleId, ro.name AS roleName, ro.description AS roleDescription, ro.game AS roleGame "
-                                                     + "FROM categories ca LEFT JOIN channels ch ON ca.channel_id = ch.id LEFT JOIN roles ro ON ca.id = ro.category_id WHERE lower(categoryName) = $name;";
+                                                     + "ch.id AS channelId, ch.d_id AS channelDiscordId, ro.id as roleId, ro.d_id AS roleDId, ro.name AS roleName, ro.description AS roleDescription, ro.game AS roleGame "
+                                                     + "FROM categories ca LEFT JOIN categories_roles cr ON cr.category_id = ca.id LEFT JOIN roles ro ON cr.role_id = ro.id LEFT JOIN channels ch ON ca.channel_id = ch.id WHERE lower(categoryName) = $name;";
 
         /// <summary>
         /// Parameters: $messageId
         /// </summary>
         internal const string SelectCategoryOnMessage = "SELECT ca.id AS categoryId, ca.name AS categoryName, ca.description AS categoryDescription, ca.color AS categoryColor, ca.message as categoryMessage, "
-                                                        + "ch.id AS channelId, ch.d_id AS channelDiscordId, ro.d_id AS roleId, ro.name AS roleName, ro.description AS roleDescription, ro.game AS roleGame "
-                                                        + "FROM categories ca LEFT JOIN channels ch ON ca.channel_id = ch.id LEFT JOIN roles ro ON ca.id = ro.category_id WHERE categoryMessage = $messageId;";
+                                                        + "ch.id AS channelId, ch.d_id AS channelDiscordId, ro.id as roleId, ro.d_id AS roleDId, ro.name AS roleName, ro.description AS roleDescription, ro.game AS roleGame "
+                                                        + "FROM categories ca LEFT JOIN categories_roles cr ON cr.category_id = ca.id LEFT JOIN roles ro ON cr.role_id = ro.id LEFT JOIN channels ch ON ca.channel_id = ch.id WHERE categoryMessage = $messageId;";
 
         /// <summary>
         /// Parameters: $name
         /// </summary>
-        internal const string SelectRoleOnName = "SELECT roles.d_id, roles.name, roles.description, roles.game FROM roles WHERE lower(roles.name) = $name;";
+        internal const string SelectRoleOnName = "SELECT roles.id, roles.d_id, roles.name, roles.description, roles.game FROM roles WHERE lower(roles.name) = $name;";
 
         /// <summary>
         /// Parameters: $id
         /// </summary>
-        internal const string SelectRoleOnId = "SELECT roles.d_id, roles.name, roles.description, roles.game FROM roles WHERE roles.d_id = $id;";
+        internal const string SelectRoleOnId = "SELECT roles.id, roles.d_id, roles.name, roles.description, roles.game FROM roles WHERE roles.d_id = $id;";
 
         /// <summary>
         /// Parameters: $id
@@ -77,7 +86,12 @@
         /// <summary>
         /// Parameters: $id
         /// </summary>
-        internal const string DeleteRoleOnId = "DELETE FROM roles WHERE d_id = $id;";
+        internal const string DeleteRoleOnId = "DELETE FROM roles WHERE (SELECT COUNT(categories_roles.role_id) FROM categories_roles WHERE categories_roles.role_id = $id) == 0 AND id = $id;";
+
+        /// <summary>
+        /// Parameters: $categoryId, $roleId
+        /// </summary>
+        internal const string DeleteRoleCategoryOnRoleId = "DELETE FROM categories_roles WHERE category_id = $categoryId AND role_id = $roleId;";
 
         /// <summary>
         /// Parameters: $id

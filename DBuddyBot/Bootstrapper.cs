@@ -133,12 +133,14 @@ namespace DBuddyBot
             };
             using IDbCommand createCategories = CreateCommand(SqlStrings.CreateTableCategories, connection, databaseType);
             using IDbCommand createRoles = CreateCommand(SqlStrings.CreateTableRoles, connection, databaseType);
+            using IDbCommand createCategorRoles = CreateCommand(SqlStrings.CreateTableCategoriesRoles, connection, databaseType);
             using IDbCommand createChannels = CreateCommand(SqlStrings.CreateTableChannels, connection, databaseType);
             try
             {
                 connection.Open();
                 createCategories.ExecuteNonQuery();
                 createRoles.ExecuteNonQuery();
+                createCategorRoles.ExecuteNonQuery();
                 createChannels.ExecuteNonQuery();
                 connection.Close();
             }

@@ -55,19 +55,26 @@ namespace DBuddyBot.Data
 
         public void AddRole(Role role, int categoryId)
         {
-            if (GetRole(role.Id) == null)
+            if (GetRole(role.DiscordId) == null)
             {
                 using IDbConnection connection = GetConnection(_connectionString);
                 using IDbCommand commandRole = GetCommand(InsertRole, connection);
-                commandRole.Parameters.Add(GetParameterWithValue(commandRole.CreateParameter(), "$roleId", role.Id));
+                commandRole.Parameters.Add(GetParameterWithValue(commandRole.CreateParameter(), "$roleId", role.DiscordId));
                 commandRole.Parameters.Add(GetParameterWithValue(commandRole.CreateParameter(), "$roleName", role.Name.ToLower()));
                 commandRole.Parameters.Add(GetParameterWithValue(commandRole.CreateParameter(), "$description", role.Description));
                 commandRole.Parameters.Add(GetParameterWithValue(commandRole.CreateParameter(), "$roleIsGame", role.IsGame));
-                commandRole.Parameters.Add(GetParameterWithValue(commandRole.CreateParameter(), "$categoryId", categoryId));
                 connection.Open();
                 commandRole.ExecuteNonQuery();
                 connection.Close();
             }
+            role = GetRole(role.DiscordId);
+            using IDbConnection conn = GetConnection(_connectionString);
+            using IDbCommand commandCategoryRoles = GetCommand(InsertCategoryRole, conn);
+            commandCategoryRoles.Parameters.Add(GetParameterWithValue(commandCategoryRoles.CreateParameter(), "$categoryId", categoryId));
+            commandCategoryRoles.Parameters.Add(GetParameterWithValue(commandCategoryRoles.CreateParameter(), "roleId", role.Id));
+            conn.Open();
+            commandCategoryRoles.ExecuteNonQuery();
+            conn.Close();
         }
 
         public int AddChannel(ulong channelId)
@@ -158,7 +165,7 @@ namespace DBuddyBot.Data
                 using IDataReader reader = command.ExecuteReader();
                 if (reader.Read())
                 {
-                    role = new((ulong)reader.GetInt64(0), reader.GetString(1), reader.GetString(2) ,reader.GetBoolean(3));
+                    role = new(reader.GetInt32(0), (ulong)reader.GetInt64(1), reader.GetString(2), reader.GetString(3) ,reader.GetBoolean(4));
                 }
                 connection.Close();
             }
@@ -183,7 +190,7 @@ namespace DBuddyBot.Data
                 using IDataReader reader = command.ExecuteReader();
                 if (reader.Read())
                 {
-                    role = new((ulong)reader.GetInt64(0), reader.GetString(1), reader.GetString(2), reader.GetBoolean(3));
+                    role = new(reader.GetInt32(0), (ulong)reader.GetInt64(1), reader.GetString(2), reader.GetString(3), reader.GetBoolean(4));
                 }
                 connection.Close();
             }
@@ -213,13 +220,17 @@ namespace DBuddyBot.Data
             return channel;
         }
 
-        public void RemoveRole(ulong id)
+        public void RemoveRole(int categoryId, int roleId)
         {
             using IDbConnection connection = GetConnection(_connectionString);
+            using IDbCommand commandCategoryRoles = GetCommand(DeleteRoleCategoryOnRoleId, connection);
             using IDbCommand commandRoles = GetCommand(DeleteRoleOnId, connection);
-            commandRoles.Parameters.Add(GetParameterWithValue(commandRoles.CreateParameter(), "$id", id));
+            commandCategoryRoles.Parameters.Add(GetParameterWithValue(commandCategoryRoles.CreateParameter(), "$categoryId", categoryId));
+            commandCategoryRoles.Parameters.Add(GetParameterWithValue(commandCategoryRoles.CreateParameter(), "$roleId", roleId));
+            commandRoles.Parameters.Add(GetParameterWithValue(commandRoles.CreateParameter(), "$id", roleId));
 
             connection.Open();
+            commandCategoryRoles.ExecuteNonQuery();
             commandRoles.ExecuteNonQuery();
             connection.Close();
         }
@@ -228,7 +239,7 @@ namespace DBuddyBot.Data
         {
             foreach(Role role in category.Roles)
             {
-                RemoveRole(role.Id);
+                RemoveRole(category.Id, role.Id);
             }
             using IDbConnection connection = GetConnection(_connectionString);
             using IDbCommand commandChannel = GetCommand(DeleteChannelOnId, connection);
@@ -291,10 +302,11 @@ namespace DBuddyBot.Data
                 ulong messageId = reader.IsDBNull(4) ? 0 : (ulong)reader.GetInt64(4);
                 int channelId = reader.IsDBNull(5) ? 0 : reader.GetInt32(5);
                 ulong channelDiscordId = reader.IsDBNull(6) ? 0 : (ulong)reader.GetInt64(6);
-                ulong roleId = reader.IsDBNull(7) ? 0 : (ulong)reader.GetInt64(7);
-                string roleName = reader.IsDBNull(8) ? string.Empty : reader.GetString(8);
-                string roleDescription = reader.IsDBNull(9) ? string.Empty : reader.GetString(9);
-                bool roleIsGame = !reader.IsDBNull(10) && reader.GetBoolean(10);
+                int roleId = reader.IsDBNull(7) ? -1 : reader.GetInt32(7);
+                ulong roleDId = reader.IsDBNull(8) ? 0 : (ulong)reader.GetInt64(8);
+                string roleName = reader.IsDBNull(9) ? string.Empty : reader.GetString(9);
+                string roleDescription = reader.IsDBNull(10) ? string.Empty : reader.GetString(10);
+                bool roleIsGame = !reader.IsDBNull(11) && reader.GetBoolean(11);
 
                 if (category == null && categoryId != -1 && categoryName != string.Empty)
                 {
@@ -309,9 +321,9 @@ namespace DBuddyBot.Data
                     }
                     category = new(categoryId, categoryName, categoryDescription, new DSharpPlus.Entities.DiscordColor(categoryColor), channel, message);
                 }
-                if (roleId != 0)
+                if (roleDId != 0)
                 {
-                    Role role = new(roleId, roleName, roleDescription, roleIsGame);
+                    Role role = new(roleId, roleDId, roleName, roleDescription, roleIsGame);
                     roles.Add(role);
                 }
             }

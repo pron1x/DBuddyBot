@@ -89,7 +89,7 @@ namespace DBuddyBot.Models
             StringBuilder roleString = new();
             foreach (Role role in Roles)
             {
-                DiscordRole discordRole = guild.GetRole(role.Id);
+                DiscordRole discordRole = guild.GetRole(role.DiscordId);
                 if (componentsList.Count == 0)
                 {
                     componentsList.Add(new List<DiscordComponent>());

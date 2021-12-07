@@ -6,14 +6,16 @@
     public class Role
     {
         #region backingfields
-        private readonly ulong _id;
+        private readonly int _id;
+        private readonly ulong _discordId;
         private readonly string _name;
         private readonly string _description;
         private readonly bool _isGame;
         #endregion backingfields
 
         #region properties
-        public ulong Id => _id;
+        public int Id => _id;
+        public ulong DiscordId => _discordId;
         public string Name => _name;
         public string Description => _description;
         public bool IsGame => _isGame;
@@ -23,9 +25,10 @@
 
         #region constructors
 
-        public Role(ulong id, string name, string description, bool isGame = false)
+        public Role(int id, ulong discordId, string name, string description, bool isGame = false)
         {
             _id = id;
+            _discordId = discordId;
             _name = name;
             _description = description;
             _isGame = isGame;
@@ -48,13 +51,13 @@
             }
             Role role = (Role)obj;
 
-            return role.Id == Id;
+            return role.DiscordId == DiscordId;
         }
 
 
         public override int GetHashCode()
         {
-            return Id.GetHashCode();
+            return DiscordId.GetHashCode();
         }
 
 

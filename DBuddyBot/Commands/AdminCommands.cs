@@ -44,7 +44,7 @@ namespace DBuddyBot.Commands
                 {
                     role = await ctx.Guild.CreateRoleAsync(name.ToTitleCase(), DSharpPlus.Permissions.None, DiscordColor.Brown, mentionable: true);
                 }
-                Role newRole = new(role.Id, role.Name.ToLower(), description);
+                Role newRole = new(-1, role.Id, role.Name.ToLower(), description);
                 if (category.AddRole(newRole))
                 {
                     Database.AddRole(newRole, category.Id);
@@ -86,7 +86,7 @@ namespace DBuddyBot.Commands
             else
             {
                 category.RemoveRole(role);
-                Database.RemoveRole(role.Id);
+                Database.RemoveRole(category.Id, role.Id);
                 ctx.Client.Logger.LogInformation($"{ctx.Member.Username} removed role {role.Name} from database.");
                 await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":white_check_mark:"));
             }

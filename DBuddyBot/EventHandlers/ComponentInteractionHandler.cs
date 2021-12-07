@@ -25,7 +25,7 @@ namespace DBuddyBot.EventHandlers
             if (role != null)
             {
                 DiscordMember member = (DiscordMember)e.User;
-                DiscordRole discordRole = e.Guild.GetRole(role.Id);
+                DiscordRole discordRole = e.Guild.GetRole(role.DiscordId);
                 if (member.Roles.Contains(discordRole))
                 {
                     await member.RevokeRoleAsync(discordRole);
