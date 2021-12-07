@@ -20,7 +20,7 @@ namespace DBuddyBot.Commands
 
         [SlashCommand("add", "Adds a role to a category."), SlashRequirePermissions(DSharpPlus.Permissions.ManageRoles)]
         public async Task AddRole(InteractionContext ctx,
-                                  [ChoiceProvider(typeof(CategoryChoiceProvider))][Option("category", "Category to add to")] string categoryName,
+                                  [Autocomplete(typeof(CategoryAutocompleteProvider))][Option("category", "Category to add to", true)] string categoryName,
                                   [Option("role", "Role to add")] string name,
                                   [Option("description", "Description for the role")] string description = "")
         {
@@ -62,7 +62,7 @@ namespace DBuddyBot.Commands
 
         [SlashCommand("remove", "Removes a role from a category."), SlashRequirePermissions(DSharpPlus.Permissions.ManageRoles)]
         public async Task RemoveRole(InteractionContext ctx,
-                                     [ChoiceProvider(typeof(CategoryChoiceProvider))][Option("category", "Category to remove from")] string categoryName,
+                                     [Autocomplete(typeof(CategoryAutocompleteProvider))][Option("category", "Category to remove from", true)] string categoryName,
                                      [Option("role", "Role to remove")] string name)
         {
             await ctx.CreateResponseAsync(DSharpPlus.InteractionResponseType.DeferredChannelMessageWithSource);
@@ -150,7 +150,7 @@ namespace DBuddyBot.Commands
         }
 
         [SlashCommand("remove", "Removes a category."), SlashRequirePermissions(DSharpPlus.Permissions.ManageRoles)]
-        public async Task RemoveCategory(InteractionContext ctx, [ChoiceProvider(typeof(CategoryChoiceProvider))][Option("category", "Category to remove")] string name)
+        public async Task RemoveCategory(InteractionContext ctx, [Autocomplete(typeof(CategoryAutocompleteProvider))][Option("category", "Category to remove", true)] string name)
         {
             await ctx.CreateResponseAsync(DSharpPlus.InteractionResponseType.DeferredChannelMessageWithSource);
             Category category = Database.GetCategory(name);
@@ -163,8 +163,11 @@ namespace DBuddyBot.Commands
             {
                 Database.RemoveCategory(category);
                 DiscordChannel channel = await ctx.Client.GetChannelAsync(category.Channel.DiscordId);
-                DiscordMessage message = await channel.GetMessageAsync(category.Message.Id);
-                await message.DeleteAsync($"Category {name} has been removed by {ctx.Member.Nickname}.");
+                if (category.Message != null)
+                {
+                    DiscordMessage message = await channel.GetMessageAsync(category.Message.Id);
+                    await message.DeleteAsync($"Category {name} has been removed by {ctx.Member.Nickname}.");
+                }
                 await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"Removed {category.Name}."));
             }
         }
