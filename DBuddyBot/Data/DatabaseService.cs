@@ -104,21 +104,27 @@ namespace DBuddyBot.Data
             connection.Close();
         }
 
+        public List<string> GetAllCategoryNames()
+        {
+            List<string> categoryNames = new();
+            using IDbConnection connection = GetConnection(_connectionString);
+            using IDbCommand command = GetCommand(SelectCategoryNames, connection);
+            connection.Open();
+            IDataReader reader = command.ExecuteReader();
+            while(reader.Read())
+            {
+                categoryNames.Add(reader.GetString(0));
+            }
+            connection.Close();
+            return categoryNames;
+        }
+
         public List<Category> GetAllCategories()
         {
             List<Category> categories = new();
-            using (IDbConnection connection = GetConnection(_connectionString))
+            foreach(string name in GetAllCategoryNames())
             {
-                using IDbCommand command = GetCommand(SelectCategoryNames, connection);
-
-                connection.Open();
-                IDataReader reader = command.ExecuteReader();
-                while (reader.Read())
-                {
-                    string categoryName = reader.GetString(0);
-                    categories.Add(GetCategory(categoryName));
-                }
-                connection.Close();
+                categories.Add(GetCategory(name));
             }
             return categories;
         }
