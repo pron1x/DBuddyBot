@@ -20,7 +20,7 @@ namespace DBuddyBot.Commands
 
         [SlashCommand("add", "Adds a role to a category."), SlashRequirePermissions(DSharpPlus.Permissions.ManageRoles)]
         public async Task AddRole(InteractionContext ctx,
-                                  [Option("category", "Category to add to")] string categoryName,
+                                  [ChoiceProvider(typeof(CategoryChoiceProvider))][Option("category", "Category to add to")] string categoryName,
                                   [Option("role", "Role to add")] string name,
                                   [Option("description", "Description for the role")] string description = "")
         {
@@ -62,10 +62,9 @@ namespace DBuddyBot.Commands
 
         [SlashCommand("remove", "Removes a role from a category."), SlashRequirePermissions(DSharpPlus.Permissions.ManageRoles)]
         public async Task RemoveRole(InteractionContext ctx,
-                                     [Option("category", "Category to remove from")] string categoryName,
+                                     [ChoiceProvider(typeof(CategoryChoiceProvider))][Option("category", "Category to remove from")] string categoryName,
                                      [Option("role", "Role to remove")] string name)
         {
-            //TODO: ctx.CreateResponseAsync to confirm interaction
             await ctx.CreateResponseAsync(DSharpPlus.InteractionResponseType.DeferredChannelMessageWithSource);
             Category category = Database.GetCategory(categoryName);
             if (category == null)
@@ -151,7 +150,7 @@ namespace DBuddyBot.Commands
         }
 
         [SlashCommand("remove", "Removes a category."), SlashRequirePermissions(DSharpPlus.Permissions.ManageRoles)]
-        public async Task RemoveCategory(InteractionContext ctx, [Option("category", "Category to remove")] string name)
+        public async Task RemoveCategory(InteractionContext ctx, [ChoiceProvider(typeof(CategoryChoiceProvider))][Option("category", "Category to remove")] string name)
         {
             await ctx.CreateResponseAsync(DSharpPlus.InteractionResponseType.DeferredChannelMessageWithSource);
             Category category = Database.GetCategory(name);
