@@ -232,19 +232,32 @@ namespace DBuddyBot
         {
             foreach (JsonElement element in categories.EnumerateArray())
             {
-                if(element.TryGetProperty("name", out JsonElement name) 
-                    && element.TryGetProperty("channel", out JsonElement channel)
-                    && element.TryGetProperty("color", out JsonElement color)
-                    && element.TryGetProperty("description", out JsonElement description))
+                if (element.TryGetProperty("name", out JsonElement name) && element.TryGetProperty("channel", out JsonElement channel))
                 {
-                    Database.AddCategory(name.GetString(),
-                                         description.GetString(),
-                                         (ulong)channel.GetInt64(),
-                                         new DSharpPlus.Entities.DiscordColor(color.GetString()).Value);
+                    if (channel.TryGetInt64(out long channelId))
+                    {
+                        string color = element.TryGetProperty("color", out JsonElement c) ? c.GetString() : "#000000";
+                        string description = element.TryGetProperty("description", out JsonElement d) ? d.GetString() : string.Empty;
+                        DSharpPlus.Entities.DiscordColor discordColor;
+                        try
+                        {
+                            discordColor = new(color);
+                        }
+                        catch
+                        {
+                            discordColor = new("#000000");
+                            Log.Logger.Warning($"Ignoring faulty color for category {name.GetString()}");
+                        }
+                        Database.AddCategory(name.GetString(), description, (ulong)channelId, discordColor.Value);
+                    }
+                    else
+                    {
+                        Log.Logger.Warning("Could not parse channel id. Skipping category.");
+                    }
                 }
                 else
                 {
-                    Log.Logger.Warning($"Ignoring a faulty category specified in config.");
+                    Log.Logger.Warning($"Skipping a faulty category specified in config.");
                 }
             }
         }
