@@ -24,7 +24,7 @@ namespace DBuddyBot.Commands
                                   [Autocomplete(typeof(DiscordRoleAutoCompleteProvider))][Option("role", "Role to add")] string name,
                                   [Option("description", "Description for the role")] string description = "")
         {
-            await ctx.CreateResponseAsync(DSharpPlus.InteractionResponseType.DeferredChannelMessageWithSource);
+            await ctx.DeferAsync(true);
             Category category = Database.GetCategory(categoryName);
             if (category == null)
             {
@@ -69,7 +69,7 @@ namespace DBuddyBot.Commands
                                      [Autocomplete(typeof(CategoryAutocompleteProvider))][Option("category", "Category to remove from", true)] string categoryName,
                                      [Autocomplete(typeof(RoleAutocompleteProvider))][Option("role", "Role to remove")] string name)
         {
-            await ctx.CreateResponseAsync(DSharpPlus.InteractionResponseType.DeferredChannelMessageWithSource);
+            await ctx.DeferAsync(true);
             Category category = Database.GetCategory(categoryName);
             if (category == null)
             {
@@ -109,7 +109,7 @@ namespace DBuddyBot.Commands
                                           [Option("color", "Embed color of the category in hex")] string color = "#000000",
                                           [Option("description", "Description for the category")] string description = "")
         {
-            await ctx.CreateResponseAsync(DSharpPlus.InteractionResponseType.DeferredChannelMessageWithSource);
+            await ctx.DeferAsync(true);
             Category category = Database.GetCategory(name);
             if (category == null)
             {
@@ -131,7 +131,7 @@ namespace DBuddyBot.Commands
         [SlashCommand("remove", "Removes a category."), SlashRequirePermissions(DSharpPlus.Permissions.ManageRoles)]
         public async Task RemoveCategory(InteractionContext ctx, [Autocomplete(typeof(CategoryAutocompleteProvider))][Option("category", "Category to remove", true)] string name)
         {
-            await ctx.CreateResponseAsync(DSharpPlus.InteractionResponseType.DeferredChannelMessageWithSource);
+            await ctx.DeferAsync(true);
             Category category = Database.GetCategory(name);
             if (category == null)
             {
@@ -154,13 +154,13 @@ namespace DBuddyBot.Commands
         [SlashCommand("refresh", "Refreshes a category message."), SlashRequirePermissions(DSharpPlus.Permissions.ManageRoles)]
         public async Task RefreshCategory(InteractionContext ctx, [Autocomplete(typeof(CategoryAutocompleteProvider))][Option("category", "Category to remove", true)] string name)
         {
-            await ctx.CreateResponseAsync(DSharpPlus.InteractionResponseType.DeferredChannelMessageWithSource);
+            await ctx.DeferAsync(true);
             Category category = Database.GetCategory(name);
             if (category != null)
             {
                 CommandUtilities.UpdateRoleMessage(ctx.Client, category, Database);
             }
-            await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("Updated."));
+            await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("Message refreshed."));
         }
     }
 }
