@@ -1,7 +1,6 @@
 ﻿using DBuddyBot.Commands;
 using DBuddyBot.EventHandlers;
 using DSharpPlus;
-using DSharpPlus.CommandsNext;
 using DSharpPlus.SlashCommands;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -14,7 +13,6 @@ namespace DBuddyBot
     {
         #region properties
         public DiscordClient Client { get; }
-        public CommandsNextExtension Commands { get; }
         #endregion properties
 
 
@@ -34,20 +32,11 @@ namespace DBuddyBot
                 .AddSingleton(Bootstrapper.Database)
                 .BuildServiceProvider();
 
-            CommandsNextConfiguration commandsConfig = new()
-            {
-                StringPrefixes = prefixes,
-                EnableDms = false,
-                Services = services
-            };
-
-            Commands = Client.UseCommandsNext(commandsConfig);
             SlashCommandsExtension slashCommands = Client.UseSlashCommands(new SlashCommandsConfiguration
             {
-                Services = new ServiceCollection().AddSingleton(Bootstrapper.Database).BuildServiceProvider()
+                Services = services
             });
 
-            Commands.RegisterCommands<UserCommands>();
 
             slashCommands.RegisterCommands<RoleCommandsGroupContainer>();
             slashCommands.RegisterCommands<CategoryCommandsGroupContainer>();
