@@ -38,23 +38,27 @@ namespace DBuddyBot.Commands
             }
             else
             {
-                DiscordRole role = ctx.Guild.Roles.FirstOrDefault(role => role.Value.Name.ToLower() == name.ToLower()).Value;
+                DiscordRole discordRole = ctx.Guild.Roles.FirstOrDefault(role => role.Value.Name.ToLower() == name.ToLower()).Value;
+                if (discordRole == null)
+                {
+                    discordRole = await ctx.Guild.CreateRoleAsync(name.ToTitleCase(), DSharpPlus.Permissions.None, DiscordColor.Brown, mentionable: true);
+                }
+                Role role = Database.GetRole(name);
                 if (role == null)
                 {
-                    role = await ctx.Guild.CreateRoleAsync(name.ToTitleCase(), DSharpPlus.Permissions.None, DiscordColor.Brown, mentionable: true);
+                    role = new(-1, discordRole.Id, discordRole.Name.ToLower(), description);
                 }
-                Role newRole = new(-1, role.Id, role.Name.ToLower(), description);
-                if (category.AddRole(newRole))
+                if (category.AddRole(role))
                 {
-                    Database.AddRole(newRole, category.Id);
-                    ctx.Client.Logger.LogInformation($"{ctx.Member.Username} added {role.Name} to database.");
+                    Database.AddRole(role, category.Id);
+                    ctx.Client.Logger.LogInformation($"{ctx.Member.Username} added {discordRole.Name} to database.");
                     UpdateRoleMessage(ctx.Client, category);
-                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"Added role {role.Name} to database."));
+                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"Added role {discordRole.Name} to database."));
                 }
                 else
                 {
                     await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"{category.Name} category already has 25 roles, the current maximum supported. " +
-                        $"{role.Name} has been created, but needs to be added to a different category."));
+                        $"{discordRole.Name} has been created, but needs to be added to a different category."));
                 }
             }
         }
