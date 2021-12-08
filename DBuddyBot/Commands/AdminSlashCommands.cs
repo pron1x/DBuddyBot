@@ -52,7 +52,7 @@ namespace DBuddyBot.Commands
                 {
                     Database.AddRole(role, category.Id);
                     ctx.Client.Logger.LogInformation($"{ctx.Member.Username} added {discordRole.Name} to database.");
-                    UpdateRoleMessage(ctx.Client, category);
+                    CommandUtilities.UpdateRoleMessage(ctx.Client, category, Database);
                     await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"Added role {discordRole.Name} to database."));
                 }
                 else
@@ -89,32 +89,7 @@ namespace DBuddyBot.Commands
                 ctx.Client.Logger.LogInformation($"{ctx.Member.Username} removed role {role.Name} from database.");
                 await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"Removed {role.Name} from {category.Name}."));
             }
-            UpdateRoleMessage(ctx.Client, category);
-        }
-
-        private async void UpdateRoleMessage(DSharpPlus.DiscordClient client, Category category)
-        {
-            DiscordChannel channel = await client.GetChannelAsync(category.Channel.DiscordId);
-            DiscordMessageBuilder messageBuilder = category.GetMessage(client.Guilds.Values.First());
-            if (category.Message == null)
-            {
-                DiscordMessage message = await messageBuilder.SendAsync(channel);
-                Database.UpdateMessage(category.Id, message.Id);
-            }
-            else
-            {
-                DiscordMessage message = await channel.GetMessageAsync(category.Message.Id);
-                if (messageBuilder == null)
-                {
-                    await message.DeleteAsync();
-                    Database.UpdateMessage(category.Id, 0);
-                    return;
-                }
-                else
-                {
-                    await message.ModifyAsync(messageBuilder);
-                }
-            }
+            CommandUtilities.UpdateRoleMessage(ctx.Client, category, Database);
         }
     }
 
@@ -174,6 +149,18 @@ namespace DBuddyBot.Commands
                 }
                 await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"Removed {category.Name}."));
             }
+        }
+
+        [SlashCommand("refresh", "Refreshes a category message."), SlashRequirePermissions(DSharpPlus.Permissions.ManageRoles)]
+        public async Task RefreshCategory(InteractionContext ctx, [Autocomplete(typeof(CategoryAutocompleteProvider))][Option("category", "Category to remove", true)] string name)
+        {
+            await ctx.CreateResponseAsync(DSharpPlus.InteractionResponseType.DeferredChannelMessageWithSource);
+            Category category = Database.GetCategory(name);
+            if (category != null)
+            {
+                CommandUtilities.UpdateRoleMessage(ctx.Client, category, Database);
+            }
+            await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("Updated."));
         }
     }
 }
