@@ -94,7 +94,7 @@ namespace DBuddyBot.Models
                 {
                     componentsList.Add(new List<DiscordComponent>());
                 }
-                roleString.AppendLine($"{discordRole.Mention}{(role.Description == string.Empty ? string.Empty : $": {role.Description}")}");
+                roleString.AppendLine($"{discordRole.Mention}{(role.Description == string.Empty ? string.Empty : $": {role.Description}")}{(guild.CurrentMember.Hierarchy >= discordRole.Position ? string.Empty : "*(Currently can't manage role due to hierarchy limitations)*")}");
                 if (componentsList[^1].Count >= 5)
                 {
                     componentsList.Add(new List<DiscordComponent>());

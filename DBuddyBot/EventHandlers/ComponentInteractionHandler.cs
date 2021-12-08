@@ -2,6 +2,7 @@
 using DBuddyBot.Models;
 using DSharpPlus;
 using DSharpPlus.Entities;
+using Serilog;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -28,11 +29,19 @@ namespace DBuddyBot.EventHandlers
                 DiscordRole discordRole = e.Guild.GetRole(role.DiscordId);
                 if (member.Roles.Contains(discordRole))
                 {
-                    await member.RevokeRoleAsync(discordRole);
+                    try
+                    {
+                        await member.RevokeRoleAsync(discordRole);
+                    }
+                    catch { }
                 }
                 else
                 {
-                    await member.GrantRoleAsync(discordRole);
+                    try
+                    {
+                        await member.GrantRoleAsync(discordRole);
+                    }
+                    catch { }
                 }
             }
         }
