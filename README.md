@@ -27,33 +27,34 @@ The bot currently has the following features:
 ##### Server Administrators
 
 The following commands are only usable by server members with the `Manage Roles` permission:
-+ `addcategory <category name> <discord channel> [color] [description]`
++ `/category add <category name> <discord channel> [color] [description]`
   + `<category name>` specifies the unique name of the new category
   + `<discord channel>` specifies the channel the category message will be posted in
-  + `[color]` specifies an optional color for the embed of the category message. Accepts a HEX value without the '#' prefix
-  + `[description]` specifies an optional description for the category which will be included in the category message
-+ `removecategory <category name>`
+  + `[color]` specifies an optional color for the embed of the category message. Accepts a HEX value with/without the '#' prefix
+  + `[description]` specifies an optional description for the category, which will be included in the category message
++ `/category remove <category name>`
   + `<category name>` specifies the name of the category that should be removed. Removes the category and roles from the database
-+ `add <category name> <role name> [description]`
++ `/category refresh <category name>`
+  + `<category name>` specifies the name of the category that should be refreshed. This forces an update of the category message.
++ `/role add <category name> <role name> [description]`
   + `<category name>` specifies the category the new role is part of
-  + `<role name>` specifies the name of the role. Must be surrounded with `""` if it contains spaces. 
-  Checks if a Discord role with the name exists before creating a new one
+  + `<role name>` specifies the name of the role. Checks if a Discord role with the name exists before creating a new one
   + `[description]` specifies an optional description of the role
-+ `remove <category name> <role name>`
++ `/role remove <category name> <role name>`
   + `<category name>` specifies the category the role is part of
-  + `<role name>` specifies the name of the role to be removed. Removes it from the bot managed roles, does not delete the Discord role.
+  + `<role name>` specifies the name of the role to be removed. Removes it from the category and database if it is not part of a different category, 
+  does not delete the Discord role.
 ##### Server Users
-Server users can assign the roles by clicking on the buttons. The buttons work as a toggle, if the user is part of a role, the role will be revoked,
-if he is not the role will instead be granted.
-The bot has a (deprecated) `info` command that anyone can use. `info <role name>` will return the amount of users that have the specified
-role. This will either be removed or changed in future versions.
+Server users can assign the roles by clicking on the buttons. The buttons work as a toggle, if the user is not part of a role, the role will be granted,
+if they are, the role will instead be revoked.
+
 
 ### Roadmap
 
 Roadmap of things to come.
-- [ ] Use Discords slash commands instead of normal text based commands
-- [ ] Add multi-server support (no guarantee for multi-server support currently)
+- [ ] Add multi-server support (mutliple servers are currently **NOT** supported!)
 - [ ] Potentially lower the amount of dependencies
+- [x] Use Discords slash commands instead of normal text based commands
 - [x] Use Discords button system for role assign/revoke instead of emojis (If the system proves to be viable)
 - [x] Add/Remove categories via commands
 - [x] SQLite and Sql Server support
@@ -66,23 +67,32 @@ It is parsed once on startup. In case the configuration file is missing, the bot
 ```json
 {
     "discord": {
-        "discord_token": "token here",
-        "command_prefixes": [ "?" ]
+        "discord_token": "token here"
     },
     "database": {
         "connection_string": ""
     },
-    "categories": {
-        "categoryName": 10000000,
-        "category2": 10000000,
-        ...
-    }
+    "categories": [
+        {
+            "name": "Name 1",
+            "channel": channel_id,
+            "color": "#FFFFFF",
+            "description": "Descriptive text!"
+        },
+        {
+            "name": "Name 2",
+            "channel": channel_id,
+            "color": "#123123",
+            "description": "It's another category."
+        }
+    ]
 }
 ```
-The ``"discord_token"`` key holds the bots discord token. Command prefixes can be added/changed in the ``"command_prefixes"``
-array. To use a custom database (currently SQLite and Sql Server should be supported) put the connection string in the corresponding
+The ``"discord_token"`` key holds the bots discord token. To use a custom database (currently SQLite and Sql Server should be supported) put the connection string in the corresponding
 field. Leave empty to use the default database.\
-Categories are added in the ``"categories:"`` section. The key value pair should be ``"YourCategoryName": DiscordChannelId``.
+Categories are added in the ``"categories"`` array. The category elements should contain the `"name"`,`"channel"`,`"color"` and `"description"` properties.
+If the `"name"` or `"channel"` attributes are missing or could not be parsed, the category is skipped and not added to the database. In the case of a missing/faulty 
+`"color"` attribute a standard value of `"#000000"` (black) is used. A missing/faulty `"description"` results in an empty description.
 
 
 ### License
