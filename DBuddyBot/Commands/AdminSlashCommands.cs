@@ -106,14 +106,23 @@ namespace DBuddyBot.Commands
         public async Task AddCategory(InteractionContext ctx,
                                           [Option("category", "Category to add")] string name,
                                           [Option("channel", "Channel for the category message")] DiscordChannel channel,
-                                          [Option("color", "Embed color of the category in hex")] string color = "#000000",
+                                          [Option("color", "Embed color of the category in hex")] string colorString = "#000000",
                                           [Option("description", "Description for the category")] string description = "")
         {
             await ctx.DeferAsync(true);
             Category category = Database.GetCategory(name);
             if (category == null)
             {
-                int categoryId = Database.AddCategory(name, description, channel.Id, new DiscordColor(color).Value);
+                DiscordColor color;
+                try
+                {
+                    color = new(colorString);
+                }
+                catch
+                {
+                    color = new("#000000");
+                }
+                int categoryId = Database.AddCategory(name, description, channel.Id, color.Value);
                 if (categoryId == -1)
                 {
                     await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"Category {name} already exists, or something went wrong."));
