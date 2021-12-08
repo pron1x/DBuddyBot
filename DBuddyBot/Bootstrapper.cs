@@ -166,7 +166,22 @@ namespace DBuddyBot
         {
             Directory.CreateDirectory(@".\Config");
             string nl = Environment.NewLine;
-            File.WriteAllText(@".\Config\BotConfig.json", $"{{{nl}\t\"discord\": {{{nl}\t\t\"discord_token\": \"\",{nl}\t\t\"command_prefixes\": [ \"\" ]{nl}\t}},{nl}\t\"database\": {{{nl}\t\t\"connection_string\": \"connection\"{nl}\t}}{nl}}}{nl}");
+            File.WriteAllText(@".\Config\BotConfig.json", $"{{{nl}" +
+                $"\t\"discord\": {{{nl}" +
+                $"\t\t\"discord_token\": \"\"{nl}" +
+                $"\t}},{nl}" +
+                $"\t\"database\": {{{nl}" +
+                $"\t\t\"connection_string\": \"connection\"{nl}" +
+                $"\t}},{nl}" +
+                $"\t\"categories\": [{nl}" +
+                $"\t\t{{{nl}" +
+                $"\t\t\t\"name\": \"\",{nl}" +
+                $"\t\t\t\"channel\": ,{nl}" +
+                $"\t\t\t\"color\": \"\",{nl}" +
+                $"\t\t\t\"description\": \"\"{nl}" +
+                $"\t\t}}{nl}" +
+                $"\t]{nl}" +
+                $"}}{nl}");
         }
 
 
