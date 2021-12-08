@@ -90,17 +90,14 @@ namespace DBuddyBot.Models
             foreach (Role role in Roles)
             {
                 DiscordRole discordRole = guild.GetRole(role.DiscordId);
-                if (componentsList.Count == 0)
-                {
-                    componentsList.Add(new List<DiscordComponent>());
-                }
-                roleString.AppendLine($"{discordRole.Mention}{(role.Description == string.Empty ? string.Empty : $": {role.Description}")}{(guild.CurrentMember.Hierarchy >= discordRole.Position ? string.Empty : "*(Currently can't manage role due to hierarchy limitations)*")}");
-                if (componentsList[^1].Count >= 5)
+                if (componentsList.Count == 0 || componentsList[^1].Count >= 5)
                 {
                     componentsList.Add(new List<DiscordComponent>());
                 }
                 componentsList[^1].Add(new DiscordButtonComponent(ButtonStyle.Primary, role.ComponentId, role.Name.ToTitleCase()));
 
+                roleString.AppendLine($"{discordRole.Mention}{(role.Description == string.Empty ? string.Empty : $": {role.Description}")}" +
+                    $"{(guild.CurrentMember.Hierarchy >= discordRole.Position ? string.Empty : " *(Currently can't manage role due to hierarchy limitations)*")}");
             }
             builder.AddField("Sign up to roles by clicking on the button.", roleString.ToString());
             messageBuilder.AddEmbed(builder.Build());
