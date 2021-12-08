@@ -1,12 +1,10 @@
 ﻿using DBuddyBot.Data;
 using Serilog;
 using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Data.SQLite;
 using System.IO;
-using System.Linq;
 using System.Text.Json;
 
 namespace DBuddyBot
@@ -20,7 +18,6 @@ namespace DBuddyBot
 
         #region backingfields
         private static string _discordToken;
-        private static List<string> _commandPrefixes;
         private static IDatabaseService _database;
         private static string _databaseConnectionString;
         private static string _databaseFilePath;
@@ -28,7 +25,6 @@ namespace DBuddyBot
 
         #region properties
         public static string DiscordToken { get => _discordToken; }
-        public static string[] CommandPrefixes { get => _commandPrefixes.ToArray(); }
         public static IDatabaseService Database { get => _database; }
         #endregion properties
 
@@ -70,7 +66,7 @@ namespace DBuddyBot
                 }
                 else
                 {
-                    Log.Logger.Warning("Config is missing categories section. Cannot manage roles without categories.");
+                    Log.Logger.Warning("Config is missing categories section. No categories will be created on startup.");
                 }
             }
             else
@@ -190,22 +186,6 @@ namespace DBuddyBot
                 Log.Logger.Fatal("Config is missing discord_token element, creating new config and shutting down...");
                 CreateNewConfigFile();
                 Environment.Exit(78);
-            }
-            _commandPrefixes = new();
-
-            if (discord.TryGetProperty("command_prefixes", out JsonElement prefixes))
-            {
-                _commandPrefixes = prefixes.EnumerateArray().Select(x => x.GetString()).ToList();
-                if (_commandPrefixes.Count == 0 || (_commandPrefixes.Count == 1 && _commandPrefixes.Contains(string.Empty)))
-                {
-                    Log.Logger.Warning("No command prefix found. Using standard '?' prefix.");
-                    _commandPrefixes.Add("?");
-                }
-            }
-            else
-            {
-                Log.Logger.Warning("Config is missing command_prefixes element, using standard '?' prefix.");
-                _commandPrefixes.Add("?");
             }
         }
 

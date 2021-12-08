@@ -4,10 +4,10 @@ namespace DBuddyBot
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
             Bootstrapper.Setup();
-            Bot bot = new(Bootstrapper.DiscordToken, Bootstrapper.CommandPrefixes);
+            Bot bot = new(Bootstrapper.DiscordToken);
 
             bot.StartAsync();
             Console.Read();

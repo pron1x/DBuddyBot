@@ -17,7 +17,7 @@ namespace DBuddyBot
 
 
         #region constructors
-        public Bot(string token, string[] prefixes)
+        public Bot(string token)
         {
             DiscordConfiguration config = new()
             {
