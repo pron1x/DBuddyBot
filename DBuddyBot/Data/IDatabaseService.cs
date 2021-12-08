@@ -12,6 +12,7 @@ namespace DBuddyBot.Data
         public void AddRole(Role role, int categoryId);
         public int AddChannel(ulong channelId);
         public void UpdateMessage(int categorId, ulong messageId);
+        public List<string> GetAllCategoryNames();
         public List<Category> GetAllCategories();
         public Category GetCategory(string name);
         public Category GetCategoryFromMessage(ulong id);
