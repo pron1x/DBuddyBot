@@ -1,12 +1,16 @@
 {
     "discord": {
-        "discord_token": "token here",
-        "command_prefixes": [ "?" ]
+        "discord_token": "token_here"
     },
     "database": {
         "connection_string": ""
     },
-    "categories": {
-        "categoryName": 10000000
-    }
+    "categories": [
+        {
+            "name": "Name 1",
+            "channel": channel_id,
+            "color": "#FFFFFF",
+            "description": "Descriptive text!"
+        }
+    ]
 }
