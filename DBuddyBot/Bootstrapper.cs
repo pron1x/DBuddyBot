@@ -13,7 +13,7 @@ namespace DBuddyBot
     {
         #region constants
         private static readonly string _configFilePath = Path.Combine(Environment.CurrentDirectory, "Config", "BotConfig.json");
-        private static readonly string _defaultDatabase = @"Data Source=.\Data\buddybotdb.sqlite;Version=3;Pooling=True;Max Pool Size=50;";
+        private static readonly string _defaultDatabase = $@"Data Source={Path.Combine(Environment.CurrentDirectory, "Data", "buddybotdb.sqlite")};Version=3;Pooling=True;Max Pool Size=50;";
         #endregion constants
 
         #region backingfields
