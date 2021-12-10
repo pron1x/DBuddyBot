@@ -12,7 +12,7 @@ namespace DBuddyBot
     public static class Bootstrapper
     {
         #region constants
-        private static readonly string _configFilePath = @".\Config\BotConfig.json";
+        private static readonly string _configFilePath = Path.Combine(Environment.CurrentDirectory, "Config", "BotConfig.json");
         private static readonly string _defaultDatabase = @"Data Source=.\Data\buddybotdb.sqlite;Version=3;Pooling=True;Max Pool Size=50;";
         #endregion constants
 
@@ -37,36 +37,45 @@ namespace DBuddyBot
             if (File.Exists(_configFilePath))
             {
                 Log.Logger.Information("Config file exists, reading settings");
-                using JsonDocument json = JsonDocument.Parse(File.ReadAllText(_configFilePath));
-                if (json.RootElement.TryGetProperty("discord", out JsonElement discord))
+                try
                 {
-                    ReadDiscordConfig(discord);
+                    using JsonDocument json = JsonDocument.Parse(File.ReadAllText(_configFilePath));
+                    if (json.RootElement.TryGetProperty("discord", out JsonElement discord))
+                    {
+                        ReadDiscordConfig(discord);
+                    }
+                    else
+                    {
+                        Log.Logger.Fatal("Config is missing discord section. Creating new config and shutting down...");
+                        CreateNewConfigFile();
+                        Environment.Exit(78);
+                    }
+
+                    if (json.RootElement.TryGetProperty("database", out JsonElement database))
+                    {
+                        ReadDatabaseConfig(database);
+                        SetupDatabase();
+                    }
+                    else
+                    {
+                        _databaseConnectionString = _defaultDatabase;
+                        Log.Logger.Warning("Config is missing database section. Using default SQLite database.");
+                    }
+
+                    if (json.RootElement.TryGetProperty("categories", out JsonElement categories))
+                    {
+                        GetCategories(categories);
+                    }
+                    else
+                    {
+                        Log.Logger.Warning("Config is missing categories section. No categories will be created on startup.");
+                    }
                 }
-                else
+                catch
                 {
-                    Log.Logger.Fatal("Config is missing discord section. Creating new config and shutting down...");
+                    Log.Logger.Fatal($"Error reading the config file. Creating a new one and shutting down...");
                     CreateNewConfigFile();
                     Environment.Exit(78);
-                }
-
-                if (json.RootElement.TryGetProperty("database", out JsonElement database))
-                {
-                    ReadDatabaseConfig(database);
-                    SetupDatabase();
-                }
-                else
-                {
-                    _databaseConnectionString = _defaultDatabase;
-                    Log.Logger.Warning("Config is missing database section. Using default SQLite database.");
-                }
-
-                if (json.RootElement.TryGetProperty("categories", out JsonElement categories))
-                {
-                    GetCategories(categories);
-                }
-                else
-                {
-                    Log.Logger.Warning("Config is missing categories section. No categories will be created on startup.");
                 }
             }
             else
