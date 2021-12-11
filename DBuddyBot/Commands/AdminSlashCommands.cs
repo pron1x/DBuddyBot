@@ -187,6 +187,23 @@ namespace DBuddyBot.Commands
             }
         }
 
+        [SlashCommand("description", "Updates the description of a category."), SlashRequirePermissions(DSharpPlus.Permissions.ManageRoles)]
+        public async Task UpdateCategoryDescription(InteractionContext ctx,
+                                                    [Autocomplete(typeof(CategoryAutocompleteProvider))][Option("category", "Category to update description of.", true)] string name,
+                                                    [Option("description", "The new description")] string description)
+        {
+            await ctx.DeferAsync(true);
+            Category category = Database.GetCategory(name);
+            if (category == null)
+            {
+                await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"Category {name} does not exist, can not update it's description."));
+                return;
+            }
+            category = Database.UpdateCategoryDescription(category, description);
+            CommandUtilities.UpdateRoleMessage(ctx.Client, category, Database);
+            await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"Category description updated."));
+        }
+
         [SlashCommand("refresh", "Refreshes a category message."), SlashRequirePermissions(DSharpPlus.Permissions.ManageRoles)]
         public async Task RefreshCategory(InteractionContext ctx, [Autocomplete(typeof(CategoryAutocompleteProvider))][Option("category", "Category to remove", true)] string name)
         {

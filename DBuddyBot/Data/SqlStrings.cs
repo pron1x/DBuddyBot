@@ -52,6 +52,11 @@
         /// </summary>
         internal const string UpdateCategoryMessage = "UPDATE categories SET message = $messageId WHERE id = $categoryId;";
 
+        /// <summary>
+        /// Parameters: $description, $categoryId
+        /// </summary>
+        internal const string UpdateCategoryDescriptionOnId = "UPDATE categories SET description = $description WHERE id = $categoryId;";
+
         internal const string SelectCategoryNames = "SELECT name FROM categories;";
 
         /// <summary>

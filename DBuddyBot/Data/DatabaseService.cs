@@ -104,6 +104,18 @@ namespace DBuddyBot.Data
             connection.Close();
         }
 
+        public Category UpdateCategoryDescription(Category category, string description)
+        {
+            using IDbConnection connection = GetConnection(_connectionString);
+            using IDbCommand command = GetCommand(UpdateCategoryDescriptionOnId, connection);
+            command.Parameters.Add(GetParameterWithValue(command.CreateParameter(), "$description", description));
+            command.Parameters.Add(GetParameterWithValue(command.CreateParameter(), "$categoryId", category.Id));
+            connection.Open();
+            command.ExecuteNonQuery();
+            connection.Close();
+            return GetCategory(category.Name);
+        }
+
         public List<string> GetAllCategoryNames()
         {
             List<string> categoryNames = new();
