@@ -49,7 +49,7 @@ namespace DBuddyBot.Commands
                     catch (System.Exception e)
                     {
                         await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"Role could not be created. Make sure necessary permissions are granted!"));
-                        ctx.Client.Logger.LogError(e, $"Unable to create a new role in guild {ctx.Guild.Name} ({ctx.Guild.Id}).");
+                        ctx.Client.Logger.LogError(e, $"Unable to create a new role in guild {ctx.Guild.Name} ({ctx.Guild.Id}). Database is unchanged.");
                         return;
                     }
                 }
@@ -144,7 +144,6 @@ namespace DBuddyBot.Commands
             {
                 await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"Category {name} already exists, or something went wrong."));
             }
-
         }
 
         [SlashCommand("remove", "Removes a category."), SlashRequirePermissions(DSharpPlus.Permissions.ManageRoles)]
@@ -173,14 +172,17 @@ namespace DBuddyBot.Commands
                 catch (NotFoundException e)
                 {
                     ctx.Client.Logger.LogError(e, $"A channel (id: {category.Channel.DiscordId}) or message (id: {category.Message.Id}) in the RemoveCategory function could not be found! Database might hold faulty records.");
+                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"The channel or message could not be found. Category has not been removed."));
                 }
                 catch (UnauthorizedException e)
                 {
                     ctx.Client.Logger.LogError(e, $"Bot is not authorized to resolve, send or modify messages in channel with id {category.Channel.DiscordId}.");
+                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"No permissions to resolve, send or modify messages. Category has not been removed."));
                 }
                 catch (System.Exception e)
                 {
                     ctx.Client.Logger.LogError(e, "Exception occured in UpdateRoleMessage.");
+                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"Something went wrong. Category has not been removed."));
                 }
             }
         }
