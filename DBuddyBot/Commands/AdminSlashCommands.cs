@@ -101,6 +101,23 @@ namespace DBuddyBot.Commands
             }
             CommandUtilities.UpdateRoleMessage(ctx.Client, category, Database);
         }
+
+        [SlashCommand("description", "Update the description of a role"), SlashRequirePermissions(DSharpPlus.Permissions.ManageRoles)]
+        public async Task UpdateRoleDescription(InteractionContext ctx,
+                                                [Option("role", "Role to update description of")] string roleName,
+                                                [Option("description", "The new description")] string description)
+        {
+            await ctx.DeferAsync(true);
+            Role role = Database.GetRole(roleName);
+            if(role == null)
+            {
+                await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"No role {roleName} exists, can not change it's description."));
+            } else
+            {
+                Database.UpdateRoleDescription(role.Id, description);
+                await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"Updated description of role {role.Name.ToTitleCase()}. Make sure to refresh the categories."));
+            }
+        }
     }
 
 

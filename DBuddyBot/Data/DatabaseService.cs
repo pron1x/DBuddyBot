@@ -116,6 +116,17 @@ namespace DBuddyBot.Data
             return GetCategory(category.Name);
         }
 
+        public void UpdateRoleDescription(int roleId, string description)
+        {
+            using IDbConnection connection = GetConnection(_connectionString);
+            using IDbCommand command = GetCommand(UpdateRoleDescriptionOnId, connection);
+            command.Parameters.Add(GetParameterWithValue(command.CreateParameter(), "$description", description));
+            command.Parameters.Add(GetParameterWithValue(command.CreateParameter(), "roleId", roleId));
+            connection.Open();
+            command.ExecuteNonQuery();
+            connection.Close();
+        }
+
         public List<string> GetAllCategoryNames()
         {
             List<string> categoryNames = new();
