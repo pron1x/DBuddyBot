@@ -18,8 +18,11 @@ namespace DBuddyBot.Commands
                 DiscordMessageBuilder messageBuilder = category.GetMessage(client.Guilds.Values.First());
                 if (category.Message == null)
                 {
-                    DiscordMessage message = await messageBuilder.SendAsync(channel);
-                    database.UpdateMessage(category.Id, message.Id);
+                    if (messageBuilder != null)
+                    {
+                        DiscordMessage message = await messageBuilder.SendAsync(channel);
+                        database.UpdateMessage(category.Id, message.Id);
+                    }
                 }
                 else
                 {
