@@ -1,6 +1,7 @@
 ﻿using DBuddyBot.Data;
 using DBuddyBot.Models;
 using DSharpPlus.Entities;
+using DSharpPlus.Exceptions;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.Attributes;
 using Microsoft.Extensions.Logging;
@@ -41,7 +42,16 @@ namespace DBuddyBot.Commands
                 DiscordRole discordRole = ctx.Guild.Roles.FirstOrDefault(role => role.Value.Name.ToLower() == name.ToLower()).Value;
                 if (discordRole == null)
                 {
-                    discordRole = await ctx.Guild.CreateRoleAsync(name.ToTitleCase(), DSharpPlus.Permissions.None, DiscordColor.Brown, mentionable: true);
+                    try
+                    {
+                        discordRole = await ctx.Guild.CreateRoleAsync(name.ToTitleCase(), DSharpPlus.Permissions.None, DiscordColor.Brown, mentionable: true);
+                    }
+                    catch (System.Exception e)
+                    {
+                        await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"Role could not be created. Make sure necessary permissions are granted!"));
+                        ctx.Client.Logger.LogError(e, $"Unable to create a new role in guild {ctx.Guild.Name} ({ctx.Guild.Id}).");
+                        return;
+                    }
                 }
                 Role role = Database.GetRole(name);
                 if (role == null)
@@ -73,7 +83,7 @@ namespace DBuddyBot.Commands
             Category category = Database.GetCategory(categoryName);
             if (category == null)
             {
-                await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"No category {categoryName} exists, cannot remove from it."));
+                await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"No category {categoryName} exists, can not remove from it."));
             }
             Role role = category?.GetRole(name.ToLower());
 
@@ -149,14 +159,29 @@ namespace DBuddyBot.Commands
             }
             else
             {
-                Database.RemoveCategory(category);
-                DiscordChannel channel = await ctx.Client.GetChannelAsync(category.Channel.DiscordId);
-                if (category.Message != null)
+                try
                 {
-                    DiscordMessage message = await channel.GetMessageAsync(category.Message.Id);
-                    await message.DeleteAsync($"Category {name} has been removed by {ctx.Member.Nickname}.");
+                    DiscordChannel channel = await ctx.Client.GetChannelAsync(category.Channel.DiscordId);
+                    if (category.Message != null)
+                    {
+                        DiscordMessage message = await channel.GetMessageAsync(category.Message.Id);
+                        await message.DeleteAsync($"Category {name} has been removed by {ctx.Member.Nickname}.");
+                    }
+                    Database.RemoveCategory(category);
+                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"Removed {category.Name}."));
                 }
-                await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"Removed {category.Name}."));
+                catch (NotFoundException e)
+                {
+                    ctx.Client.Logger.LogError(e, $"A channel (id: {category.Channel.DiscordId}) or message (id: {category.Message.Id}) in the RemoveCategory function could not be found! Database might hold faulty records.");
+                }
+                catch (UnauthorizedException e)
+                {
+                    ctx.Client.Logger.LogError(e, $"Bot is not authorized to resolve, send or modify messages in channel with id {category.Channel.DiscordId}.");
+                }
+                catch (System.Exception e)
+                {
+                    ctx.Client.Logger.LogError(e, "Exception occured in UpdateRoleMessage.");
+                }
             }
         }
 
