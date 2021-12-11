@@ -79,6 +79,8 @@
                                                         + "ch.id AS channelId, ch.d_id AS channelDiscordId, ro.id as roleId, ro.d_id AS roleDId, ro.name AS roleName, ro.description AS roleDescription, ro.game AS roleGame "
                                                         + "FROM categories ca LEFT JOIN categories_roles cr ON cr.category_id = ca.id LEFT JOIN roles ro ON cr.role_id = ro.id LEFT JOIN channels ch ON ca.channel_id = ch.id WHERE categoryMessage = $messageId;";
 
+        internal const string SelectAllRoles = "SELECT roles.id, roles.d_id, roles.name, roles.description, roles.game FROM roles;";
+
         /// <summary>
         /// Parameters: $name
         /// </summary>

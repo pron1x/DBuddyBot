@@ -134,7 +134,7 @@ namespace DBuddyBot.Data
             using IDbCommand command = GetCommand(SelectCategoryNames, connection);
             connection.Open();
             IDataReader reader = command.ExecuteReader();
-            while(reader.Read())
+            while (reader.Read())
             {
                 categoryNames.Add(reader.GetString(0));
             }
@@ -145,7 +145,7 @@ namespace DBuddyBot.Data
         public List<Category> GetAllCategories()
         {
             List<Category> categories = new();
-            foreach(string name in GetAllCategoryNames())
+            foreach (string name in GetAllCategoryNames())
             {
                 categories.Add(GetCategory(name));
             }
@@ -182,6 +182,21 @@ namespace DBuddyBot.Data
             return category;
         }
 
+        public List<Role> GetAllRoles()
+        {
+            List<Role> roles = new();
+            using IDbConnection connection = GetConnection(_connectionString);
+            using IDbCommand command = GetCommand(SelectAllRoles, connection);
+            connection.Open();
+            using IDataReader reader = command.ExecuteReader();
+            while(reader.Read())
+            {
+                roles.Add(new(reader.GetInt32(0), (ulong)reader.GetInt64(1), reader.GetString(2), reader.GetString(3), reader.GetBoolean(4)));
+            }
+            connection.Close();
+            return roles;
+        }
+
         public Role GetRole(string name)
         {
             Role role = null;
@@ -194,7 +209,7 @@ namespace DBuddyBot.Data
                 using IDataReader reader = command.ExecuteReader();
                 if (reader.Read())
                 {
-                    role = new(reader.GetInt32(0), (ulong)reader.GetInt64(1), reader.GetString(2), reader.GetString(3) ,reader.GetBoolean(4));
+                    role = new(reader.GetInt32(0), (ulong)reader.GetInt64(1), reader.GetString(2), reader.GetString(3), reader.GetBoolean(4));
                 }
                 connection.Close();
             }
@@ -266,7 +281,7 @@ namespace DBuddyBot.Data
 
         public void RemoveCategory(Category category)
         {
-            foreach(Role role in category.Roles)
+            foreach (Role role in category.Roles)
             {
                 RemoveRole(category.Id, role.Id);
             }

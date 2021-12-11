@@ -77,7 +77,7 @@ namespace DBuddyBot.Commands
         [SlashCommand("remove", "Removes a role from a category."), SlashRequirePermissions(DSharpPlus.Permissions.ManageRoles)]
         public async Task RemoveRole(InteractionContext ctx,
                                      [Autocomplete(typeof(CategoryAutocompleteProvider))][Option("category", "Category to remove from", true)] string categoryName,
-                                     [Autocomplete(typeof(RoleAutocompleteProvider))][Option("role", "Role to remove")] string name)
+                                     [Autocomplete(typeof(RoleCategoryAutocompleteProvider))][Option("role", "Role to remove")] string name)
         {
             await ctx.DeferAsync(true);
             Category category = Database.GetCategory(categoryName);
@@ -104,7 +104,7 @@ namespace DBuddyBot.Commands
 
         [SlashCommand("description", "Update the description of a role"), SlashRequirePermissions(DSharpPlus.Permissions.ManageRoles)]
         public async Task UpdateRoleDescription(InteractionContext ctx,
-                                                [Option("role", "Role to update description of")] string roleName,
+                                                [Autocomplete(typeof(RoleAutocompleteProvider))][Option("role", "Role to update description of")] string roleName,
                                                 [Option("description", "The new description")] string description)
         {
             await ctx.DeferAsync(true);
