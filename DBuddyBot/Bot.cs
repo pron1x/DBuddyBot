@@ -42,6 +42,7 @@ namespace DBuddyBot
             slashCommands.RegisterCommands<CategoryCommandsGroupContainer>();
 
             Client.GuildDownloadCompleted += ClientGuildEventHandler.SendRoleMessages;
+            Client.GuildRoleUpdated += ClientGuildEventHandler.UpdateRoleInDatabase;
             Client.ComponentInteractionCreated += ComponentInteractionHandler.HandleComponentInteraction;
 
         }
