@@ -3,7 +3,6 @@ using DBuddyBot.Models;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -19,18 +18,21 @@ namespace DBuddyBot.EventHandlers
             _database = Bootstrapper.Database;
         }
 
-        internal static async Task SendRoleMessages(DiscordClient sender, GuildDownloadCompletedEventArgs e)
+        internal static Task SendRoleMessages(DiscordClient sender, GuildDownloadCompletedEventArgs e)
         {
-            List<Category> categories = _database.GetAllCategories();
-            foreach (Category category in categories)
+            return Task.Run(async () =>
             {
-                if (category.Message == null && category.RoleCount > 0)
+                List<Category> categories = _database.GetAllCategories();
+                foreach (Category category in categories)
                 {
-                    DiscordChannel channel = await sender.GetChannelAsync(category.Channel.DiscordId);
-                    DiscordMessage message = await channel.SendMessageAsync(category.GetMessage(e.Guilds.Values.First()));
-                    _database.UpdateMessage(category.Id, message.Id);
+                    if (category.Message == null && category.RoleCount > 0)
+                    {
+                        DiscordChannel channel = await sender.GetChannelAsync(category.Channel.DiscordId);
+                        DiscordMessage message = await channel.SendMessageAsync(category.GetMessage(e.Guilds.Values.First()));
+                        _database.UpdateMessage(category.Id, message.Id);
+                    }
                 }
-            }
+            });
         }
 
         internal static Task UpdateRoleInDatabase(DiscordClient sender, GuildRoleUpdateEventArgs e)
@@ -42,7 +44,6 @@ namespace DBuddyBot.EventHandlers
                     _database.UpdateRoleName(e.RoleAfter.Id, e.RoleAfter.Name);
                 }
             });
-            
         }
     }
 }

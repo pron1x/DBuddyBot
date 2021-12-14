@@ -19,42 +19,45 @@ namespace DBuddyBot.EventHandlers
             _database = Bootstrapper.Database;
         }
 
-        public static async Task HandleComponentInteraction(DiscordClient sender, DSharpPlus.EventArgs.ComponentInteractionCreateEventArgs e)
+        public static Task HandleComponentInteraction(DiscordClient sender, DSharpPlus.EventArgs.ComponentInteractionCreateEventArgs e)
         {
-            Category category = _database.GetCategoryFromMessage(e.Message.Id);
-            Role role = category?.GetRoleFromComponentId(e.Id);
-            if (role != null)
+            return Task.Run(async () =>
             {
-                DiscordMember member = (DiscordMember)e.User;
-                DiscordRole discordRole = e.Guild.GetRole(role.DiscordId);
-                try
+                Category category = _database.GetCategoryFromMessage(e.Message.Id);
+                Role role = category?.GetRoleFromComponentId(e.Id);
+                if (role != null)
                 {
-                    if (member.Roles.Contains(discordRole))
+                    DiscordMember member = (DiscordMember)e.User;
+                    DiscordRole discordRole = e.Guild.GetRole(role.DiscordId);
+                    try
                     {
-                        await member.RevokeRoleAsync(discordRole);
+                        if (member.Roles.Contains(discordRole))
+                        {
+                            await member.RevokeRoleAsync(discordRole);
+                        }
+                        else
+                        {
+                            await member.GrantRoleAsync(discordRole);
+                        }
                     }
-                    else
+                    catch (UnauthorizedException exception)
                     {
-                        await member.GrantRoleAsync(discordRole);
+                        Log.Logger.Error(exception, $"Not allowed to grant/revoke role {discordRole.Name} ({discordRole.Id}) on guild {e.Guild.Name} ({e.Guild.Id}).");
+                        return;
+                    }
+                    catch (NotFoundException exception)
+                    {
+                        Log.Logger.Error(exception, $"Role {discordRole.Name} ({discordRole.Id}) was not found on guild {e.Guild.Name} ({e.Guild.Id}).");
+                        return;
+                    }
+                    catch (Exception exception)
+                    {
+                        Log.Logger.Error(exception, "An error occured trying to grant/revoke a role.");
+                        return;
                     }
                 }
-                catch (UnauthorizedException exception)
-                {
-                    Log.Logger.Error(exception, $"Not allowed to grant/revoke role {discordRole.Name} ({discordRole.Id}) on guild {e.Guild.Name} ({e.Guild.Id}).");
-                    return;
-                }
-                catch (NotFoundException exception)
-                {
-                    Log.Logger.Error(exception, $"Role {discordRole.Name} ({discordRole.Id}) was not found on guild {e.Guild.Name} ({e.Guild.Id}).");
-                    return;
-                }
-                catch (Exception exception)
-                {
-                    Log.Logger.Error(exception, "An error occured trying to grant/revoke a role.");
-                    return;
-                }
-            }
-            await e.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
+                await e.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate);
+            });
         }
     }
 }
