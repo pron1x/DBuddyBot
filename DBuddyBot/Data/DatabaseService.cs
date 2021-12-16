@@ -116,6 +116,18 @@ namespace DBuddyBot.Data
             return GetCategory(category.Name);
         }
 
+        public Category UpdateCategoryColor(Category category, int color)
+        {
+            using IDbConnection connection = GetConnection(_connectionString);
+            using IDbCommand command = GetCommand(UpdateCategoryColorOnId, connection);
+            command.Parameters.Add(GetParameterWithValue(command.CreateParameter(), "$color", color));
+            command.Parameters.Add(GetParameterWithValue(command.CreateParameter(), "categoryId", category.Id));
+            connection.Open();
+            command.ExecuteNonQuery();
+            connection.Close();
+            return GetCategory(category.Name);
+        }
+
         public void UpdateRoleName(ulong roleId, string name)
         {
             using IDbConnection connection = GetConnection(_connectionString);

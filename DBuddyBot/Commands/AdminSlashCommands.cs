@@ -109,10 +109,11 @@ namespace DBuddyBot.Commands
         {
             await ctx.DeferAsync(true);
             Role role = Database.GetRole(roleName);
-            if(role == null)
+            if (role == null)
             {
                 await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"No role {roleName} exists, can not change it's description."));
-            } else
+            }
+            else
             {
                 Database.UpdateRoleDescription(role.Id, description);
                 await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"Updated description of role {role.Name.ToTitleCase()}. Make sure to refresh the categories."));
@@ -220,6 +221,33 @@ namespace DBuddyBot.Commands
             CommandUtilities.UpdateRoleMessage(ctx.Client, category, Database);
             await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"Category description updated."));
         }
+
+        [SlashCommand("color", "Updates the color of a category embed.")]
+        public async Task UpdateCategoryColor(InteractionContext ctx, [Autocomplete(typeof(CategoryAutocompleteProvider))][Option("category", "Category to change the color of.")] string name,
+            [Option("color", "Embed color of the category in hex")] string color)
+        {
+            await ctx.DeferAsync(true);
+            Category category = Database.GetCategory(name);
+            if (category == null)
+            {
+                await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"Category {name} does not exist, can not update it's embed color."));
+                return;
+            }
+            DiscordColor discordColor;
+            try
+            {
+                discordColor = new(color);
+            }
+            catch
+            {
+                await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"{color} is not a valid hex color."));
+                return;
+            }
+            category = Database.UpdateCategoryColor(category, discordColor.Value);
+            CommandUtilities.UpdateRoleMessage(ctx.Client, category, Database);
+            await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"Category color updated."));
+        }
+
 
         [SlashCommand("refresh", "Refreshes a category message."), SlashRequirePermissions(DSharpPlus.Permissions.ManageRoles)]
         public async Task RefreshCategory(InteractionContext ctx, [Autocomplete(typeof(CategoryAutocompleteProvider))][Option("category", "Category to remove", true)] string name)

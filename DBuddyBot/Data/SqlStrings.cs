@@ -58,6 +58,11 @@
         internal const string UpdateCategoryDescriptionOnId = "UPDATE categories SET description = $description WHERE id = $categoryId;";
 
         /// <summary>
+        /// Parameters: $color, $categoryId
+        /// </summary>
+        internal const string UpdateCategoryColorOnId = "UPDATE categories SET color = $color WHERE id = $categoryId;";
+
+        /// <summary>
         /// Parameters: $name, $id
         /// </summary>
         internal const string UpdateRoleNameOnDId = "UPDATE roles SET name = $name WHERE d_id = $id;";
