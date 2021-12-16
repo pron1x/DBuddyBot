@@ -111,6 +111,11 @@
         internal const string DeleteRoleCategoryOnRoleId = "DELETE FROM categories_roles WHERE category_id = $categoryId AND role_id = $roleId;";
 
         /// <summary>
+        /// Parameters: $roleId
+        /// </summary>
+        internal const string DeleteAllRoleCategoryOnRoleId = "DELETE FROM categories_roles WHERE role_id = $roleId;";
+
+        /// <summary>
         /// Parameters: $id
         /// </summary>
         internal const string DeleteChannelOnId = "DELETE FROM channels WHERE(SELECT COUNT(categories.channel_id) FROM categories WHERE categories.channel_id == $id) == 1 AND channels.ID == $id;";

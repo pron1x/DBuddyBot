@@ -26,6 +26,7 @@ namespace DBuddyBot.Data
         public bool TryGetRole(ulong id, out Role role);
         public Channel GetChannel(ulong channelId);
         public void RemoveRole(int categoryId, int roleId);
+        public void RemoveRole(int roleId);
         public void RemoveCategory(Category category);
     }
 }

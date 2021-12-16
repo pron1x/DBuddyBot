@@ -43,6 +43,7 @@ namespace DBuddyBot
 
             Client.GuildDownloadCompleted += ClientGuildEventHandler.SendRoleMessages;
             Client.GuildRoleUpdated += ClientGuildEventHandler.UpdateRoleInDatabase;
+            Client.GuildRoleDeleted += ClientGuildEventHandler.DeleteRoleFromDatabase;
             Client.MessageDeleted += ClientMessageEventHandler.RemoveRoleMessage;
             Client.ComponentInteractionCreated += ComponentInteractionHandler.HandleComponentInteraction;
 

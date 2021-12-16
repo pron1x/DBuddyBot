@@ -290,6 +290,20 @@ namespace DBuddyBot.Data
             connection.Close();
         }
 
+        public void RemoveRole(int roleId)
+        {
+            using IDbConnection connection = GetConnection(_connectionString);
+            using IDbCommand commandCategoryRoles = GetCommand(DeleteAllRoleCategoryOnRoleId, connection);
+            using IDbCommand commandRoles = GetCommand(DeleteRoleOnId, connection);
+            commandCategoryRoles.Parameters.Add(GetParameterWithValue(commandCategoryRoles.CreateParameter(), "$roleId", roleId));
+            commandRoles.Parameters.Add(GetParameterWithValue(commandRoles.CreateParameter(), "$id", roleId));
+
+            connection.Open();
+            commandCategoryRoles.ExecuteNonQuery();
+            commandRoles.ExecuteNonQuery();
+            connection.Close();
+        }
+
         public void RemoveCategory(Category category)
         {
             foreach (Role role in category.Roles)
