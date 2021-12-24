@@ -38,8 +38,8 @@ namespace DBuddyBot
             });
 
 
-            slashCommands.RegisterCommands<RoleCommandsGroupContainer>();
-            slashCommands.RegisterCommands<CategoryCommandsGroupContainer>();
+            slashCommands.RegisterCommands<RoleSlashCommands>();
+            slashCommands.RegisterCommands<CategorySlashCommands>();
 
             Client.GuildDownloadCompleted += ClientGuildEventHandler.SendRoleMessages;
             Client.GuildRoleUpdated += ClientGuildEventHandler.UpdateRoleInDatabase;
