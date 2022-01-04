@@ -109,7 +109,7 @@ namespace DBuddyBot.Commands
             await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"Category description updated."));
         }
 
-        [SlashCommand("color", "Updates the color of a category embed.")]
+        [SlashCommand("color", "Updates the color of a category embed."), SlashRequirePermissions(DSharpPlus.Permissions.ManageRoles)]
         public async Task UpdateCategoryColor(InteractionContext ctx, [Autocomplete(typeof(CategoryAutocompleteProvider))][Option("category", "Category to change the color of.")] string name,
             [Option("color", "Embed color of the category in hex")] string color)
         {
