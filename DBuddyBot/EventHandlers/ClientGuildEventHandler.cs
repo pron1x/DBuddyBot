@@ -25,7 +25,7 @@ namespace DBuddyBot.EventHandlers
                 List<Category> categories = _database.GetAllCategories();
                 foreach (Category category in categories)
                 {
-                    if (category.Message == null && category.RoleCount > 0)
+                    if (category.Message == null && category.RoleCount > 0 && category.Channel != null)
                     {
                         DiscordChannel channel = await sender.GetChannelAsync(category.Channel.DiscordId);
                         DiscordMessage message = await channel.SendMessageAsync(category.GetMessage(e.Guilds.Values.First()));
