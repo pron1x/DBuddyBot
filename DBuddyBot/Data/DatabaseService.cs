@@ -329,8 +329,8 @@ namespace DBuddyBot.Data
             commandCategory.Parameters.Add(GetParameterWithValue(commandCategory.CreateParameter(), "$id", category.Id));
 
             connection.Open();
-            commandChannel.ExecuteNonQuery();
             commandCategory.ExecuteNonQuery();
+            commandChannel.ExecuteNonQuery();
             connection.Close();
         }
 

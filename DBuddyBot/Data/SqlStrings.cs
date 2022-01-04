@@ -58,6 +58,11 @@
         internal const string UpdateCategoryDescriptionOnId = "UPDATE categories SET description = $description WHERE id = $categoryId;";
 
         /// <summary>
+        /// Parameters: $channel, $categoryId
+        /// </summary>
+        internal const string UpdateCategoryChannelOnId = "UPDATE categories SET channel_id = $channel WHERE id = $categoryId;";
+
+        /// <summary>
         /// Parameters: $color, $categoryId
         /// </summary>
         internal const string UpdateCategoryColorOnId = "UPDATE categories SET color = $color WHERE id = $categoryId;";
@@ -123,7 +128,7 @@
         /// <summary>
         /// Parameters: $id
         /// </summary>
-        internal const string DeleteChannelOnId = "DELETE FROM channels WHERE(SELECT COUNT(categories.channel_id) FROM categories WHERE categories.channel_id == $id) == 1 AND channels.ID == $id;";
+        internal const string DeleteChannelOnId = "DELETE FROM channels WHERE(SELECT COUNT(categories.channel_id) FROM categories WHERE categories.channel_id == $id) == 0 AND channels.ID == $id;";
 
         /// <summary>
         /// Parameters: $id
