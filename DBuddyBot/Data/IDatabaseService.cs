@@ -30,5 +30,6 @@ namespace DBuddyBot.Data
         public void RemoveRole(int categoryId, int roleId);
         public void RemoveRole(int roleId);
         public void RemoveCategory(Category category);
+        public void RemoveChannel(int channelId);
     }
 }

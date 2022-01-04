@@ -46,11 +46,23 @@ namespace DBuddyBot.EventHandlers
             });
         }
 
+        internal static Task DeleteChannelFromDatabase(DiscordClient sender, ChannelDeleteEventArgs e)
+        {
+            return Task.Run(() =>
+            {
+                Channel channel = _database.GetChannel(e.Channel.Id);
+                if (channel != null)
+                {
+                    _database.RemoveChannel(channel.Id);
+                }
+            });
+        }
+
         internal static Task DeleteRoleFromDatabase(DiscordClient sender, GuildRoleDeleteEventArgs e)
         {
             return Task.Run(() =>
             {
-                if(_database.TryGetRole(e.Role.Id, out Role role))
+                if (_database.TryGetRole(e.Role.Id, out Role role))
                 {
                     _database.RemoveRole(role.Id);
                 }

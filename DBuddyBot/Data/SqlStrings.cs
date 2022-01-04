@@ -63,6 +63,11 @@
         internal const string UpdateCategoryChannelOnId = "UPDATE categories SET channel_id = $channel WHERE id = $categoryId;";
 
         /// <summary>
+        /// Parameters: $channel, $channelId
+        /// </summary>
+        internal const string UpdateCategoriesChannelOnChannelId = "UPDATE categories SET channel_id = $channel WHERE channel_id = $channelId;";
+
+        /// <summary>
         /// Parameters: $color, $categoryId
         /// </summary>
         internal const string UpdateCategoryColorOnId = "UPDATE categories SET color = $color WHERE id = $categoryId;";

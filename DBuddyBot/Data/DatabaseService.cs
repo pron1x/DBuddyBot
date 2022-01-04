@@ -347,6 +347,20 @@ namespace DBuddyBot.Data
             connection.Close();
         }
 
+        public void RemoveChannel(int channelId)
+        {
+            using IDbConnection connection = GetConnection(_connectionString);
+            using IDbCommand commandCategories = GetCommand(UpdateCategoriesChannelOnChannelId, connection);
+            using IDbCommand commandChannel = GetCommand(DeleteChannelOnId, connection);
+            commandCategories.Parameters.Add(GetParameterWithValue(commandCategories.CreateParameter(), "$channel", null));
+            commandCategories.Parameters.Add(GetParameterWithValue(commandCategories.CreateParameter(), "$channelId", channelId));
+            commandChannel.Parameters.Add(GetParameterWithValue(commandChannel.CreateParameter(), "id", channelId));
+            connection.Open();
+            commandCategories.ExecuteNonQuery();
+            commandChannel.ExecuteNonQuery();
+            connection.Close();
+        }
+
         #endregion publicmethods
 
 
