@@ -98,15 +98,23 @@ namespace DBuddyBot.Commands
                                                     [Option("description", "The new description")] string description)
         {
             await ctx.DeferAsync(true);
+            DiscordWebhookBuilder response = new();
             Category category = Database.GetCategory(name);
             if (category == null)
             {
-                await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"Category {name} does not exist, can not update it's description."));
+                await ctx.EditResponseAsync(response.WithContent($"Category {name} does not exist, can not update it's description."));
                 return;
             }
             category = Database.UpdateCategoryDescription(category, description);
-            CommandUtilities.UpdateRoleMessage(ctx.Client, category, Database);
-            await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"Category description updated."));
+            await ctx.EditResponseAsync(response.WithContent($"Category description updated."));
+            if (category.Channel != null)
+            {
+                CommandUtilities.UpdateRoleMessage(ctx.Client, category, Database);
+            }
+            else
+            {
+                await ctx.EditResponseAsync(response.WithContent(response.Content + $"\nNo channel assigned to {category.Name}. Please assign one with `/category channel`."));
+            }
         }
 
         [SlashCommand("color", "Updates the color of a category embed."), SlashRequirePermissions(DSharpPlus.Permissions.ManageRoles)]
@@ -114,10 +122,11 @@ namespace DBuddyBot.Commands
             [Option("color", "Embed color of the category in hex")] string color)
         {
             await ctx.DeferAsync(true);
+            DiscordWebhookBuilder response = new();
             Category category = Database.GetCategory(name);
             if (category == null)
             {
-                await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"Category {name} does not exist, can not update it's embed color."));
+                await ctx.EditResponseAsync(response.WithContent($"Category {name} does not exist, can not update it's embed color."));
                 return;
             }
             DiscordColor discordColor;
@@ -127,12 +136,19 @@ namespace DBuddyBot.Commands
             }
             catch
             {
-                await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"{color} is not a valid hex color."));
+                await ctx.EditResponseAsync(response.WithContent($"{color} is not a valid hex color."));
                 return;
             }
             category = Database.UpdateCategoryColor(category, discordColor.Value);
-            CommandUtilities.UpdateRoleMessage(ctx.Client, category, Database);
-            await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"Category color updated."));
+            await ctx.EditResponseAsync(response.WithContent($"Category color updated."));
+            if (category.Channel != null)
+            {
+                CommandUtilities.UpdateRoleMessage(ctx.Client, category, Database);
+            }
+            else
+            {
+                await ctx.EditResponseAsync(response.WithContent(response.Content + $"\nNo channel assigned to {category.Name}. Please assign one with `/category channel`."));
+            }
         }
 
         [SlashCommand("channel", "Updates the channel of the category."), SlashRequirePermissions(DSharpPlus.Permissions.ManageRoles)]
