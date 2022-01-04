@@ -14,6 +14,7 @@ namespace DBuddyBot.Data
         public void UpdateMessage(int categorId, ulong messageId);
         public Category UpdateCategoryDescription(Category category, string description);
         public Category UpdateCategoryColor(Category category, int color);
+        public Category UpdateCategoryChannel(Category category, ulong channelId);
         public void UpdateRoleName(ulong roleId, string name);
         public void UpdateRoleDescription(int roleId, string description);
         public List<string> GetAllCategoryNames();
