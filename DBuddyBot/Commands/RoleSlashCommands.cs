@@ -24,15 +24,16 @@ namespace DBuddyBot.Commands
                                   [Option("description", "Description for the role")] string description = "")
         {
             await ctx.DeferAsync(true);
+            DiscordWebhookBuilder response = new();
             Category category = Database.GetCategory(categoryName);
             if (category == null)
             {
-                await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"No category {categoryName} exists. Can not add role to it."));
+                await ctx.EditResponseAsync(response.WithContent($"No category {categoryName} exists. Can not add role to it."));
                 return;
             }
             else if (category.GetRole(name.ToLower()) != null)
             {
-                await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"Role {name} already exists in managed context, no need to add it again."));
+                await ctx.EditResponseAsync(response.WithContent($"Role {name} already exists in managed context, no need to add it again."));
                 return;
             }
             else
@@ -46,7 +47,7 @@ namespace DBuddyBot.Commands
                     }
                     catch (System.Exception e)
                     {
-                        await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"Role could not be created. Make sure necessary permissions are granted!"));
+                        await ctx.EditResponseAsync(response.WithContent($"Role could not be created. Make sure necessary permissions are granted!"));
                         ctx.Client.Logger.LogError(e, $"Unable to create a new role in guild {ctx.Guild.Name} ({ctx.Guild.Id}). Database is unchanged.");
                         return;
                     }
@@ -60,12 +61,19 @@ namespace DBuddyBot.Commands
                 {
                     Database.AddRole(role, category.Id);
                     ctx.Client.Logger.LogInformation($"{ctx.Member.Username} added {discordRole.Name} to database.");
-                    CommandUtilities.UpdateRoleMessage(ctx.Client, category, Database);
-                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"Added role {discordRole.Name} to database."));
+                    await ctx.EditResponseAsync(response.WithContent($"Added role {discordRole.Name} to database."));
+                    if (category.Channel != null)
+                    {
+                        CommandUtilities.UpdateRoleMessage(ctx.Client, category, Database);
+                    }
+                    else
+                    {
+                        await ctx.EditResponseAsync(response.WithContent(response.Content + $"\nNo channel assigned to {category.Name}. Please assign one with `/category channel`."));
+                    }
                 }
                 else
                 {
-                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"{category.Name} category already has 25 roles, the current maximum supported. " +
+                    await ctx.EditResponseAsync(response.WithContent($"{category.Name} category already has 25 roles, the current maximum supported. " +
                         $"{discordRole.Name} has been created, but needs to be added to a different category."));
                 }
             }
@@ -78,16 +86,17 @@ namespace DBuddyBot.Commands
                                      [Autocomplete(typeof(RoleCategoryAutocompleteProvider))][Option("role", "Role to remove")] string name)
         {
             await ctx.DeferAsync(true);
+            DiscordWebhookBuilder response = new();
             Category category = Database.GetCategory(categoryName);
             if (category == null)
             {
-                await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"No category {categoryName} exists, can not remove from it."));
+                await ctx.EditResponseAsync(response.WithContent($"No category {categoryName} exists, can not remove from it."));
             }
             Role role = category?.GetRole(name.ToLower());
 
             if (role == null)
             {
-                await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"No role {name} exists. Can not remove it."));
+                await ctx.EditResponseAsync(response.WithContent($"No role {name} exists. Can not remove it."));
                 return;
             }
             else
@@ -95,9 +104,16 @@ namespace DBuddyBot.Commands
                 category.RemoveRole(role);
                 Database.RemoveRole(category.Id, role.Id);
                 ctx.Client.Logger.LogInformation($"{ctx.Member.Username} removed role {role.Name} from database.");
-                await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"Removed {role.Name} from {category.Name}."));
+                await ctx.EditResponseAsync(response.WithContent($"Removed {role.Name} from {category.Name}."));
             }
-            CommandUtilities.UpdateRoleMessage(ctx.Client, category, Database);
+            if (category.Message != null)
+            {
+                CommandUtilities.UpdateRoleMessage(ctx.Client, category, Database);
+            }
+            else
+            {
+                await ctx.EditResponseAsync(response.WithContent(response.Content + $"\nNo channel assigned to {category.Name}. Please assign one with `/category channel`."));
+            }
         }
 
         [SlashCommand("description", "Update the description of a role"), SlashRequirePermissions(DSharpPlus.Permissions.ManageRoles)]
