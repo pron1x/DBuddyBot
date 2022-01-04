@@ -168,9 +168,16 @@ namespace DBuddyBot.Commands
             Category category = Database.GetCategory(name);
             if (category != null)
             {
-                CommandUtilities.UpdateRoleMessage(ctx.Client, category, Database);
+                if (category.Channel != null)
+                {
+                    CommandUtilities.UpdateRoleMessage(ctx.Client, category, Database);
+                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("Message refreshed."));
+                }
+                else
+                {
+                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"No channel assigned to {category.Name}. Please assign one with `/category channel`."));
+                }
             }
-            await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent("Message refreshed."));
         }
     }
 }
