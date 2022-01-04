@@ -146,10 +146,13 @@ namespace DBuddyBot.Commands
                 await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"Category {name} does not exist, can not update it's channel."));
                 return;
             }
-            if (category.Channel.DiscordId != channel.Id)
+            if (category.Channel?.DiscordId != channel.Id)
             {
-                DiscordChannel oldChannel = await ctx.Client.GetChannelAsync(category.Channel.DiscordId);
-                await oldChannel.GetMessageAsync(category.Message.Id).Result.DeleteAsync();
+                if (category.Channel != null && category.Message != null)
+                {
+                    DiscordChannel oldChannel = await ctx.Client.GetChannelAsync(category.Channel.DiscordId);
+                    await oldChannel.GetMessageAsync(category.Message.Id).Result.DeleteAsync();
+                }
                 Database.UpdateMessage(category.Id, 0);
                 category = Database.UpdateCategoryChannel(category, channel.Id);
             }
