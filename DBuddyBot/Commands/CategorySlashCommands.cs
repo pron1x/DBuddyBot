@@ -135,6 +135,28 @@ namespace DBuddyBot.Commands
             await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"Category color updated."));
         }
 
+        [SlashCommand("channel", "Updates the channel of the category."), SlashRequirePermissions(DSharpPlus.Permissions.ManageRoles)]
+        public async Task UpdateCategoryChannel(InteractionContext ctx, [Autocomplete(typeof(CategoryAutocompleteProvider))][Option("category", "Category to change the channel of.")] string name,
+            [Option("channel", "New channel of the category.")] DiscordChannel channel)
+        {
+            await ctx.DeferAsync(true);
+            Category category = Database.GetCategory(name);
+            if (category == null)
+            {
+                await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"Category {name} does not exist, can not update it's channel."));
+                return;
+            }
+            if (category.Channel.DiscordId != channel.Id)
+            {
+                DiscordChannel oldChannel = await ctx.Client.GetChannelAsync(category.Channel.DiscordId);
+                await oldChannel.GetMessageAsync(category.Message.Id).Result.DeleteAsync();
+                Database.UpdateMessage(category.Id, 0);
+                category = Database.UpdateCategoryChannel(category, channel.Id);
+            }
+            CommandUtilities.UpdateRoleMessage(ctx.Client, category, Database);
+            await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"Category channel updated."));
+        }
+
 
         [SlashCommand("refresh", "Refreshes a category message."), SlashRequirePermissions(DSharpPlus.Permissions.ManageRoles)]
         public async Task RefreshCategory(InteractionContext ctx, [Autocomplete(typeof(CategoryAutocompleteProvider))][Option("category", "Category to remove", true)] string name)
