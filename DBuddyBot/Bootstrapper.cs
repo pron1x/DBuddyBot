@@ -12,6 +12,7 @@ namespace DBuddyBot
     public static class Bootstrapper
     {
         #region constants
+        private static readonly string _version = "1.1";
         private static readonly string _configFilePath = Path.Combine(Environment.CurrentDirectory, "Config", "BotConfig.json");
         private static readonly string _defaultDatabase = $@"Data Source={Path.Combine(Environment.CurrentDirectory, "Data", "buddybotdb.sqlite")};Version=3;Pooling=True;Max Pool Size=50;";
         #endregion constants
@@ -32,6 +33,7 @@ namespace DBuddyBot
         #region publicmethods
         public static void Setup()
         {
+            PrintHeader();
             SetupLogger();
 
             if (File.Exists(_configFilePath))
@@ -112,6 +114,7 @@ namespace DBuddyBot
             DatabaseType databaseType = sqliteDatabase ? DatabaseType.SQLite : DatabaseType.Sql;
             if (sqliteDatabase)
             {
+                Log.Logger.Information($"SQLite database detected.");
                 try
                 {
                     SQLiteConnectionStringBuilder connStringBuilder = new(_databaseConnectionString);
@@ -127,6 +130,7 @@ namespace DBuddyBot
                     Log.Logger.Warning("No database found. Creating new SQLite database.");
                     Directory.CreateDirectory(Path.GetDirectoryName(_databaseFilePath));
                     SQLiteConnection.CreateFile(_databaseFilePath);
+                    Log.Logger.Information("New SQLite database file created.");
                 }
             }
             Log.Logger.Information("Setting up database with required tables.");
@@ -155,6 +159,7 @@ namespace DBuddyBot
                 Environment.Exit(74);
             };
             _database = new DatabaseService(_databaseConnectionString, databaseType);
+            Log.Logger.Information("Database set up.");
         }
 
 
@@ -191,11 +196,13 @@ namespace DBuddyBot
                 $"\t\t}}{nl}" +
                 $"\t]{nl}" +
                 $"}}{nl}");
+            Log.Logger.Information($"New database file created in directory {_configFilePath}.");
         }
 
 
         private static void ReadDiscordConfig(JsonElement discord)
         {
+            Log.Logger.Debug("Parsing discord section.");
             if (discord.TryGetProperty("discord_token", out JsonElement token))
             {
                 _discordToken = token.GetString();
@@ -216,6 +223,7 @@ namespace DBuddyBot
 
         private static void ReadDatabaseConfig(JsonElement database)
         {
+            Log.Logger.Debug("Parsing database section.");
             if (database.TryGetProperty("connection_string", out JsonElement connection))
             {
                 _databaseConnectionString = connection.GetString();
@@ -239,6 +247,7 @@ namespace DBuddyBot
 
         private static void GetCategories(JsonElement categories)
         {
+            Log.Logger.Debug("Parsing categories section.");
             foreach (JsonElement element in categories.EnumerateArray())
             {
                 if (element.TryGetProperty("name", out JsonElement name) && element.TryGetProperty("channel", out JsonElement channel))
@@ -269,6 +278,19 @@ namespace DBuddyBot
                     Log.Logger.Warning($"Skipping a faulty category specified in config.");
                 }
             }
+        }
+
+        private static void PrintHeader()
+        {
+            Console.WriteLine("  _____  ____            _     _       ____        _   \r\n" +
+                " |  __ \\|  _ \\          | |   | |     |  _ \\      | |  \r\n" +
+                " | |  | | |_) |_   _  __| | __| |_   _| |_) | ___ | |_ \r\n" +
+                " | |  | |  _ <| | | |/ _` |/ _` | | | |  _ < / _ \\| __|\r\n" +
+                " | |__| | |_) | |_| | (_| | (_| | |_| | |_) | (_) | |_ \r\n" +
+                " |_____/|____/ \\__,_|\\__,_|\\__,_|\\__, |____/ \\___/ \\__|\r\n" +
+                "                                  __/ |                \r\n" +
+                "                                 |___/                 ");
+            Console.WriteLine($"DBuddyBot version {_version}");
         }
 
         #endregion privatemethods
