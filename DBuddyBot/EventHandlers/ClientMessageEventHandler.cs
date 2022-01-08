@@ -2,6 +2,7 @@
 using DBuddyBot.Models;
 using DSharpPlus;
 using DSharpPlus.EventArgs;
+using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 
 namespace DBuddyBot.EventHandlers
@@ -19,10 +20,12 @@ namespace DBuddyBot.EventHandlers
         {
             return Task.Run(() =>
             {
+                sender.Logger.LogInformation($"Message {e.Message.Id} has been deleted in guild {e.Guild.Name}({e.Guild.Id}).");
                 Category category;
                 if ((category = _database.GetCategoryFromMessage(e.Message.Id)) != null)
                 {
                     _database.UpdateMessage(category.Id, 0);
+                    sender.Logger.LogInformation($"Message of category {category.Name} has been removed.");
                 }
             });
         }
