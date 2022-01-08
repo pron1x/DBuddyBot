@@ -101,7 +101,7 @@ namespace DBuddyBot
                 .CreateLogger();
 #else
             Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Warning()
+                .MinimumLevel.Information()
                 .WriteTo.File("log.txt", fileSizeLimitBytes: 10000000, outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}")
                 .CreateLogger();
 #endif

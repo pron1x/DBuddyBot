@@ -22,7 +22,11 @@ namespace DBuddyBot
             DiscordConfiguration config = new()
             {
                 Token = token,
+#if DEBUG
                 MinimumLogLevel = LogLevel.Debug,
+#else
+                MinimumLogLevel = LogLevel.Information,
+#endif
                 LoggerFactory = new LoggerFactory().AddSerilog()
             };
 
@@ -50,10 +54,10 @@ namespace DBuddyBot
 
         }
 
-        #endregion constructors
+#endregion constructors
 
 
-        #region publicmethods
+#region publicmethods
         public async void StartAsync()
         {
             try
@@ -70,6 +74,6 @@ namespace DBuddyBot
 
         public Task StopAsync() => Client.DisconnectAsync();
 
-        #endregion publicmethods
+#endregion publicmethods
     }
 }
