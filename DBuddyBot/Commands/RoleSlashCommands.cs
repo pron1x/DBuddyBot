@@ -23,7 +23,7 @@ namespace DBuddyBot.Commands
                                   [Autocomplete(typeof(DiscordRoleAutoCompleteProvider))][Option("role", "Role to add")] string name,
                                   [Option("description", "Description for the role")] string description = "")
         {
-            ctx.Client.Logger.LogDebug($"AddRole method executed by user {ctx.Member.DisplayName}.");
+            ctx.Client.Logger.LogInformation($"{ctx.CommandName} executed by user {ctx.Member.DisplayName}.");
             await ctx.DeferAsync(true);
             DiscordWebhookBuilder response = new();
             Category category = Database.GetCategory(categoryName);
@@ -74,7 +74,7 @@ namespace DBuddyBot.Commands
                     }
                     else
                     {
-                        ctx.Client.Logger.LogWarning($"Category {category.Name} does not have an assigned channel.");
+                        ctx.Client.Logger.LogInformation($"Category {category.Name} does not have an assigned channel.");
                         await ctx.EditResponseAsync(response.WithContent(response.Content + $"\nNo channel assigned to {category.Name}. Please assign one with `/category channel`."));
                     }
                 }
@@ -93,13 +93,13 @@ namespace DBuddyBot.Commands
                                      [Autocomplete(typeof(CategoryAutocompleteProvider))][Option("category", "Category to remove from", true)] string categoryName,
                                      [Autocomplete(typeof(RoleCategoryAutocompleteProvider))][Option("role", "Role to remove")] string name)
         {
-            ctx.Client.Logger.LogDebug($"RemoveRole method executed by user {ctx.Member.DisplayName}.");
+            ctx.Client.Logger.LogInformation($"{ctx.CommandName} executed by user {ctx.Member.DisplayName}.");
             await ctx.DeferAsync(true);
             DiscordWebhookBuilder response = new();
             Category category = Database.GetCategory(categoryName);
             if (category == null)
             {
-                ctx.Client.Logger.LogDebug($"Category {categoryName} does not exist in the database.");
+                ctx.Client.Logger.LogInformation($"Category {categoryName} does not exist in the database.");
                 await ctx.EditResponseAsync(response.WithContent($"No category {categoryName} exists, can not remove from it."));
             }
             Role role = category?.GetRole(name.ToLower());
@@ -119,12 +119,12 @@ namespace DBuddyBot.Commands
             }
             if (category.Message != null)
             {
-                ctx.Client.Logger.LogDebug($"Updated message of category {category.Name}");
                 CommandUtilities.UpdateRoleMessage(ctx.Client, category, Database);
+                ctx.Client.Logger.LogDebug($"Updated message of category {category.Name}");
             }
             else
             {
-                ctx.Client.Logger.LogWarning($"Category {category.Name} does not have an assigned channel.");
+                ctx.Client.Logger.LogInformation($"Category {category.Name} does not have an assigned channel.");
                 await ctx.EditResponseAsync(response.WithContent(response.Content + $"\nNo channel assigned to {category.Name}. Please assign one with `/category channel`."));
             }
         }
@@ -134,7 +134,7 @@ namespace DBuddyBot.Commands
                                                 [Autocomplete(typeof(RoleAutocompleteProvider))][Option("role", "Role to update description of")] string roleName,
                                                 [Option("description", "The new description")] string description)
         {
-            ctx.Client.Logger.LogDebug($"UpdateRoleDescription method executed by user {ctx.Member.DisplayName}.");
+            ctx.Client.Logger.LogInformation($"{ctx.CommandName} executed by user {ctx.Member.DisplayName}.");
             await ctx.DeferAsync(true);
             Role role = Database.GetRole(roleName);
             if (role == null)
