@@ -20,6 +20,8 @@ The bot currently has the following features:
 + Removing Discord roles from categories (does not delete the Discord role)
 + Removing categories
 + Adding/Removing roles by clicking the corresponding button by users
++ Autocompletion for commands
++ Dismissable messages acknowledging commands/revoking/assigning of roles
 + Use of a SQLite (standard) or Sql Server database.
 
 ### Usage
@@ -27,15 +29,27 @@ The bot currently has the following features:
 ##### Server Administrators
 
 The following commands are only usable by server members with the `Manage Roles` permission:
-+ `/category add <category name> <discord channel> [color] [description]`
-  + `<category name>` specifies the unique name of the new category
+###### Category commands
++ `/category add <name> <discord channel> [color] [description]`
+  + `<name>` specifies the unique name of the new category
   + `<discord channel>` specifies the channel the category message will be posted in
   + `[color]` specifies an optional color for the embed of the category message. Accepts a HEX value with/without the '#' prefix
   + `[description]` specifies an optional description for the category, which will be included in the category message
-+ `/category remove <category name>`
-  + `<category name>` specifies the name of the category that should be removed. Removes the category and roles from the database
-+ `/category refresh <category name>`
-  + `<category name>` specifies the name of the category that should be refreshed. This forces an update of the category message.
++ `/category remove <name>`
+  + `<name>` specifies the name of the category that should be removed. Removes the category and roles from the database
++ `/category description <name> <description>`
+  + `<name>` specifies the name of the category the description should be changed of
+  + `<description>` specifies the new description
++ `/category color <name> <color>`
+  + `<name>` specifies the name of the category the color should be changed of
+  + `<color>` specifies a new color for the category embed. Accepts a HEX value with/without the '#' prefix
++ `/category channel <name> <discord channel>`
+  + `<name>` specifies the name of the category the channel should be changed of
+  + `<discord channel>` specifies the new channel the category message will be sent in
++ `/category refresh <name>`
+  + `<name>` specifies the name of the category that should be refreshed. This forces an update of the category message.
+
+###### Role commands
 + `/role add <category name> <role name> [description]`
   + `<category name>` specifies the category the new role is part of
   + `<role name>` specifies the name of the role. Checks if a Discord role with the name exists before creating a new one
@@ -44,16 +58,21 @@ The following commands are only usable by server members with the `Manage Roles`
   + `<category name>` specifies the category the role is part of
   + `<role name>` specifies the name of the role to be removed. Removes it from the category and database if it is not part of a different category, 
   does not delete the Discord role.
++ `/role description <role name> <description>`
+  + `<role name>` specifies the name of the role the description should be changed of
+  + `<description>` specifies the new description of the category
+
+
 ##### Server Users
 Server users can assign the roles by clicking on the buttons. The buttons work as a toggle, if the user is not part of a role, the role will be granted,
-if they are, the role will instead be revoked.
+if they are, the role will instead be revoked. The user will be notified of the successfull granting/revoking of a role with a dismissable message.
 
 
 ### Roadmap
 
 Roadmap of things to come.
 - [ ] Add multi-server support (mutliple servers are currently **NOT** supported!)
-- [ ] Potentially lower the amount of dependencies
+- [ ] Containerize the application / Host official instance once multi server support is implemented
 - [x] Use Discords slash commands instead of normal text based commands
 - [x] Use Discords button system for role assign/revoke instead of emojis (If the system proves to be viable)
 - [x] Add/Remove categories via commands
