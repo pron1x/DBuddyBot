@@ -14,7 +14,7 @@
 
         internal const string CreateTableRoles = "CREATE TABLE IF NOT EXISTS roles (id INTEGER PRIMARY KEY AUTOINCREMENT, "
                                                  + "d_id UNSIGNED BIG INTEGER UNIQUE NOT NULL, "
-                                                 + "name TEXT NOT NULL, "
+                                                 + "name TEXT NOT NULL UNIQUE, "
                                                  + "description TEXT, "
                                                  + "game BOOL);";
 
