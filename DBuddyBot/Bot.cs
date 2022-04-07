@@ -7,73 +7,72 @@ using Microsoft.Extensions.Logging;
 using Serilog;
 using System.Threading.Tasks;
 
-namespace DBuddyBot
+namespace DBuddyBot;
+
+public class Bot
 {
-    public class Bot
+    #region properties
+    public DiscordClient Client { get; }
+    #endregion properties
+
+
+    #region constructors
+    public Bot(string token)
     {
-        #region properties
-        public DiscordClient Client { get; }
-        #endregion properties
-
-
-        #region constructors
-        public Bot(string token)
+        DiscordConfiguration config = new()
         {
-            DiscordConfiguration config = new()
-            {
-                Token = token,
+            Token = token,
 #if DEBUG
-                MinimumLogLevel = LogLevel.Debug,
+            MinimumLogLevel = LogLevel.Debug,
 #else
-                MinimumLogLevel = LogLevel.Information,
+            MinimumLogLevel = LogLevel.Information,
 #endif
-                LoggerFactory = new LoggerFactory().AddSerilog()
-            };
+            LoggerFactory = new LoggerFactory().AddSerilog()
+        };
 
-            Client = new DiscordClient(config);
+        Client = new DiscordClient(config);
 
-            ServiceProvider services = new ServiceCollection()
-                .AddSingleton(Bootstrapper.Database)
-                .BuildServiceProvider();
+        ServiceProvider services = new ServiceCollection()
+            .AddSingleton(Bootstrapper.Database)
+            .BuildServiceProvider();
 
-            SlashCommandsExtension slashCommands = Client.UseSlashCommands(new SlashCommandsConfiguration
-            {
-                Services = services
-            });
-
-
-            slashCommands.RegisterCommands<RoleSlashCommands>();
-            slashCommands.RegisterCommands<CategorySlashCommands>();
-
-            Client.GuildDownloadCompleted += ClientGuildEventHandler.SendRoleMessages;
-            Client.GuildRoleUpdated += ClientGuildEventHandler.UpdateRoleInDatabase;
-            Client.GuildRoleDeleted += ClientGuildEventHandler.DeleteRoleFromDatabase;
-            Client.MessageDeleted += ClientMessageEventHandler.RemoveRoleMessage;
-            Client.ChannelDeleted += ClientGuildEventHandler.DeleteChannelFromDatabase;
-            Client.ComponentInteractionCreated += ComponentInteractionHandler.HandleComponentInteraction;
-
-        }
-
-#endregion constructors
-
-
-#region publicmethods
-        public async void StartAsync()
+        SlashCommandsExtension slashCommands = Client.UseSlashCommands(new SlashCommandsConfiguration
         {
-            try
-            {
-                await Client.ConnectAsync();
-            }
-            catch (System.Exception e)
-            {
-                Log.Logger.Fatal($"Bot could not connect to the discord server. {e.Message}");
-                System.Environment.Exit(1);
-            }
-        }
+            Services = services
+        });
 
 
-        public Task StopAsync() => Client.DisconnectAsync();
+        slashCommands.RegisterCommands<RoleSlashCommands>();
+        slashCommands.RegisterCommands<CategorySlashCommands>();
 
-#endregion publicmethods
+        Client.GuildDownloadCompleted += ClientGuildEventHandler.SendRoleMessages;
+        Client.GuildRoleUpdated += ClientGuildEventHandler.UpdateRoleInDatabase;
+        Client.GuildRoleDeleted += ClientGuildEventHandler.DeleteRoleFromDatabase;
+        Client.MessageDeleted += ClientMessageEventHandler.RemoveRoleMessage;
+        Client.ChannelDeleted += ClientGuildEventHandler.DeleteChannelFromDatabase;
+        Client.ComponentInteractionCreated += ComponentInteractionHandler.HandleComponentInteraction;
+
     }
+
+    #endregion constructors
+
+
+    #region publicmethods
+    public async void StartAsync()
+    {
+        try
+        {
+            await Client.ConnectAsync();
+        }
+        catch (System.Exception e)
+        {
+            Log.Logger.Fatal($"Bot could not connect to the discord server. {e.Message}");
+            System.Environment.Exit(1);
+        }
+    }
+
+
+    public Task StopAsync() => Client.DisconnectAsync();
+
+    #endregion publicmethods
 }
