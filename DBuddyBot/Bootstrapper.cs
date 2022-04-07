@@ -25,8 +25,8 @@ public static class Bootstrapper
     #endregion backingfields
 
     #region properties
-    public static string DiscordToken { get => _discordToken; }
-    public static IDatabaseService Database { get => _database; }
+    public static string DiscordToken => _discordToken;
+    public static IDatabaseService Database => _database;
     #endregion properties
 
 

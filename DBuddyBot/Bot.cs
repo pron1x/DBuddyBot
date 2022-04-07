@@ -72,7 +72,10 @@ public class Bot
     }
 
 
-    public Task StopAsync() => Client.DisconnectAsync();
+    public Task StopAsync()
+    {
+        return Client.DisconnectAsync();
+    }
 
     #endregion publicmethods
 }
