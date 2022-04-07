@@ -20,12 +20,12 @@ public class ClientMessageEventHandler
     {
         return Task.Run(() =>
         {
-            sender.Logger.LogInformation($"Message {e.Message.Id} has been deleted in guild {e.Guild.Name}({e.Guild.Id}).");
+            sender.Logger.LogInformation("Message {message} has been deleted in guild {guild}({id}).", e.Message.Id, e.Guild.Name, e.Guild.Id);
             Category category;
             if ((category = _database.GetCategoryFromMessage(e.Message.Id)) != null)
             {
                 _database.UpdateMessage(category.Id, 0);
-                sender.Logger.LogInformation($"Message of category {category.Name} has been removed.");
+                sender.Logger.LogInformation("Message of category {category} has been removed.", category.Name);
             }
         });
     }

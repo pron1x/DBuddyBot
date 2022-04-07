@@ -23,7 +23,7 @@ public class ComponentInteractionHandler
     {
         return Task.Run(async () =>
         {
-            sender.Logger.LogInformation($"Received ComponentInteractionEvent for component with id {e.Id} on guild {e.Guild.Name}({e.Guild.Id}). Invoked by user {e.User.Username}.");
+            sender.Logger.LogInformation("Received ComponentInteractionEvent for component with id {id} on guild {guild}({id}). Invoked by user {user}.", e.Id, e.Guild.Name, e.Guild.Id, e.User.Username);
             await e.Interaction.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder() { IsEphemeral = true }); ;
             string description = string.Empty;
             DiscordColor color = DiscordColor.DarkGreen;
@@ -38,25 +38,25 @@ public class ComponentInteractionHandler
                     if (member.Roles.Contains(discordRole))
                     {
                         await member.RevokeRoleAsync(discordRole);
-                        sender.Logger.LogInformation($"Revoked role {discordRole.Name}({discordRole.Id}) from user {member.Nickname} on guild {e.Guild.Name}({e.Guild.Id}).");
+                        sender.Logger.LogInformation("Revoked role {role}({id}) from user {user} on guild {guild}({id}).", discordRole.Name, discordRole.Id, member.Nickname, e.Guild.Name, e.Guild.Id);
                         description = $"Removed {discordRole.Mention}";
                     }
                     else
                     {
                         await member.GrantRoleAsync(discordRole);
-                        sender.Logger.LogInformation($"Granted role {discordRole.Name}({discordRole.Id}) to user {member.Nickname} on guild {e.Guild.Name}({e.Guild.Id}).");
+                        sender.Logger.LogInformation("Granted role {role}({id}) to user {user} on guild {guild}({id}).", discordRole.Name, discordRole.Id, member.Nickname, e.Guild.Name, e.Guild.Id);
                         description = $"Added {discordRole.Mention}";
                     }
                 }
                 catch (UnauthorizedException exception)
                 {
-                    sender.Logger.LogError(exception, $"Not allowed to grant/revoke role {discordRole.Name} ({discordRole.Id}) on guild {e.Guild.Name} ({e.Guild.Id}).");
+                    sender.Logger.LogError(exception, "Not allowed to grant/revoke role {role}({id}) on guild {guild}({id}).", discordRole.Name, discordRole.Id, e.Guild.Name, e.Guild.Id);
                     color = DiscordColor.DarkRed;
                     description = $"Can't manage the role {discordRole.Mention}. Please let the admins know!";
                 }
                 catch (NotFoundException exception)
                 {
-                    sender.Logger.LogError(exception, $"Role {discordRole.Name} ({discordRole.Id}) was not found on guild {e.Guild.Name} ({e.Guild.Id}).");
+                    sender.Logger.LogError(exception, "Role {role}({id}) was not found on guild {guild}({id}).", discordRole.Name, discordRole.Id, e.Guild.Name, e.Guild.Id);
                     color = DiscordColor.DarkRed;
                     description = $"Role {discordRole.Name} was not found. Please let the admins know!";
                 }
